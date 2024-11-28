@@ -1,1 +1,1 @@
-# barberhub
+# BarberHub
