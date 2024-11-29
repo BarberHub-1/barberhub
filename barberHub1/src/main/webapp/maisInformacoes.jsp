@@ -12,13 +12,13 @@
             font-family: 'Arial', sans-serif;
         }
         .navbar {
-            background-color: #343a40;
+            background-color: #d0d0d0 !important;
         }
         .navbar-brand {
             font-size: 1.5rem;
         }
         .container {
-            max-width: 900px;
+            max-width: 600px;
             margin-top: 40px;
         }
         .card {
@@ -28,8 +28,8 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         }
         .card-header {
-            background-color: #007bff;
-            color: #fff;
+            background-color: #d3d3d3 !important; 
+            color: #333;
             font-size: 1.5rem;
             font-weight: bold;
             text-align: center;
@@ -37,8 +37,8 @@
         }
         .card-body {
             background-color: #ffffff;
-            padding: 25px;
-            font-size: 1.1rem;
+            padding: 20px; 
+            font-size: 1rem;
             color: #333;
         }
         .card-body img {
@@ -46,91 +46,95 @@
             border-radius: 8px;
         }
         .btn-agendar {
-            margin-top: 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            display: block;
-            margin: 20px auto 0;
-        }
+		    margin-top: 20px;
+		    background-color: #000000 !important;
+		    color: white;
+		    border: none;
+		    padding: 12px 30px;
+		    border-radius: 25px; 
+		    font-size: 1.2rem;
+		    text-align: center; 
+		    display: flex; 
+		    justify-content: center; 
+		    align-items: center; 
+		    margin: 20px auto 0;
+		    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
+		    transition: background-color 0.3s ease, transform 0.3s ease;
+		}
         .btn-agendar:hover {
-            background-color: #0056b3;
+            background-color: #292929 !important;
             cursor: pointer;
+            transform: translateY(-2px); 
         }
         footer {
             background-color: #343a40;
             color: white;
             padding: 20px 0;
             text-align: center;
+            margin-top: 40px; 
         }
         .error-message {
             color: red;
+        }
+        a {
+            text-decoration: none;
+            color: white !important;
         }
     </style>
 </head>
 <body>
 
-<!-- Barra de Navegação -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="home.jsp">BarberHub</a>
+<!-- Barra de Navegação --> 
+<nav class="navbar navbar-expand-lg navbar-dark bg-light">
+    <a class="navbar-brand text-dark" href="home.jsp">
+        <img src="http://localhost:8080/barberHub1/uploads/Logo.png" alt="BarberHub Logo" height="60" class="d-inline-block align-top">
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link" href="home.jsp">Início</a>
+                <a class="nav-link text-dark" href="home.jsp">Início</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="barbearias.jsp">Barbearias</a>
+                <a class="nav-link text-dark" href="barbearias.jsp">Barbearias</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="promocoes.jsp">Promoções</a>
+                <a class="nav-link text-dark" href="promocoes.jsp">Promoções</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Meus Agendamentos</a>
+                <a class="nav-link text-dark" href="agendamentosClientes.jsp">Meus Agendamentos</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="login.jsp">Login</a>
+                <a class="nav-link text-dark" href="login.jsp">Login</a>
             </li>
         </ul>
     </div>
 </nav>
 
-
 <div class="container">
     <h2 class="text-center mb-4">Detalhes da Barbearia</h2>
 
-  
     <div id="mensagemStatus" style="display: none;">Carregando dados...</div>
 
-   
     <div id="dadosEstabelecimento" style="display: none;">
-       
         <div class="card">
             <div class="card-header">
                 Informações do Estabelecimento
             </div>
             <div class="card-body">
-         
-                <img src="https://via.placeholder.com/800x400.png?text=Imagem+da+Barbearia" alt="Foto da Barbearia">
-
-            
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png?text=Imagem+da+Barbearia" alt="Foto da Barbearia">
                 <p><strong>Nome:</strong> <span id="nomeEstabelecimento"></span></p>
                 <p><strong>Email:</strong> <span id="emailEstabelecimento"></span></p>
                 <p><strong>Telefone:</strong> <span id="telefoneEstabelecimento"></span></p>
                 <p><strong>Cidade:</strong> <span id="cidadeEstabelecimento"></span></p>
                 <p><strong>Serviços:</strong> <span id="servicosEstabelecimento"></span></p>
                 <p><strong>Profissionais:</strong> <span id="profissionaisEstabelecimento"></span></p>
-                
             </div>
         </div>
 
-        
-        <a id="btnAgendar" href="#" class="btn-agendar">Agendar Agora</a>
+        <a id="btnAgendar" href="#" class="btn-agendar bt">Agendar Agora</a>
     </div>
 </div>
 
@@ -139,22 +143,18 @@
     <p>© 2024 BarberHub - Todos os direitos reservados.</p>
 </footer>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
 
 <script>
     $(document).ready(function() {
-        
         var urlParams = new URLSearchParams(window.location.search);
         var id = urlParams.get('id');
 
         if (id) {
-            
             $('#mensagemStatus').show();
             $('#dadosEstabelecimento').hide();
 
-           
             $.ajax({
                 url: '/barberHub1/estabelecimento', 
                 type: 'GET',
@@ -163,7 +163,6 @@
                 success: function(response) {
                     console.log('Resposta do servidor:', response);
 
-                    
                     $('#nomeEstabelecimento').text(response.nome);
                     $('#emailEstabelecimento').text(response.email);
                     $('#telefoneEstabelecimento').text(response.telefone);
@@ -171,11 +170,9 @@
                     $('#servicosEstabelecimento').text(response.servicos);
                     $('#profissionaisEstabelecimento').text(response.profissionais);
 
-                    
                     $('#mensagemStatus').hide();
                     $('#dadosEstabelecimento').show();
 
-                    
                     $('#btnAgendar').attr('href', 'agendarServico.jsp?id=' + id);
                 },
                 error: function(xhr, status, error) {

@@ -124,6 +124,12 @@
 				url: '/barberHub1/estabelecimento',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'estabelecimentoId' },
 				{ data: 'nome' },

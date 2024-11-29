@@ -13,7 +13,7 @@ public class ProfissionalDAO {
     }
 
     public int save(Profissional profissional) {
-        if (profissional.getProfissionalid() >= 0) {
+        if (profissional.getProfissionalid() > 0) {
             return this.update(profissional);
         } else {
             return this.insert(profissional);
@@ -26,11 +26,17 @@ public class ProfissionalDAO {
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Verifique se os campos obrigatórios estão preenchidos
+            
+            if (profissional.getEstabelecimentoid() <= 0) {
+                System.err.println("Erro: EstabelecimentoID é obrigatório e deve ser maior que 0.");
+                return 0;
+            }
             if (profissional.getNome() == null || profissional.getNome().isEmpty()) {
+                System.err.println("Erro: Nome é obrigatório.");
                 return 0;
             }
 
+            
             statement.setInt(1, profissional.getEstabelecimentoid());
             statement.setString(2, profissional.getNome());
             statement.setString(3, profissional.getServico());
@@ -43,29 +49,40 @@ public class ProfissionalDAO {
             statement.setString(10, profissional.getEstado());
             statement.setString(11, profissional.getFoto());
 
+            
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        return generatedKeys.getInt(1); // Retorna o ID gerado
+                        return generatedKeys.getInt(1); 
+                    } else {
+                        System.err.println("Erro: Nenhuma chave gerada após a inserção.");
+                        return 0;
                     }
                 }
+            } else {
+                System.err.println("Erro: Nenhuma linha foi afetada durante a inserção.");
+                return 0;
             }
-            return 0;
+
         } catch (SQLException e) {
+            System.err.println("Erro ao inserir profissional: " + e.getMessage());
             e.printStackTrace();
-            return 0;
+            return -1;
         }
     }
+
+
+
 
     public int update(Profissional profissional) {
         String query = "UPDATE profissional SET estabelecimentoId = ?, nome = ?, servico = ?, cep = ?, rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, foto = ? WHERE profissionalId = ?";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            // Verifique se os campos obrigatórios estão preenchidos
+            
             if (profissional.getNome() == null || profissional.getNome().isEmpty()) {
-                return 0;  // Retorna 0 para indicar que a atualização não foi realizada devido a dados inválidos
+                return 0;  
             }
 
             statement.setInt(1, profissional.getEstabelecimentoid());
@@ -83,13 +100,13 @@ public class ProfissionalDAO {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                return 1;  // Retorna 1 para indicar que a atualização foi bem-sucedida
+                return 1;  
             } else {
-                return 0;  // Retorna 0 se nenhuma linha foi afetada
+                return 0;  
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;  // Retorna -1 para indicar que ocorreu um erro
+            return -1;  
         }
     }
 

@@ -12,15 +12,43 @@
    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
   
+        .navbar {
+            background-color: #d0d0d0 !important;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: white;
+        }
+
+        .banner {
+            background-color: #333;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #555;
+            border-color: #555;
+        }
+
+        .btn-primary:hover {
+            background-color: #444;
+            border-color: #444;
+        }
+
         .cards-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px; 
+            gap: 20px;
             justify-content: space-around;
             padding: 20px;
         }
-
        
         .card {
             width: 22%;
@@ -57,13 +85,13 @@
 
         @media (max-width: 768px) {
             .card {
-                width: 45%; 
+                width: 45%;
             }
         }
 
         @media (max-width: 480px) {
             .card {
-                width: 90%; 
+                width: 90%;
             }
         }
     </style>
@@ -82,7 +110,7 @@
                         var listHtml = '';
                         data.forEach(function(estabelecimento) {
                             listHtml += '<div class="card">' +
-                                            '<img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Imagem do estabelecimento">' +
+                                            '<img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Imagem do estabelecimento">' +
                                             '<div class="card-body">' +
                                                 '<h5 class="card-title">' + estabelecimento.nome + '</h5>' +
                                                 '<p class="card-text"><strong>Email:</strong>' + estabelecimento.email + '</p>' +
@@ -102,7 +130,7 @@
 
             
             $.ajax({
-                url: '/barberHub1/tipoServico',  
+                url: '/barberHub1/tipoServico',
                 method: 'GET',
                 dataType: 'json',
                 success: function(data) {
@@ -130,38 +158,40 @@
     </script>
 </head>
 <body>
-    <!-- Barra de Navegação -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="home.jsp">BarberHub</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="home.jsp">Início</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="barbearias.jsp">Barbearias</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="promocoes.jsp">Promoções</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="agendamentosClientes.jsp">Meus Agendamentos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.jsp">Login</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <!-- Barra de Navegação --> 
+	<nav class="navbar navbar-expand-lg navbar-dark bg-light">
+	    <a class="navbar-brand text-dark" href="home.jsp">
+	        <img src="http://localhost:8080/barberHub1/uploads/Logo.png" alt="BarberHub Logo" height="60" class="d-inline-block align-top">
+	    </a>
+	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+	        <span class="navbar-toggler-icon"></span>
+	    </button>
+	    <div class="collapse navbar-collapse" id="navbarNav">
+	        <ul class="navbar-nav ml-auto">
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="home.jsp">Início</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="barbearias.jsp">Barbearias</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="promocoes.jsp">Promoções</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="agendamentosClientes.jsp">Meus Agendamentos</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="login.jsp">Login</a>
+	            </li>
+	        </ul>
+	    </div>
+	</nav>
 
     <!-- Banner Principal -->
-    <div class="container-fluid p-5 bg-primary text-white text-center">
+    <div class="container-fluid p-5 banner text-center">
         <h1>Bem-vindo ao BarberHub!</h1>
         <p>Encontre as melhores barbearias da sua cidade com facilidade</p>
-        <a href="barbearias.jsp" class="btn btn-light btn-lg">Buscar Barbearias</a>
+        <a href="barbearias.jsp" class="btn btn-primary btn-lg">Buscar Barbearias</a>
     </div>
 
     <!-- Filtros de Busca -->

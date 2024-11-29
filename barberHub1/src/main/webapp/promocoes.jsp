@@ -11,32 +11,34 @@
 </head>
 <body>
 
-<!-- Barra de Navegação -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="home.jsp">BarberHub</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="home.jsp">Início</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="barbearias.jsp">Barbearias</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="promocoes.jsp">Promoções</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="agendamentosClientes.jsp">Meus Agendamentos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="login.jsp">Login</a>
-            </li>
-        </ul>
-    </div>
-</nav>
+<!-- Barra de Navegação --> 
+	<nav class="navbar navbar-expand-lg navbar-dark bg-light">
+	    <a class="navbar-brand text-dark" href="home.jsp">
+	        <img src="http://localhost:8080/barberHub1/uploads/Logo.png" alt="BarberHub Logo" height="60" class="d-inline-block align-top">
+	    </a>
+	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+	        <span class="navbar-toggler-icon"></span>
+	    </button>
+	    <div class="collapse navbar-collapse" id="navbarNav">
+	        <ul class="navbar-nav ml-auto">
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="home.jsp">Início</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="barbearias.jsp">Barbearias</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="promocoes.jsp">Promoções</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="agendamentosClientes.jsp">Meus Agendamentos</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="login.jsp">Login</a>
+	            </li>
+	        </ul>
+	    </div>
+	</nav>
 
 <!-- Tela de Promoções -->
 <div class="container my-5">
@@ -47,7 +49,7 @@
         
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Promoção 1">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Promoção 1">
                 <div class="card-body">
                     <h5 class="card-title">Desconto em Cortes de Cabelo</h5>
                     <p class="card-text">Aproveite 20% de desconto nos cortes de cabelo durante o mês de novembro.</p>
@@ -59,7 +61,7 @@
         
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Promoção 2">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Promoção 2">
                 <div class="card-body">
                     <h5 class="card-title">Combo de Barba e Cabelo</h5>
                     <p class="card-text">Adquira um combo de corte de cabelo e barba com 25% de desconto.</p>
@@ -71,7 +73,7 @@
         
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Promoção 3">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Promoção 3">
                 <div class="card-body">
                     <h5 class="card-title">Desconto para Novos Clientes</h5>
                     <p class="card-text">Novos clientes ganham 15% de desconto na primeira visita.</p>
@@ -85,7 +87,7 @@
         
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Promoção 1">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Promoção 1">
                 <div class="card-body">
                     <h5 class="card-title">Desconto em Cortes de Cabelo</h5>
                     <p class="card-text">Aproveite 20% de desconto nos cortes de cabelo durante o mês de novembro.</p>
@@ -97,7 +99,7 @@
         
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Promoção 2">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Promoção 2">
                 <div class="card-body">
                     <h5 class="card-title">Combo de Barba e Cabelo</h5>
                     <p class="card-text">Adquira um combo de corte de cabelo e barba com 25% de desconto.</p>
@@ -109,7 +111,7 @@
         
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Promoção 3">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Promoção 3">
                 <div class="card-body">
                     <h5 class="card-title">Desconto para Novos Clientes</h5>
                     <p class="card-text">Novos clientes ganham 15% de desconto na primeira visita.</p>

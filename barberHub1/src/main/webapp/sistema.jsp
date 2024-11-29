@@ -125,7 +125,7 @@
 		    var sistemaId = $(this).data('id');
 
 		    $.ajax({
-		        url: '/barberHub1/sistema/' + sistemaId,
+		        url: '/barberHub1/sistema?sistemaId=' + sistemaId,
 		        method: 'GET',
 		        success: function(data) {
 		            $('#sistemaId').val(data.sistemaId);
@@ -147,7 +147,7 @@
 
 		    if (confirm('Tem certeza que deseja excluir?')) {
 		        $.ajax({
-		            url: '/barberHub1/sistema/' + sistemaId,
+		            url: '/barberHub1/sistema?sistemaId=' + sistemaId,
 		            method: 'DELETE',
 		            success: function(response) {
 		                table.ajax.reload();

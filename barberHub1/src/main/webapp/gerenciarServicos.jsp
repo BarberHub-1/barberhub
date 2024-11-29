@@ -15,22 +15,37 @@
 
 <!-- Barra de Navegação -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Barbearia Marketplace</a>
+    <a class="navbar-brand" href="#">BarberHub</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="homeBarbearia.jsp">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="gerenciarAgendamentos.jsp">Agendamentos</a></li>
-            <li class="nav-item"><a class="nav-link" href="gerenciarClientes.jsp">Clientes</a></li>
-            <li class="nav-item"><a class="nav-link" href="gerenciarServicos.jsp">Serviços</a></li>
-            <li class="nav-item"><a class="nav-link" href="gerenciarProfissionais.jsp">Profissionais</a></li>
-            <li class="nav-item"><a class="nav-link" href="gerenciarPromocoes.jsp">Promoções</a></li>
-            <li class="nav-item"><a class="nav-link" href="login.jsp">Logout</a></li>
+            <li class="nav-item">
+                <a class="nav-link" href="homeBarbearia.jsp">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarAgendamentos.jsp">Agendamentos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarClientes.jsp">Clientes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarServicos.jsp">Serviços</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarProfissionais.jsp">Profissionais</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarPromocoes.jsp">Promoções</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="login.jsp">Logout</a>
+            </li>
         </ul>
     </div>
 </nav>
+
 
 <div class="container my-5">
     <h2>Gerenciamento de Serviços</h2>
@@ -111,6 +126,12 @@ $(document).ready(function() {
             "type": "GET",
             "dataSrc": "" 
         },
+        "columnDefs": [
+            {
+                "targets": "_all", 
+                "defaultContent": "null" 
+            }
+        ],
         "columns": [
             { "data": "servicoId" },
             { "data": "nome" },

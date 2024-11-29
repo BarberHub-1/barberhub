@@ -59,6 +59,12 @@
 				url: '/barberHub1/statuscadastro',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'statusCadastroId' },
 				{ data: 'descricao' },

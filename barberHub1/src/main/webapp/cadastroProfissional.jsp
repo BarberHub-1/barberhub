@@ -53,7 +53,7 @@
                 
                 <div class="mb-3">
                     <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                    <input type="text" id="estabelecimentoId" name="estabelecimentoId" class="form-control">
+                    <input type="number" id="estabelecimentoId" name="estabelecimentoId" class="form-control">
                 </div>
 
                 <div class="form-group mb-3">
@@ -139,7 +139,7 @@
                
                 var servicoHtml = '<option value="">Selecione um serviço</option>';
                 data.forEach(function(servico) {
-                    servicoHtml += '<option value="' + servico.id + '">' + servico.nome + '</option>';
+                    servicoHtml += '<option value="' + servico.nome + '">' + servico.nome + '</option>';
                 });
                 $('#servico').html(servicoHtml);
             },

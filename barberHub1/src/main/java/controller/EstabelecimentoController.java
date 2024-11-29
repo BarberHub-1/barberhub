@@ -20,19 +20,19 @@ import model.EstabelecimentoDAO;
 @WebServlet("/estabelecimento")
 public class EstabelecimentoController extends HttpServlet {
 
-    private EstabelecimentoDAO estabelecimentoDAO = new EstabelecimentoDAO(); // Acesso ao DAO
+    private EstabelecimentoDAO estabelecimentoDAO = new EstabelecimentoDAO(); 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    // Método GET para retornar todos os estabelecimentos ou um específico por ID
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         
         try {
-            String estabelecimentoId = request.getParameter("id"); // Captura o ID da URL (parâmetro de consulta)
+            String estabelecimentoId = request.getParameter("id"); 
             
             if (estabelecimentoId != null) {
-                // Se o ID for fornecido, busca o estabelecimento específico
+                
                 int id = Integer.parseInt(estabelecimentoId);
                 Estabelecimento estabelecimento = estabelecimentoDAO.findById1(id);
                 
@@ -46,16 +46,16 @@ public class EstabelecimentoController extends HttpServlet {
                     estabelecimentoJson.addProperty("profissionais", estabelecimento.getProfissionalNome());
                     estabelecimentoJson.addProperty("servicos", estabelecimento.getProfissionalServico());
                     
-                    // Retorna o estabelecimento encontrado
+                    
                     response.getWriter().write(gson.toJson(estabelecimentoJson));
                 } else {
-                    // Caso não encontre o estabelecimento
+                    
                     JsonObject json = new JsonObject();
                     json.addProperty("error", "Estabelecimento not found");
                     response.getWriter().write(gson.toJson(json));
                 }
             } else {
-                // Se não for passado o ID, retorna todos os estabelecimentos
+                
                 List<Estabelecimento> estabelecimentos = estabelecimentoDAO.findAll();
                 JsonArray jsonArray = new JsonArray();
 
@@ -70,7 +70,7 @@ public class EstabelecimentoController extends HttpServlet {
                     jsonArray.add(estabelecimentoJson);
                 }
 
-                // Retorna todos os estabelecimentos em formato JSON
+                
                 response.getWriter().write(gson.toJson(jsonArray));
             }
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class EstabelecimentoController extends HttpServlet {
         }
     }
 
-    // Método POST para criar um novo estabelecimento
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -97,16 +97,16 @@ public class EstabelecimentoController extends HttpServlet {
         }
     }
 
-    // Método PUT para atualizar um estabelecimento
+    
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
-        String estabelecimentoId = request.getParameter("id"); // Captura o parâmetro ID da URL
+        String estabelecimentoId = request.getParameter("id"); 
         
         try {
             if (estabelecimentoId != null) {
                 Estabelecimento estabelecimento = gson.fromJson(request.getReader(), Estabelecimento.class);
-                estabelecimento.setEstabelecimentoid(Integer.parseInt(estabelecimentoId)); // Atualiza o ID
+                estabelecimento.setEstabelecimentoid(Integer.parseInt(estabelecimentoId)); 
                 estabelecimentoDAO.save(estabelecimento);
                 JsonObject json = new JsonObject();
                 json.addProperty("success", true);
@@ -123,7 +123,7 @@ public class EstabelecimentoController extends HttpServlet {
         }
     }
 
-    // Método DELETE para excluir um estabelecimento
+    
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");

@@ -10,32 +10,34 @@
 </head>
 <body>
 
-<!-- Barra de Navegação -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="home.jsp">BarberHub</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="home.jsp">Início</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="barbearias.jsp">Barbearias</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="promocoes.jsp">Promoções</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="agendamentosClientes.jsp">Meus Agendamentos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="login.jsp">Login</a>
-            </li>
-        </ul>
-    </div>
-</nav>
+<!-- Barra de Navegação --> 
+	<nav class="navbar navbar-expand-lg navbar-dark bg-light">
+	    <a class="navbar-brand text-dark" href="home.jsp">
+	        <img src="http://localhost:8080/barberHub1/uploads/Logo.png" alt="BarberHub Logo" height="60" class="d-inline-block align-top">
+	    </a>
+	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+	        <span class="navbar-toggler-icon"></span>
+	    </button>
+	    <div class="collapse navbar-collapse" id="navbarNav">
+	        <ul class="navbar-nav ml-auto">
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="home.jsp">Início</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="barbearias.jsp">Barbearias</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="promocoes.jsp">Promoções</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="agendamentosClientes.jsp">Meus Agendamentos</a>
+	            </li>
+	            <li class="nav-item">
+	                <a class="nav-link text-dark" href="login.jsp">Login</a>
+	            </li>
+	        </ul>
+	    </div>
+	</nav>
 
 
 <div class="container my-5">
@@ -54,11 +56,11 @@
       
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Barbearia 1">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Barbearia 1">
                 <div class="card-body">
-                    <h5 class="card-title">Barbearia X</h5>
-                    <p class="card-text">Barbearia moderna com cortes de cabelo e barba, localizada no centro da cidade.</p>
-                    <a href="maisInformacoes.jsp?id=1" class="btn btn-primary">Ver Detalhes</a>
+                    <h5 class="card-title">Barber Shop São Paulo</h5>
+                   <!--  <p class="card-text">Barbearia moderna com cortes de cabelo e barba, localizada no centro da cidade.</p>
+                    <a href="maisInformacoes.jsp?id=1" class="btn btn-primary">Ver Detalhes</a> -->
                 </div>
             </div>
         </div>
@@ -66,11 +68,11 @@
       
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Barbearia 2">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Barbearia 2">
                 <div class="card-body">
-                    <h5 class="card-title">Barbearia Y</h5>
-                    <p class="card-text">Ambiente aconchegante e atendimento de qualidade, ideal para um corte de cabelo rápido e elegante.</p>
-                    <a href="detalhesBarbearia.jsp?id=2" class="btn btn-primary">Ver Detalhes</a>
+                    <h5 class="card-title">Barbearia Hermanos</h5>
+                   <!--  <p class="card-text">Ambiente aconchegante e atendimento de qualidade, ideal para um corte de cabelo rápido e elegante.</p>
+                    <a href="detalhesBarbearia.jsp?id=2" class="btn btn-primary">Ver Detalhes</a> -->
                 </div>
             </div>
         </div>
@@ -78,11 +80,11 @@
        
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="https://via.placeholder.com/350x200" class="card-img-top" alt="Barbearia 3">
+                <img src="http://localhost:8080/barberHub1/uploads/barbearia.png" class="card-img-top" alt="Barbearia 3">
                 <div class="card-body">
-                    <h5 class="card-title">Barbearia Z</h5>
-                    <p class="card-text">Com um atendimento especializado e um ambiente descontraído, a Barbearia Z é ideal para todos os públicos.</p>
-                    <a href="detalhesBarbearia.jsp?id=3" class="btn btn-primary">Ver Detalhes</a>
+                    <h5 class="card-title">Black Jack</h5>
+                   <!--  <p class="card-text">Com um atendimento especializado e um ambiente descontraído, a Black Jack é ideal para todos os públicos.</p>
+                    <a href="detalhesBarbearia.jsp?id=3" class="btn btn-primary">Ver Detalhes</a> -->
                 </div>
             </div>
         </div>

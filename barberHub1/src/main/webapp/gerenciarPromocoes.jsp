@@ -12,7 +12,7 @@
 
 <!-- Barra de Navegação -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Barbearia Marketplace</a>
+    <a class="navbar-brand" href="#">BarberHub</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -42,6 +42,7 @@
         </ul>
     </div>
 </nav>
+
 
 
     <h2>Gerenciar Promoções</h2>

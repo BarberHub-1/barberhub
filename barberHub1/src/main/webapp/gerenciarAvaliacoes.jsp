@@ -83,6 +83,12 @@
 				url: '/barberHub1/avaliacao',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'avaliacaoId' },
 				{ data: 'agendamentoId' },

@@ -79,6 +79,12 @@
 				url: 'barberHub1/disponibilidade',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'disponibilidadeId' },
 				{ data: 'profissionalId' },

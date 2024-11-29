@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*, javax.sql.*, java.util.*" %>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -36,30 +37,67 @@
     </div>
 </nav>
 
-
 <div class="container my-5">
     <h2 class="text-center mb-4">Agendar Serviço</h2>
 
     <form action="confirmarAgendamento.jsp" method="post">
+        <%
+            // Obter o ID do estabelecimento da URL
+            String estabelecimentoId = request.getParameter("id");
 
+            // Conectar ao banco de dados
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
 
-    
+            try {
+                // Carregar o driver JDBC
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/seu_banco_de_dados", "usuario", "senha");
+
+                // Consultar os serviços disponíveis para os profissionais do estabelecimento
+                String query = "SELECT s.servicoId, s.nome " +
+                               "FROM servico s " +
+                               "JOIN profissionalservico ps ON s.servicoId = ps.servicoId " +
+                               "JOIN profissional p ON ps.profissionalId = p.profissionalId " +
+                               "WHERE p.estabelecimentoId = ?";
+                stmt = conn.prepareStatement(query);
+                stmt.setInt(1, Integer.parseInt(estabelecimentoId));
+
+                rs = stmt.executeQuery();
+
+                // Armazenar os serviços para exibição no formulário
+                List<String> servicos = new ArrayList<>();
+                while (rs.next()) {
+                    servicos.add(rs.getString("nome"));
+                }
+        %>
+
         <div class="mb-3">
             <label for="servico" class="form-label">Escolha o Serviço</label>
             <select class="form-select" id="servico" name="servico" required>
-                <option value="corte">Corte de Cabelo</option>
-                <option value="barba">Barba e Corte</option>
-                <option value="hidratação">Hidratação Capilar</option>
+                <% for (String servico : servicos) { %>
+                    <option value="<%= servico %>"><%= servico %></option>
+                <% } %>
             </select>
         </div>
 
-     
+        <% 
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                // Fechar recursos
+                if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+                if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+                if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        %>
+
         <div class="mb-3">
             <label for="dataHora" class="form-label">Escolha a Data e Hora</label>
             <input type="datetime-local" class="form-control" id="dataHora" name="dataHora" required />
         </div>
 
-      
         <div class="mb-3">
             <label for="nome" class="form-label">Seu Nome</label>
             <input type="text" class="form-control" id="nome" name="nome" required />
@@ -75,11 +113,9 @@
             <input type="tel" class="form-control" id="telefone" name="telefone" required />
         </div>
 
-       
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Confirmar Agendamento</button>
         </div>
-
     </form>
 </div>
 
@@ -87,7 +123,6 @@
 <footer class="bg-dark text-white text-center py-3 mt-5">
     <p>© 2024 Marketplace de Barbearias - Todos os direitos reservados.</p>
 </footer>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>

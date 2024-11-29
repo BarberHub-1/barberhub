@@ -74,6 +74,12 @@
 				url: '/barberHub1/denuncia',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'denunciaId' },
 				{ data: 'estabelecimentoId' },

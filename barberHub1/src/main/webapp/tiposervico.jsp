@@ -63,6 +63,12 @@
 				url: '/barberHub1/tipoServico',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'tipoServicoId' },
 				{ data: 'servico' },

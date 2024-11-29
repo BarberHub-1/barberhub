@@ -11,10 +11,44 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 </head>
 <body>
+<!-- Barra de Navegação -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">BarberHub</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="homeBarbearia.jsp">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarAgendamentos.jsp">Agendamentos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarClientes.jsp">Clientes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarServicos.jsp">Serviços</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarProfissionais.jsp">Profissionais</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarPromocoes.jsp">Promoções</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="login.jsp">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
 <div class="container my-4">
 	<h1>Gerenciamento - Cliente</h1>
 	<div class="mb-3">
-		<button class="btn btn-primary" id="addNew">Add New Cliente</button>
+		<button class="btn btn-primary" id="addNew">Adicionar Cliente</button>
 	</div>
 	<table id="dataTable" class="table table-striped">
 		<thead>
@@ -114,6 +148,12 @@
 				url: '/barberHub1/cliente',
 				dataSrc: ''
 			},
+			"columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
 			columns: [
 				{ data: 'clienteId' },
 				{ data: 'nome' },

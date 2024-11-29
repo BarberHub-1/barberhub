@@ -10,8 +10,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 </head>
 <body>
+
+<!-- Barra de Navegação -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">BarberHub</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="homeBarbearia.jsp">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarAgendamentos.jsp">Agendamentos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarClientes.jsp">Clientes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarServicos.jsp">Serviços</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarProfissionais.jsp">Profissionais</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gerenciarPromocoes.jsp">Promoções</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="login.jsp">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+
+
 <div class="container my-4">
-    <h1>Profissional Management</h1>
+    <h1>Gerenciamento - Profissional</h1>
     <div class="mb-3">
         
         <button class="btn btn-primary" id="addNew">Add New Profissional</button>
@@ -55,7 +92,7 @@
             
             <div class="mb-3">
                 <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                <input type="text" class="form-control" id="estabelecimentoId">
+                <input type="number" class="form-control" id="estabelecimentoId">
             </div>
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome</label>
@@ -104,7 +141,7 @@
   </div>
 </div>
 
-<!-- Scripts do jQuery e DataTables -->
+
 <script>
 $(document).ready(function() {
     
@@ -132,6 +169,12 @@ $(document).ready(function() {
                 });
             }
         },
+        "columnDefs": [
+            {
+                "targets": "_all", 
+                "defaultContent": "null" 
+            }
+        ],
         "columns": [
             { "data": "profissionalId" },
             { "data": "estabelecimentoId" },

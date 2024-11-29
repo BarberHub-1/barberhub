@@ -75,6 +75,12 @@
                 url: '/barberHub1/agendamento', 
                 dataSrc: ''  
             },
+            "columnDefs": [
+	            {
+	                "targets": "_all", 
+	                "defaultContent": "null" 
+	            }
+	        ],
             columns: [
                 { data: 'agendamentoId' },  
                 { data: 'estabelecimentoId' },
@@ -90,54 +96,19 @@
                 {
                     data: null,
                     render: function(data, type, row) {
-                        return '<button class="btn btn-warning btn-sm editRow" data-id=' + row.agendamentoId + '>Editar</button>' +
-                               '<button class="btn btn-danger btn-sm deleteRow" data-id=' + row.agendamentoId + '>Excluir</button>';
+                        return '<button class="btn btn-danger btn-sm deleteRow" data-id=' + row.agendamentoId + '>Cancelar</button>';
                     }
                 }
             ]
         });
 
-        
-        $('#agendamento').on('click', '.editRow', function() {
-            var id = $(this).data('id');
-            $.ajax({
-                url: '/barberHub1/agendamento/' + id, 
-                method: 'GET',
-                success: function(data) {
-                   
-                    $('#editIdAgendamento').val(data.agendamentoId); 
-                    $('#editCliente').val(data.cliente); 
-                    $('#editServico').val(data.servico); 
-                    $('#editDataHora').val(data.dataHora);  
-                    $('#editStatus').val(data.status);  
-                    $('#editModal').modal('show');
-                },
-                error: function() {
-                    alert('Erro ao buscar dados do agendamento.');
-                }
-            });
-        });
-
-        
-        $('#saveEdit').click(function() {
-            var formData = $('#editAgendamentoForm').serialize();
-            $.ajax({
-                url: '/barberHub1/agendamento', 
-                method: 'PUT',
-                data: formData,
-                success: function() {
-                    $('#editModal').modal('hide');
-                    table.ajax.reload();
-                }
-            });
-        });
-
+       
         
         $('#agendamento').on('click', '.deleteRow', function() {
             var id = $(this).data('id');
-            if (confirm('Você tem certeza que deseja excluir este agendamento?')) {
+            if (confirm('Você tem certeza que deseja cancelar este agendamento?')) {
                 $.ajax({
-                    url: '/barberHub1/agendamento/' + id,
+                    url: '/barberHub1/agendamento?agendamentoId=' + id,
                     method: 'DELETE',
                     success: function() {
                         table.ajax.reload();
