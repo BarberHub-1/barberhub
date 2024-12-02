@@ -3,6 +3,7 @@ package model;
 import database.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProfissionalDAO {
 
@@ -12,42 +13,41 @@ public class ProfissionalDAO {
         this.dbConnection = new DBConnection(); 
     }
 
+    
     public int save(Profissional profissional) {
-        if (profissional.getProfissionalid() > 0) {
+        if (profissional.getProfissionalId() > 0) {
             return this.update(profissional);
         } else {
             return this.insert(profissional);
         }
     }
 
+   
     private int insert(Profissional profissional) {
-        String query = "INSERT INTO profissional (estabelecimentoId, nome, servico, cep, rua, numero, complemento, bairro, cidade, estado, foto) " +
-                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO profissional (estabelecimentoId, nome, cep, rua, numero, complemento, bairro, cidade, estado, foto) " +
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             
-            if (profissional.getEstabelecimentoid() <= 0) {
-                System.err.println("Erro: EstabelecimentoID é obrigatório e deve ser maior que 0.");
-                return 0;
+            if (profissional.getEstabelecimentoId() <= 0) {
+                throw new IllegalArgumentException("EstabelecimentoID é obrigatório e deve ser maior que 0.");
             }
             if (profissional.getNome() == null || profissional.getNome().isEmpty()) {
-                System.err.println("Erro: Nome é obrigatório.");
-                return 0;
+                throw new IllegalArgumentException("Nome é obrigatório.");
             }
 
-            
-            statement.setInt(1, profissional.getEstabelecimentoid());
+           
+            statement.setInt(1, profissional.getEstabelecimentoId());
             statement.setString(2, profissional.getNome());
-            statement.setString(3, profissional.getServico());
-            statement.setString(4, profissional.getCep());
-            statement.setString(5, profissional.getRua());
-            statement.setString(6, profissional.getNumero());
-            statement.setString(7, profissional.getComplemento());
-            statement.setString(8, profissional.getBairro());
-            statement.setString(9, profissional.getCidade());
-            statement.setString(10, profissional.getEstado());
-            statement.setString(11, profissional.getFoto());
+            statement.setString(3, profissional.getCep());
+            statement.setString(4, profissional.getRua());
+            statement.setString(5, profissional.getNumero());
+            statement.setString(6, profissional.getComplemento());
+            statement.setString(7, profissional.getBairro());
+            statement.setString(8, profissional.getCidade());
+            statement.setString(9, profissional.getEstado());
+            statement.setString(10, profissional.getFoto());
 
             
             int affectedRows = statement.executeUpdate();
@@ -55,16 +55,10 @@ public class ProfissionalDAO {
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         return generatedKeys.getInt(1); 
-                    } else {
-                        System.err.println("Erro: Nenhuma chave gerada após a inserção.");
-                        return 0;
                     }
                 }
-            } else {
-                System.err.println("Erro: Nenhuma linha foi afetada durante a inserção.");
-                return 0;
             }
-
+            return 0;
         } catch (SQLException e) {
             System.err.println("Erro ao inserir profissional: " + e.getMessage());
             e.printStackTrace();
@@ -72,60 +66,41 @@ public class ProfissionalDAO {
         }
     }
 
-
-
-
+    
     public int update(Profissional profissional) {
-        String query = "UPDATE profissional SET estabelecimentoId = ?, nome = ?, servico = ?, cep = ?, rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, foto = ? WHERE profissionalId = ?";
+        String query = "UPDATE profissional SET estabelecimentoId = ?, nome = ?, cep = ?, rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, foto = ? WHERE profissionalId = ?";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            
-            if (profissional.getNome() == null || profissional.getNome().isEmpty()) {
-                return 0;  
-            }
+            System.out.println("Atualizando profissional: " + profissional);
 
-            statement.setInt(1, profissional.getEstabelecimentoid());
+            statement.setInt(1, profissional.getEstabelecimentoId());
             statement.setString(2, profissional.getNome());
-            statement.setString(3, profissional.getServico());
-            statement.setString(4, profissional.getCep());
-            statement.setString(5, profissional.getRua());
-            statement.setString(6, profissional.getNumero());
-            statement.setString(7, profissional.getComplemento());
-            statement.setString(8, profissional.getBairro());
-            statement.setString(9, profissional.getCidade());
-            statement.setString(10, profissional.getEstado());
-            statement.setString(11, profissional.getFoto());
-            statement.setInt(12, profissional.getProfissionalid());
+            statement.setString(3, profissional.getCep());
+            statement.setString(4, profissional.getRua());
+            statement.setString(5, profissional.getNumero());
+            statement.setString(6, profissional.getComplemento());
+            statement.setString(7, profissional.getBairro());
+            statement.setString(8, profissional.getCidade());
+            statement.setString(9, profissional.getEstado());
+            statement.setString(10, profissional.getFoto());
+            statement.setInt(11, profissional.getProfissionalId());
 
-            int affectedRows = statement.executeUpdate();
-            if (affectedRows > 0) {
-                return 1;  
-            } else {
-                return 0;  
-            }
+            int rowsUpdated = statement.executeUpdate();
+            System.out.println("Linhas atualizadas: " + rowsUpdated);
+            return rowsUpdated;
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;  
+            return -1; 
         }
     }
 
-
+    
     public int delete(Profissional profissional) {
-        if (profissional.getProfissionalid() != 0) {
-            String query = "DELETE FROM profissional WHERE profissionalId = ?";
-            try (Connection connection = dbConnection.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, profissional.getProfissionalid());
-                return statement.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        return 0;
+        return deleteById(profissional.getProfissionalId());
     }
 
+   
     public int deleteById(int id) {
         String query = "DELETE FROM profissional WHERE profissionalId = ?";
         try (Connection connection = dbConnection.getConnection();
@@ -133,40 +108,32 @@ public class ProfissionalDAO {
             statement.setInt(1, id);
             return statement.executeUpdate();
         } catch (SQLException e) {
+            System.err.println("Erro ao deletar profissional: " + e.getMessage());
             e.printStackTrace();
             return 0;
         }
     }
 
-    public ArrayList<Profissional> findAll() {
+    
+    public List<Profissional> findAll() {
         String query = "SELECT * FROM profissional";
-        ArrayList<Profissional> list = new ArrayList<>();
+        List<Profissional> profissionais = new ArrayList<>();
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
-                Profissional profissional = new Profissional();
-                profissional.setProfissionalid(rs.getInt("profissionalId"));
-                profissional.setEstabelecimentoid(rs.getInt("estabelecimentoId"));
-                profissional.setNome(rs.getString("nome"));
-                profissional.setServico(rs.getString("servico"));
-                profissional.setCep(rs.getString("cep"));
-                profissional.setRua(rs.getString("rua"));
-                profissional.setNumero(rs.getString("numero"));
-                profissional.setComplemento(rs.getString("complemento"));
-                profissional.setBairro(rs.getString("bairro"));
-                profissional.setCidade(rs.getString("cidade"));
-                profissional.setEstado(rs.getString("estado"));
-                profissional.setFoto(rs.getString("foto"));
-                list.add(profissional);
+                Profissional profissional = mapResultSetToProfissional(rs);
+                profissionais.add(profissional);
             }
         } catch (SQLException e) {
+            System.err.println("Erro ao buscar todos os profissionais: " + e.getMessage());
             e.printStackTrace();
         }
-        return list;
+        return profissionais;
     }
 
+    
     public Profissional findById(int id) {
         String query = "SELECT * FROM profissional WHERE profissionalId = ?";
         try (Connection connection = dbConnection.getConnection();
@@ -175,11 +142,49 @@ public class ProfissionalDAO {
             statement.setInt(1, id);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
+                    return mapResultSetToProfissional(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar profissional pelo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Método auxiliar para mapear um ResultSet em um objeto Profissional
+    private Profissional mapResultSetToProfissional(ResultSet rs) throws SQLException {
+        Profissional profissional = new Profissional();
+        profissional.setProfissionalId(rs.getInt("profissionalId"));
+        profissional.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
+        profissional.setNome(rs.getString("nome"));
+        profissional.setCep(rs.getString("cep"));
+        profissional.setRua(rs.getString("rua"));
+        profissional.setNumero(rs.getString("numero"));
+        profissional.setComplemento(rs.getString("complemento"));
+        profissional.setBairro(rs.getString("bairro"));
+        profissional.setCidade(rs.getString("cidade"));
+        profissional.setEstado(rs.getString("estado"));
+        profissional.setFoto(rs.getString("foto"));
+        return profissional;
+    }
+    
+    public List<Profissional> findProfissionaisByEstabelecimentoId(int estabelecimentoId) {
+        String query = "SELECT * FROM profissional WHERE estabelecimentoId = ?";
+        List<Profissional> profissionais = new ArrayList<>();
+
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+
+            
+            stmt.setInt(1, estabelecimentoId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
                     Profissional profissional = new Profissional();
-                    profissional.setProfissionalid(rs.getInt("profissionalId"));
-                    profissional.setEstabelecimentoid(rs.getInt("estabelecimentoId"));
+                    profissional.setProfissionalId(rs.getInt("profissionalId"));
+                    profissional.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
                     profissional.setNome(rs.getString("nome"));
-                    profissional.setServico(rs.getString("servico"));
                     profissional.setCep(rs.getString("cep"));
                     profissional.setRua(rs.getString("rua"));
                     profissional.setNumero(rs.getString("numero"));
@@ -188,12 +193,17 @@ public class ProfissionalDAO {
                     profissional.setCidade(rs.getString("cidade"));
                     profissional.setEstado(rs.getString("estado"));
                     profissional.setFoto(rs.getString("foto"));
-                    return profissional;
+
+                    
+                    profissionais.add(profissional);
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Erro ao buscar profissionais por estabelecimentoId: " + e.getMessage());
             e.printStackTrace();
         }
-        return null;
+
+        return profissionais;
     }
+
 }

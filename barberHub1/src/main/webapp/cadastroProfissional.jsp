@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,10 +12,10 @@
 </head>
 <body>
 
-<!-- Barra de Navegação -->
+<!-- Barra de NavegaÃ§Ã£o -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">BarberHub</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegaÃ§Ã£o">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
@@ -29,13 +30,13 @@
                 <a class="nav-link" href="gerenciarClientes.jsp">Clientes</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="gerenciarServicos.jsp">Serviços</a>
+                <a class="nav-link" href="gerenciarServicos.jsp">ServiÃ§os</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="gerenciarProfissionais.jsp">Profissionais</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="gerenciarPromocoes.jsp">Promoções</a>
+                <a class="nav-link" href="gerenciarPromocoes.jsp">PromoÃ§Ãµes</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="login.jsp">Logout</a>
@@ -63,9 +64,9 @@
 
               
                 <div class="form-group mb-3">
-                    <label for="servico" class="form-label">Serviço</label>
+                    <label for="servico" class="form-label">ServiÃ§o</label>
                     <select id="servico" name="servico" class="form-select">
-                        <option value="">Selecione um serviço</option>
+                        <option value="">Selecione um serviÃ§o</option>
                     </select>
                 </div>
 
@@ -87,7 +88,7 @@
 
             <div class="col-md-6">
                 <div class="form-group mb-3">
-                    <label for="numero" class="form-label">Número</label>
+                    <label for="numero" class="form-label">NÃºmero</label>
                     <input type="text" id="numero" name="numero" class="form-control">
                 </div>
 
@@ -119,9 +120,9 @@
     </form>
 </div>
 
-<!-- Rodapé -->
+<!-- RodapÃ© -->
 <footer class="bg-dark text-white text-center py-3 mt-5">
-    <p>© 2024 BarberHub - Todos os direitos reservados.</p>
+    <p>Â© 2024 BarberHub - Todos os direitos reservados.</p>
 </footer>
 
 
@@ -137,15 +138,15 @@
             dataType: 'json',
             success: function(data) {
                
-                var servicoHtml = '<option value="">Selecione um serviço</option>';
+                var servicoHtml = '<option value="">Selecione um serviÃ§o</option>';
                 data.forEach(function(servico) {
                     servicoHtml += '<option value="' + servico.nome + '">' + servico.nome + '</option>';
                 });
                 $('#servico').html(servicoHtml);
             },
             error: function(error) {
-                console.error('Erro ao buscar dados dos serviços:', error);
-                alert('Erro ao carregar os serviços. Por favor, tente novamente mais tarde.');
+                console.error('Erro ao buscar dados dos serviÃ§os:', error);
+                alert('Erro ao carregar os serviÃ§os. Por favor, tente novamente mais tarde.');
             }
         });
         

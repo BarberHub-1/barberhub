@@ -1,158 +1,155 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Profissional {
-	private int profissionalId;
-	private int estabelecimentoId;
-	private String nome;
-	private String servico;
-	private String cep;
-	private String rua;
-	private String numero;
-	private String complemento;
-	private String bairro;
-	private String cidade;
-	private String estado;
-	private String foto;
+    private int profissionalId;
+    private int estabelecimentoId;
+    private String nome;
+    private String cep;
+    private String rua;
+    private String numero;
+    private String complemento;
+    private String bairro;
+    private String cidade;
+    private String estado;
+    private String foto;
+    private List<Servico> servicos = new ArrayList<>();
 
-	public Profissional( int profissionalId, int estabelecimentoId, String nome, String servicoId, String cep, String rua, String numero, String complemento, String bairro, String cidade, String estado, String foto ) {
-		this.setProfissionalid( profissionalId );
-		this.setEstabelecimentoid( estabelecimentoId );
-		this.setNome( nome );
-		this.setServico( servico );
-		this.setCep( cep );
-		this.setRua( rua );
-		this.setNumero( numero );
-		this.setComplemento( complemento );
-		this.setBairro( bairro );
-		this.setCidade( cidade );
-		this.setEstado( estado );
-		this.setFoto( foto );
-	}
+    public Profissional() {}
 
-	public Profissional(String string, String string2, String string3, double d, int i) {
-		
-	}
+    public Profissional(int profissionalId, int estabelecimentoId, String nome, String cep, String rua, String numero, 
+                        String complemento, String bairro, String cidade, String estado, String foto) {
+        this.profissionalId = profissionalId;
+        this.estabelecimentoId = estabelecimentoId;
+        this.nome = nome;
+        this.cep = cep;
+        this.rua = rua;
+        this.numero = numero;
+        this.complemento = complemento;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+        this.foto = foto;
+    }
 
-	public Profissional() {
-		
-	}
+    public String[] toArray() {
+        return new String[] {
+            String.valueOf(this.profissionalId),
+            String.valueOf(this.estabelecimentoId),
+            this.nome,
+            this.cep,
+            this.rua,
+            this.numero,
+            this.complemento,
+            this.bairro,
+            this.cidade,
+            this.estado,
+            this.foto
+        };
+    }
 
-	public String[] toArray() {
-		return new String[] {
-			String.valueOf(this.getProfissionalid()),			
-			String.valueOf(this.getEstabelecimentoid()),			
-			String.valueOf(this.getNome()),			
-			String.valueOf(this.getServico()),			
-			String.valueOf(this.getCep()),			
-			String.valueOf(this.getRua()),			
-			String.valueOf(this.getNumero()),			
-			String.valueOf(this.getComplemento()),			
-			String.valueOf(this.getBairro()),			
-			String.valueOf(this.getCidade()),			
-			String.valueOf(this.getEstado()),			
-			String.valueOf(this.getFoto())
-		};
-	}
+    @Override
+    public String toString() {
+        return Arrays.toString(this.toArray());
+    }
 
-	public String toString() {
-		return Arrays.toString(this.toArray());
-	}
+    // Getters e Setters
+    public int getProfissionalId() {
+        return profissionalId;
+    }
 
-	public void setProfissionalid(int profissionalId) {
-		this.profissionalId = profissionalId;
-	}
+    public void setProfissionalId(int profissionalId) {
+        this.profissionalId = profissionalId;
+    }
 
-	public int getProfissionalid() {
-		return this.profissionalId;
-	}
+    public int getEstabelecimentoId() {
+        return estabelecimentoId;
+    }
 
-	public void setEstabelecimentoid(int estabelecimentoId) {
-		this.estabelecimentoId = estabelecimentoId;
-	}
+    public void setEstabelecimentoId(int estabelecimentoId) {
+        this.estabelecimentoId = estabelecimentoId;
+    }
 
-	public int getEstabelecimentoid() {
-		return this.estabelecimentoId;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public String getNome() {
-		return this.nome;
-	}
+    public String getCep() {
+        return cep;
+    }
 
-	public void setServico(String servico) {
-		this.servico = servico;
-	}
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
 
-	public String getServico() {
-		return this.servico;
-	}
+    public String getRua() {
+        return rua;
+    }
 
-	public void setCep(String cep) {
-		this.cep = cep;
-	}
+    public void setRua(String rua) {
+        this.rua = rua;
+    }
 
-	public String getCep() {
-		return this.cep;
-	}
+    public String getNumero() {
+        return numero;
+    }
 
-	public void setRua(String rua) {
-		this.rua = rua;
-	}
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
 
-	public String getRua() {
-		return this.rua;
-	}
+    public String getComplemento() {
+        return complemento;
+    }
 
-	public void setNumero(String numero) {
-		this.numero = numero;
-	}
+    public void setComplemento(String complemento) {
+        this.complemento = complemento;
+    }
 
-	public String getNumero() {
-		return this.numero;
-	}
+    public String getBairro() {
+        return bairro;
+    }
 
-	public void setComplemento(String complemento) {
-		this.complemento = complemento;
-	}
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
 
-	public String getComplemento() {
-		return this.complemento;
-	}
+    public String getCidade() {
+        return cidade;
+    }
 
-	public void setBairro(String bairro) {
-		this.bairro = bairro;
-	}
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
 
-	public String getBairro() {
-		return this.bairro;
-	}
+    public String getEstado() {
+        return estado;
+    }
 
-	public void setCidade(String cidade) {
-		this.cidade = cidade;
-	}
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
-	public String getCidade() {
-		return this.cidade;
-	}
+    public String getFoto() {
+        return foto;
+    }
 
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+    
+    public List<Servico> getServicos() {
+        return servicos;
+    }
 
-	public String getEstado() {
-		return this.estado;
-	}
-
-	public void setFoto(String foto) {
-		this.foto = foto;
-	}
-
-	public String getFoto() {
-		return this.foto;
-	}
+    public void addServico(Servico servico) {
+        this.servicos.add(servico);
+    }
 }

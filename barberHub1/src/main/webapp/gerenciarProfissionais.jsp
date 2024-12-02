@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,10 +12,10 @@
 </head>
 <body>
 
-<!-- Barra de Navegação -->
+<!-- Barra de NavegaÃ§Ã£o -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">BarberHub</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegaÃ§Ã£o">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
@@ -29,13 +30,13 @@
                 <a class="nav-link" href="gerenciarClientes.jsp">Clientes</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="gerenciarServicos.jsp">Serviços</a>
+                <a class="nav-link" href="gerenciarServicos.jsp">ServiÃ§os</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="gerenciarProfissionais.jsp">Profissionais</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="gerenciarPromocoes.jsp">Promoções</a>
+                <a class="nav-link" href="gerenciarPromocoes.jsp">PromoÃ§Ãµes</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="login.jsp">Logout</a>
@@ -59,7 +60,6 @@
                 <th>Profissionalid</th>
                 <th>Estabelecimentoid</th>
                 <th>Nome</th>
-                <th>Servico</th>
                 <th>Cep</th>
                 <th>Rua</th>
                 <th>Numero</th>
@@ -98,10 +98,7 @@
                 <label for="nome" class="form-label">Nome</label>
                 <input type="text" class="form-control" id="nome">
             </div>
-            <div class="mb-3">
-                <label for="servico" class="form-label">Servico</label>
-                <input type="text" class="form-control" id="servico">
-            </div>
+            
             <div class="mb-3">
                 <label for="cep" class="form-label">CEP</label>
                 <input type="text" class="form-control" id="cep">
@@ -156,7 +153,6 @@ $(document).ready(function() {
                         profissionalId: item.profissionalId,
                         estabelecimentoId: item.estabelecimentoId,
                         nome: item.nome,
-                        servico: item.servico,
                         cep: item.cep,
                         rua: item.rua,
                         numero: item.numero,
@@ -179,7 +175,6 @@ $(document).ready(function() {
             { "data": "profissionalId" },
             { "data": "estabelecimentoId" },
             { "data": "nome" },
-            { "data": "servico" },
             { "data": "cep" },
             { "data": "rua" },
             { "data": "numero" },
@@ -216,7 +211,6 @@ $(document).ready(function() {
                 $('#profissionalId').val(data.profissionalId); 
                 $('#estabelecimentoId').val(data.estabelecimentoId);
                 $('#nome').val(data.nome);
-                $('#servico').val(data.servico);
                 $('#cep').val(data.cep);
                 $('#rua').val(data.rua);
                 $('#numero').val(data.numero);
@@ -237,13 +231,13 @@ $(document).ready(function() {
     $('#profissional').on('click', '.deleteRow', function() {
         var id = $(this).data('id'); 
 
-        if (confirm("Você tem certeza que deseja excluir este profissional?")) {
+        if (confirm("VocÃª tem certeza que deseja excluir este profissional?")) {
             
             $.ajax({
                 url: "/barberHub1/profissional?profissionalId=" + id,  
                 method: 'DELETE',  
                 success: function(response) {
-                    alert("Profissional excluído com sucesso");
+                    alert("Profissional excluÃ­do com sucesso");
                     table.ajax.reload();  
                 },
                 error: function(error) {
@@ -254,15 +248,14 @@ $(document).ready(function() {
     });
     
  
-    $('#formProfissional').submit(function(e) {
+    $('#formProfissional').submit(function (e) {
         e.preventDefault();
 
         var id = $('#profissionalId').val();
         var profissionalData = {
-            profissionalId: id,
+            profissionalId: id , 
             estabelecimentoId: $('#estabelecimentoId').val(),
             nome: $('#nome').val(),
-            servico: $('#servico').val(),
             cep: $('#cep').val(),
             rua: $('#rua').val(),
             numero: $('#numero').val(),
@@ -270,25 +263,27 @@ $(document).ready(function() {
             bairro: $('#bairro').val(),
             cidade: $('#cidade').val(),
             estado: $('#estado').val(),
-            foto: $('#foto').val()
+            foto: $('#foto').val(),
         };
 
         $.ajax({
-            url: "/barberHub1/profissional?profissionalId=" + id, 
+            url: "/barberHub1/profissional", 
             method: 'PUT',
-            data: profissionalData,
-            success: function(response) {
+            contentType: 'application/json', // Define o formato como JSON
+            data: JSON.stringify(profissionalData), // Stringify os dados
+            success: function (response) {
                 alert("Profissional editado com sucesso!");
                 $('#formModal').modal('hide');
-                table.ajax.reload();  
+                table.ajax.reload(); 
             },
-            error: function(error) {
+            error: function (error) {
                 alert("Erro ao salvar dados do profissional.");
             }
         });
     });
 
-    // Função de mask para CEP
+
+    // FunÃ§Ã£o de mask para CEP
     $('#cep').mask('00000-000');
 });
 </script>

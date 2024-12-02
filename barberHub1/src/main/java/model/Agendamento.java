@@ -10,12 +10,12 @@ public class Agendamento {
 	private int servicoId;
 	private int clienteId;
 	private String data;
-	private Time hora;
+	private String hora;
 	private double preco;
 	private double desconto;
 	private String status;
 
-	public Agendamento( int agendamentoId, int estabelecimentoId, int profissionalId, int servicoId, int clienteId, String data, Time hora, double preco, double desconto, String status ) {
+	public Agendamento( int agendamentoId, int estabelecimentoId, int profissionalId, int servicoId, int clienteId, String data, String hora, double preco, double desconto, String status ) {
 		this.setAgendamentoid( agendamentoId );
 		this.setEstabelecimentoid( estabelecimentoId );
 		this.setProfissionalid( profissionalId );
@@ -31,6 +31,16 @@ public class Agendamento {
 	public Agendamento() {
 		
 	}
+
+	public Agendamento(int estabelecimentoId, int profissionalId, int servicoId, String data, String hora2, double preco, String status) {
+        this.estabelecimentoId = estabelecimentoId;
+        this.profissionalId = profissionalId;
+        this.servicoId = servicoId;
+        this.data = data;
+        this.hora = hora2;
+        this.preco = preco;
+        this.status = status;
+    }
 
 	public String[] toArray() {
 		return new String[] {
@@ -99,11 +109,11 @@ public class Agendamento {
 		return this.data;
 	}
 
-	public void setHora(Time hora) {
+	public void setHora(String hora) {
 		this.hora = hora;
 	}
 
-	public Time getHora() {
+	public String getHora() {
 		return this.hora;
 	}
 

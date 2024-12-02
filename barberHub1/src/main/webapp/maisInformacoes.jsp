@@ -129,8 +129,9 @@
                 <p><strong>Email:</strong> <span id="emailEstabelecimento"></span></p>
                 <p><strong>Telefone:</strong> <span id="telefoneEstabelecimento"></span></p>
                 <p><strong>Cidade:</strong> <span id="cidadeEstabelecimento"></span></p>
-                <p><strong>Serviços:</strong> <span id="servicosEstabelecimento"></span></p>
-                <p><strong>Profissionais:</strong> <span id="profissionaisEstabelecimento"></span></p>
+
+                <h4>Serviços:</h4>
+                <div id="profissionaisEstabelecimento"></div>
             </div>
         </div>
 
@@ -161,14 +162,21 @@
                 data: { id: id },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('Resposta do servidor:', response);
-
                     $('#nomeEstabelecimento').text(response.nome);
                     $('#emailEstabelecimento').text(response.email);
                     $('#telefoneEstabelecimento').text(response.telefone);
                     $('#cidadeEstabelecimento').text(response.cidade);
-                    $('#servicosEstabelecimento').text(response.servicos);
-                    $('#profissionaisEstabelecimento').text(response.profissionais);
+
+                    // Exibir os profissionais e serviços
+                    var profissionaisHTML = '';
+                    response.profissionais.forEach(function(profissional) {
+                        profissionaisHTML += '<div><strong>' + profissional.nome + '</strong><ul>';
+                        profissional.servicos.forEach(function(servico) {
+                            profissionaisHTML += '<li>' + servico.nome + ' - R$ ' + servico.preco + ' (' + servico.duracao + ' min)</li>';
+                        });
+                        profissionaisHTML += '</ul></div>';
+                    });
+                    $('#profissionaisEstabelecimento').html(profissionaisHTML);
 
                     $('#mensagemStatus').hide();
                     $('#dadosEstabelecimento').show();

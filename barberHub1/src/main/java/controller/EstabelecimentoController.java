@@ -16,6 +16,8 @@ import com.google.gson.JsonObject;
 
 import model.Estabelecimento;
 import model.EstabelecimentoDAO;
+import model.Profissional;
+import model.Servico;
 
 @WebServlet("/estabelecimento")
 public class EstabelecimentoController extends HttpServlet {
@@ -23,7 +25,6 @@ public class EstabelecimentoController extends HttpServlet {
     private EstabelecimentoDAO estabelecimentoDAO = new EstabelecimentoDAO(); 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -32,9 +33,8 @@ public class EstabelecimentoController extends HttpServlet {
             String estabelecimentoId = request.getParameter("id"); 
             
             if (estabelecimentoId != null) {
-                
                 int id = Integer.parseInt(estabelecimentoId);
-                Estabelecimento estabelecimento = estabelecimentoDAO.findById1(id);
+                Estabelecimento estabelecimento = estabelecimentoDAO.findById(id);
                 
                 if (estabelecimento != null) {
                     JsonObject estabelecimentoJson = new JsonObject();
@@ -43,19 +43,38 @@ public class EstabelecimentoController extends HttpServlet {
                     estabelecimentoJson.addProperty("email", estabelecimento.getEmail());
                     estabelecimentoJson.addProperty("cidade", estabelecimento.getCidade());
                     estabelecimentoJson.addProperty("telefone", estabelecimento.getTelefone());
-                    estabelecimentoJson.addProperty("profissionais", estabelecimento.getProfissionalNome());
-                    estabelecimentoJson.addProperty("servicos", estabelecimento.getProfissionalServico());
+
                     
-                    
+                    JsonArray profissionaisArray = new JsonArray();
+                    for (Profissional profissional : estabelecimento.getProfissionais()) {
+                        JsonObject profissionalJson = new JsonObject();
+                        profissionalJson.addProperty("id", profissional.getProfissionalId());
+                        profissionalJson.addProperty("nome", profissional.getNome());
+
+                       
+                        JsonArray servicosArray = new JsonArray();
+                        for (Servico servico : profissional.getServicos()) {
+                            JsonObject servicoJson = new JsonObject();
+                            servicoJson.addProperty("id", servico.getServicoId());
+                            servicoJson.addProperty("nome", servico.getNome());
+                            servicoJson.addProperty("descricao", servico.getDescricao());
+                            servicoJson.addProperty("preco", servico.getPreco());
+                            servicoJson.addProperty("duracao", servico.getDuracao());
+                            servicosArray.add(servicoJson);
+                        }
+                        profissionalJson.add("servicos", servicosArray);
+                        profissionaisArray.add(profissionalJson);
+                    }
+
+                    estabelecimentoJson.add("profissionais", profissionaisArray);
+
                     response.getWriter().write(gson.toJson(estabelecimentoJson));
                 } else {
-                    
                     JsonObject json = new JsonObject();
                     json.addProperty("error", "Estabelecimento not found");
                     response.getWriter().write(gson.toJson(json));
                 }
             } else {
-                
                 List<Estabelecimento> estabelecimentos = estabelecimentoDAO.findAll();
                 JsonArray jsonArray = new JsonArray();
 
@@ -66,11 +85,9 @@ public class EstabelecimentoController extends HttpServlet {
                     estabelecimentoJson.addProperty("email", estabelecimento.getEmail());
                     estabelecimentoJson.addProperty("cidade", estabelecimento.getCidade());
                     estabelecimentoJson.addProperty("telefone", estabelecimento.getTelefone());
-                    
                     jsonArray.add(estabelecimentoJson);
                 }
 
-                
                 response.getWriter().write(gson.toJson(jsonArray));
             }
         } catch (Exception e) {
@@ -80,7 +97,6 @@ public class EstabelecimentoController extends HttpServlet {
         }
     }
 
-    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -97,7 +113,6 @@ public class EstabelecimentoController extends HttpServlet {
         }
     }
 
-    
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -123,7 +138,6 @@ public class EstabelecimentoController extends HttpServlet {
         }
     }
 
-    
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");

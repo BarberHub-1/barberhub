@@ -39,7 +39,7 @@ public class DisponibilidadeDAO extends DBQuery {
 			while (rs.next()) {
 				Disponibilidade disponibilidade = new Disponibilidade();
 				disponibilidade.setDisponibilidadeid(rs.getInt("disponibilidadeId"));
-				disponibilidade.getProfissional().setProfissionalid(rs.getInt("profissionalId"));
+				disponibilidade.getProfissional().setProfissionalId(rs.getInt("profissionalId"));
 				disponibilidade.setData(rs.getString("data"));
 				disponibilidade.setHorainicio(rs.getTime("horaInicio"));
 				disponibilidade.setHorafim(rs.getTime("horaFim"));
@@ -58,7 +58,7 @@ public class DisponibilidadeDAO extends DBQuery {
 			if (rs.next()) {
 				Disponibilidade disponibilidade = new Disponibilidade();
 				disponibilidade.setDisponibilidadeid(rs.getInt("disponibilidadeId"));
-				disponibilidade.getProfissional().setProfissionalid(rs.getInt("profissionalId"));
+				disponibilidade.getProfissional().setProfissionalId(rs.getInt("profissionalId"));
 				disponibilidade.setData(rs.getString("data"));
 				disponibilidade.setHorainicio(rs.getTime("horaInicio"));
 				disponibilidade.setHorafim(rs.getTime("horaFim"));

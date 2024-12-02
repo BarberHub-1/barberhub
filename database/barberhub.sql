@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 29/11/2024 às 03:45
+-- Tempo de geração: 02/12/2024 às 07:28
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.0.30
 
@@ -50,7 +50,11 @@ INSERT INTO `agendamento` (`agendamentoId`, `estabelecimentoId`, `profissionalId
 (3, 2, 3, 2, 6, '2024-10-18', '11:30:00', 200.00, 20.00, 'Finalizado'),
 (4, 4, 1, 1, 7, '2025-02-05', '13:00:00', 100.00, 0.00, 'Agendada'),
 (5, 1, 2, 4, 8, '2025-01-13', '15:00:00', 180.00, 10.00, 'Agendada'),
-(6, 2, 3, 3, 9, '2025-01-14', '16:30:00', 150.00, 15.00, 'Agendada');
+(6, 2, 3, 3, 9, '2025-01-14', '16:30:00', 150.00, 15.00, 'Agendada'),
+(7, 0, 6, 3, 0, '2024-12-17', '04:21:00', 30.00, 0.00, 'Agendada'),
+(8, 0, 6, 3, 0, '2024-12-17', '05:25:00', 30.00, 0.00, 'Agendada'),
+(9, 0, 7, 4, 0, '2024-12-11', '05:39:00', 25.00, 0.00, 'Agendada'),
+(10, 0, 6, 3, 0, '2024-12-17', '06:29:00', 30.00, 0.00, 'Agendada');
 
 -- --------------------------------------------------------
 
@@ -158,10 +162,10 @@ CREATE TABLE `estabelecimento` (
 --
 
 INSERT INTO `estabelecimento` (`estabelecimentoId`, `nome`, `email`, `senha`, `telefone`, `cep`, `rua`, `numero`, `complemento`, `bairro`, `cidade`, `estado`, `statusCadastroId`, `dataCadastro`, `foto`) VALUES
-(1, 'Barber Shop São Paulo', 'contato@barbershopsao.com', 'senha123', '(11) 99999-0001', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', 1, '2024-11-24 19:46:32', NULL),
-(6, 'Barbearia Hermanos', 'contato@hermanos.com', 'senha358', '(11) 91234-5678', '04562-002', 'Rua dos Pinheiros', '123', 'Sala 10', 'Pinheiros', 'São Paulo', 'SP', 1, '2024-11-29 01:29:16', NULL),
-(7, 'Black Jack', 'contato@blackjack.com', 'senha847', '(11) 92345-6789', '02345-678', 'Avenida Brasil', '45', NULL, 'Jardim Paulista', 'São Paulo', 'SP', 2, '2024-11-29 01:29:16', NULL),
-(8, 'Salão Bela Vista', 'contato@belavista.com', 'senha24912', '(11) 93456-7890', '01234-567', 'Rua da Consolação', '890', 'Andar 2', 'Consolação', 'São Paulo', 'SP', 3, '2024-11-29 01:29:16', NULL);
+(1, 'Barber Shop São Paulo', 'contato@barbershopsao.com', 'senha123', '(11) 99999-0001', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', 1, '2024-11-24 22:46:32', NULL),
+(2, 'Barbearia Hermanos', 'contato@hermanos.com', 'senha358', '(11) 91234-5678', '04562-002', 'Rua dos Pinheiros', '123', 'Sala 10', 'Pinheiros', 'São Paulo', 'SP', 1, '2024-11-29 04:29:16', NULL),
+(3, 'Black Jack', 'contato@blackjack.com', 'senha847', '(11) 92345-6789', '02345-678', 'Avenida Brasil', '45', NULL, 'Jardim Paulista', 'São Paulo', 'SP', 2, '2024-11-29 04:29:16', NULL),
+(4, 'Salão Bela Vista', 'contato@belavista.com', 'senha24912', '(11) 93456-7890', '01234-567', 'Rua da Consolação', '890', 'Andar 2', 'Consolação', 'São Paulo', 'SP', 3, '2024-11-29 04:29:16', NULL);
 
 -- --------------------------------------------------------
 
@@ -209,7 +213,6 @@ CREATE TABLE `profissional` (
   `profissionalId` int(11) NOT NULL,
   `estabelecimentoId` int(11) DEFAULT NULL,
   `nome` varchar(255) NOT NULL,
-  `servico` varchar(255) DEFAULT NULL,
   `cep` varchar(20) DEFAULT NULL,
   `rua` varchar(100) DEFAULT NULL,
   `numero` varchar(10) DEFAULT NULL,
@@ -224,15 +227,16 @@ CREATE TABLE `profissional` (
 -- Despejando dados para a tabela `profissional`
 --
 
-INSERT INTO `profissional` (`profissionalId`, `estabelecimentoId`, `nome`, `servico`, `cep`, `rua`, `numero`, `complemento`, `bairro`, `cidade`, `estado`, `foto`) VALUES
-(1, 6, 'João Souza', 'Corte', '04562-002', 'Rua dos Pinheiros', '123', 'Sala 10', 'Pinheiros', 'São Paulo', 'SP', NULL),
-(2, 6, 'Mariano Oliveira', 'Corte', '04562-002', 'Rua dos Pinheiros', '123', 'Sala 10', 'Pinheiros', 'São Paulo', 'SP', NULL),
-(3, 7, 'Lucas Ferreira', 'Barba', '02345-678', 'Avenida Brasil', '45', NULL, 'Jardim Paulista', 'São Paulo', 'SP', NULL),
-(4, 7, 'Fernando Costa', 'Corte', '02345-678', 'Avenida Brasil', '45', NULL, 'Jardim Paulista', 'São Paulo', 'SP', NULL),
-(5, 8, 'Pedro Lima', 'Corte', '01234-567', 'Rua da Consolação', '890', 'Andar 2', 'Consolação', 'São Paulo', 'SP', NULL),
-(6, 1, 'Carlos Alves', 'Barba Modelada', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', NULL),
-(7, 1, 'Ana Mendes', 'Corte Infantil', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', NULL),
-(8, 1, 'Roberto Santos', 'Barba Completa', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', NULL);
+INSERT INTO `profissional` (`profissionalId`, `estabelecimentoId`, `nome`, `cep`, `rua`, `numero`, `complemento`, `bairro`, `cidade`, `estado`, `foto`) VALUES
+(1, 2, 'João Souza', '04562-002', 'Rua dos Pinheiros', '123', 'Sala 10', 'Pinheiros', 'São Paulo', 'SP', NULL),
+(2, 2, 'Mariano Oliveira', '04562-002', 'Rua dos Pinheiros', '123', 'Sala 10', 'Pinheiros', 'São Paulo', 'SP', 'foto'),
+(3, 3, 'Lucas Ferreira', '02345-678', 'Avenida Brasil', '45', NULL, 'Jardim Paulista', 'São Paulo', 'SP', NULL),
+(4, 3, 'Fernando Costa', '02345-678', 'Avenida Brasil', '45', NULL, 'Jardim Paulista', 'São Paulo', 'SP', NULL),
+(5, 4, 'Pedro Lima', '01234-567', 'Rua da Consolação', '890', 'Andar 2', 'Consolação', 'São Paulo', 'SP', NULL),
+(6, 1, 'Carlos Alves', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', NULL),
+(7, 1, 'Ana Mendes', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', NULL),
+(8, 1, 'Roberto Santos', '01001-000', 'Av. Paulista', '1000', 'Conjunto 101', 'Centro', 'São Paulo', 'SP', NULL),
+(9, 1, 'Profissional 1', '03334-566', 'Rua teste', '123', '', 'Teste', 'São Paulo', 'São Paulo', 'foto');
 
 -- --------------------------------------------------------
 
@@ -252,7 +256,10 @@ CREATE TABLE `profissionalservico` (
 INSERT INTO `profissionalservico` (`profissionalId`, `servicoId`) VALUES
 (1, 1),
 (1, 2),
-(2, 2);
+(2, 2),
+(6, 3),
+(7, 4),
+(8, 6);
 
 -- --------------------------------------------------------
 
@@ -276,10 +283,10 @@ CREATE TABLE `servico` (
 INSERT INTO `servico` (`servicoId`, `nome`, `descricao`, `tipoServicoId`, `preco`, `duracao`) VALUES
 (1, 'Corte Clássico', 'Corte de cabelo clássico masculino', 1, 40.00, 30),
 (2, 'Barba Modelada', 'Barba modelada com acabamentos perfeitos', 2, 30.00, 20),
-(3, 'Corte Masculino', 'Corte de cabelo masculino tradicional', 3, 30.00, 30),
-(4, 'Corte Infantil', 'Corte de cabelo para crianças', 4, 25.00, 25),
-(5, 'Aparar Barba', 'Aparar e modelar a barba', 5, 20.00, 20),
-(6, 'Barba Completa', 'Corte completo e modelagem da barba com navalha', 6, 35.00, 30);
+(3, 'Corte Masculino', 'Corte de cabelo masculino tradicional', 1, 30.00, 30),
+(4, 'Corte Infantil', 'Corte de cabelo para crianças', 1, 25.00, 25),
+(5, 'Aparar Barba', 'Aparar e modelar a barba', 2, 20.00, 20),
+(6, 'Barba Completa', 'Corte completo e modelagem da barba com navalha', 3, 35.00, 30);
 
 -- --------------------------------------------------------
 
@@ -457,7 +464,7 @@ ALTER TABLE `tiposervico`
 -- AUTO_INCREMENT de tabela `agendamento`
 --
 ALTER TABLE `agendamento`
-  MODIFY `agendamentoId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `agendamentoId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `avaliacao`
@@ -487,7 +494,7 @@ ALTER TABLE `disponibilidade`
 -- AUTO_INCREMENT de tabela `estabelecimento`
 --
 ALTER TABLE `estabelecimento`
-  MODIFY `estabelecimentoId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `estabelecimentoId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `pagamento`
@@ -499,13 +506,13 @@ ALTER TABLE `pagamento`
 -- AUTO_INCREMENT de tabela `profissional`
 --
 ALTER TABLE `profissional`
-  MODIFY `profissionalId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `profissionalId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de tabela `servico`
 --
 ALTER TABLE `servico`
-  MODIFY `servicoId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `servicoId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `sistema`

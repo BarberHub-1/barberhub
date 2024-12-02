@@ -16,7 +16,7 @@ public class ProfissionalServicoDAO extends DBQuery {
 
   
     public int save(ProfissionalServico profissionalServico) {
-        if (profissionalServico.getProfissionaIdl() >= 0) {
+        if (profissionalServico.getProfissionalId() >= 0) {
           
             return this.update(profissionalServico.toArray());
         } else {

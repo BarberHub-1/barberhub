@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Estabelecimento {
 	private int estabelecimentoId;
@@ -23,6 +24,7 @@ public class Estabelecimento {
 	private String servicoNome;
 	private double servicoPreco;
 	private int servicoDuracao;
+	private List<Profissional> profissionais;
 
 	public Estabelecimento( int estabelecimentoId, String nome, String email, String senha, String telefone, String cep, String rua, String numero, String complemento, String bairro, String cidade, String estado, int statusCadastroId, String dataCadastro, String foto ) {
 		this.setEstabelecimentoid( estabelecimentoId );
@@ -279,6 +281,14 @@ public class Estabelecimento {
 
 	public void setServicoDuracao(int servicoDuracao) {
 		this.servicoDuracao = servicoDuracao;
+	}
+	
+	public List<Profissional> getProfissionais() {
+	    return profissionais;
+	}
+
+	public void setProfissionais(List<Profissional> profissionais) {
+	    this.profissionais = profissionais;
 	}
 	
 	
