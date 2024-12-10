@@ -15,7 +15,7 @@ public class EstabelecimentoDAO {
 
  
     public int save(Estabelecimento estabelecimento) {
-        if (estabelecimento.getEstabelecimentoid() >= 0) {
+        if (estabelecimento.getEstabelecimentoId() >= 0) {
             return this.update(estabelecimento);
         } else {
             return this.insert(estabelecimento);
@@ -41,10 +41,10 @@ public class EstabelecimentoDAO {
             statement.setString(9, estabelecimento.getBairro());
             statement.setString(10, estabelecimento.getCidade());
             statement.setString(11, estabelecimento.getEstado());
-            statement.setInt(12, estabelecimento.getStatuscadastroid());
-            statement.setString(13, estabelecimento.getDatacadastro());
+            statement.setInt(12, estabelecimento.getStatusCadastro().getStatuscadastroId());
+            statement.setString(13, estabelecimento.getDataCadastro());
             statement.setString(14, estabelecimento.getFoto());
-            statement.setInt(15, estabelecimento.getEstabelecimentoid());
+            statement.setInt(15, estabelecimento.getEstabelecimentoId());
             return statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -70,8 +70,8 @@ public class EstabelecimentoDAO {
             statement.setString(9, estabelecimento.getBairro());
             statement.setString(10, estabelecimento.getCidade());
             statement.setString(11, estabelecimento.getEstado());
-            statement.setInt(12, estabelecimento.getStatuscadastroid());
-            statement.setString(13, estabelecimento.getDatacadastro());
+            statement.setInt(12, estabelecimento.getStatusCadastro().getStatuscadastroId());
+            statement.setString(13, estabelecimento.getDataCadastro());
             statement.setString(14, estabelecimento.getFoto());
             
             int affectedRows = statement.executeUpdate();
@@ -91,11 +91,11 @@ public class EstabelecimentoDAO {
 
   
     public int delete(Estabelecimento estabelecimento) {
-        if (estabelecimento.getEstabelecimentoid() != 0) {
+        if (estabelecimento.getEstabelecimentoId() != 0) {
             String query = "DELETE FROM estabelecimento WHERE estabelecimentoId = ?";
             try (Connection connection = dbConnection.getConnection();
                  PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, estabelecimento.getEstabelecimentoid());
+                statement.setInt(1, estabelecimento.getEstabelecimentoId());
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -115,7 +115,7 @@ public class EstabelecimentoDAO {
 
             while (rs.next()) {
                 Estabelecimento estabelecimento = new Estabelecimento();
-                estabelecimento.setEstabelecimentoid(rs.getInt("estabelecimentoId"));
+                estabelecimento.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
                 estabelecimento.setNome(rs.getString("nome"));
                 estabelecimento.setEmail(rs.getString("email"));
                 estabelecimento.setSenha(rs.getString("senha"));
@@ -127,8 +127,8 @@ public class EstabelecimentoDAO {
                 estabelecimento.setBairro(rs.getString("bairro"));
                 estabelecimento.setCidade(rs.getString("cidade"));
                 estabelecimento.setEstado(rs.getString("estado"));
-                estabelecimento.setStatuscadastroid(rs.getInt("statusCadastroId"));
-                estabelecimento.setDatacadastro(rs.getString("dataCadastro"));
+                estabelecimento.getStatusCadastro().setStatuscadastroId(rs.getInt("statusCadastroId"));
+                estabelecimento.setDataCadastro(rs.getString("dataCadastro"));
                 estabelecimento.setFoto(rs.getString("foto"));
                 list.add(estabelecimento);
             }
@@ -165,7 +165,7 @@ public class EstabelecimentoDAO {
                     
                     if (estabelecimento == null) {
                         estabelecimento = new Estabelecimento();
-                        estabelecimento.setEstabelecimentoid(rs.getInt("estabelecimentoId"));
+                        estabelecimento.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
                         estabelecimento.setNome(rs.getString("estabelecimentoNome"));
                         estabelecimento.setEmail(rs.getString("estabelecimentoEmail"));
                         estabelecimento.setTelefone(rs.getString("estabelecimentoTelefone"));

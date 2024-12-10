@@ -2,22 +2,22 @@ package model;
 
 import java.util.Arrays;
 
-public class Statuscadastro {
+public class StatusCadastro {
 	private int statusCadastroId;
 	private String descricao;
 
-	public Statuscadastro( int statusCadastroId, String descricao ) {
-		this.setStatuscadastroid( statusCadastroId );
+	public StatusCadastro( int statusCadastroId, String descricao ) {
+		this.setStatuscadastroId( statusCadastroId );
 		this.setDescricao( descricao );
 	}
 
-	public Statuscadastro() {
+	public StatusCadastro() {
 		
 	}
 
 	public String[] toArray() {
 		return new String[] {
-			String.valueOf(this.getStatuscadastroid()),			
+			String.valueOf(this.getStatuscadastroId()),			
 			String.valueOf(this.getDescricao())
 		};
 	}
@@ -26,11 +26,11 @@ public class Statuscadastro {
 		return Arrays.toString(this.toArray());
 	}
 
-	public void setStatuscadastroid(int statusCadastroId) {
+	public void setStatuscadastroId(int statusCadastroId) {
 		this.statusCadastroId = statusCadastroId;
 	}
 
-	public int getStatuscadastroid() {
+	public int getStatuscadastroId() {
 		return this.statusCadastroId;
 	}
 

@@ -11,7 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import model.Statuscadastro;
+import model.StatusCadastro;
 import model.StatuscadastroDAO;
 
 @WebServlet("/statuscadastro")
@@ -26,7 +26,7 @@ public class StatuscadastroController extends HttpServlet {
 		String statusCadastroId = request.getParameter("statusCadastroId");
 		try {
 			if (statusCadastroId != null) {
-				Statuscadastro statusCadastro = dao.findById(Integer.parseInt(statusCadastroId));
+				StatusCadastro statusCadastro = dao.findById(Integer.parseInt(statusCadastroId));
 				if (statusCadastro != null) {
 					String json = gson.toJson(statusCadastro);
 					response.getWriter().write(json);
@@ -50,7 +50,7 @@ public class StatuscadastroController extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("application/json");
 		try {
-			Statuscadastro statusCadastro = gson.fromJson(request.getReader(), Statuscadastro.class);
+			StatusCadastro statusCadastro = gson.fromJson(request.getReader(), StatusCadastro.class);
 			dao.save(statusCadastro);
 			JsonObject json = new JsonObject();
 			json.addProperty("success", true);
@@ -68,7 +68,7 @@ public class StatuscadastroController extends HttpServlet {
 		String statusCadastroId = request.getParameter("statusCadastroId");
 		try {
 			if (statusCadastroId != null) {
-				Statuscadastro statusCadastro = gson.fromJson(request.getReader(), Statuscadastro.class);
+				StatusCadastro statusCadastro = gson.fromJson(request.getReader(), StatusCadastro.class);
 				dao.save(statusCadastro);
 				JsonObject json = new JsonObject();
 				json.addProperty("success", true);
@@ -89,7 +89,7 @@ public class StatuscadastroController extends HttpServlet {
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("application/json");
 		try {
-			Statuscadastro statusCadastro = gson.fromJson(request.getReader(), Statuscadastro.class);
+			StatusCadastro statusCadastro = gson.fromJson(request.getReader(), StatusCadastro.class);
 			dao.delete(statusCadastro);
 			JsonObject json = new JsonObject();
 			json.addProperty("success", true);

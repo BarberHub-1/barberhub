@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Profissional</title>
+    <title>Cadastro de Tipo de Serviço</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -47,14 +47,14 @@
 
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Cadastro de Profissional</h2>
+    <h2 class="text-center mb-4">Cadastro de Tipo de Serviço</h2>
     <form id="cadastroProfissionalForm" method="POST" action="/profissional">
         <div class="row">
             <div class="col-md-6">
                 
                 <div class="mb-3">
                     <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                    <input type="hidden" id="estabelecimentoId" name="estabelecimentoId" class="form-control" value="<%= session.getAttribute("estabelecimentoId") %>">
+                    <input type="number" id="estabelecimentoId" name="estabelecimentoId" class="form-control">
                 </div>
 
                 <div class="form-group mb-3">
@@ -115,7 +115,7 @@
         </div>
 
         <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary mt-4">Cadastrar Profissional</button>
+            <button type="submit" class="btn btn-primary mt-4">Cadastrar Tipo de Serviço</button>
         </div>
     </form>
 </div>
@@ -183,8 +183,6 @@
                     alert('Profissional cadastrado com sucesso!');
                    
                     $('#cadastroProfissionalForm')[0].reset();
-                    
-                    window.location.href = "gerenciarProfissionais.jsp";
                 },
                 error: function(error) {
                     alert('Erro ao cadastrar o profissional. Tente novamente.');

@@ -12,16 +12,16 @@ public class StatuscadastroDAO extends DBQuery {
 		this.setFieldKey("statusCadastroId");
 	}
 
-	public int save(Statuscadastro statusCadastro) {
-		if(statusCadastro.getStatuscadastroid() >= 0) {
+	public int save(StatusCadastro statusCadastro) {
+		if(statusCadastro.getStatuscadastroId() >= 0) {
 			return this.update(statusCadastro.toArray());
 		} else {
 			return this.insert(statusCadastro.toArray());
 		}
 	}
 
-	public int delete(Statuscadastro statusCadastro) {
-		if(statusCadastro.getStatuscadastroid() != 0) {
+	public int delete(StatusCadastro statusCadastro) {
+		if(statusCadastro.getStatuscadastroId() != 0) {
 			return this.delete(statusCadastro.toArray());
 		} else {
 			return 0;
@@ -32,13 +32,13 @@ public class StatuscadastroDAO extends DBQuery {
 	    return super.select(where); 
 	}
 
-	public ArrayList<Statuscadastro> findAll() {
+	public ArrayList<StatusCadastro> findAll() {
 		ResultSet rs = this.select("");
-		ArrayList<Statuscadastro> list = new ArrayList<>();
+		ArrayList<StatusCadastro> list = new ArrayList<>();
 		try {
 			while (rs.next()) {
-				Statuscadastro statusCadastro = new Statuscadastro();
-				statusCadastro.setStatuscadastroid(rs.getInt("statusCadastroId"));
+				StatusCadastro statusCadastro = new StatusCadastro();
+				statusCadastro.setStatuscadastroId(rs.getInt("statusCadastroId"));
 				statusCadastro.setDescricao(rs.getString("descricao"));
 				list.add(statusCadastro);
 			}
@@ -48,12 +48,12 @@ public class StatuscadastroDAO extends DBQuery {
 		return list;
 	}
 
-	public Statuscadastro findById(int id) {
+	public StatusCadastro findById(int id) {
 		ResultSet rs = this.select("WHERE " + this.getFieldKey() + " = " + id);
 		try {
 			if (rs.next()) {
-				Statuscadastro statusCadastro = new Statuscadastro();
-				statusCadastro.setStatuscadastroid(rs.getInt("statusCadastroId"));
+				StatusCadastro statusCadastro = new StatusCadastro();
+				statusCadastro.setStatuscadastroId(rs.getInt("statusCadastroId"));
 				statusCadastro.setDescricao(rs.getString("descricao"));
 				return statusCadastro;
 			}

@@ -101,7 +101,7 @@ public class ServicoController extends HttpServlet {
                 if (servicoExistente != null) {
                     servicoExistente.setNome(servico.getNome());
                     servicoExistente.setDescricao(servico.getDescricao());
-                    servicoExistente.setTipoServicoId(servico.getTipoServicoId());
+                    servicoExistente.getTipoServico().setTipoServicoId(servico.getTipoServico().getTipoServicoId());
                     servicoExistente.setPreco(servico.getPreco());
                     dao.update(servicoExistente);
 

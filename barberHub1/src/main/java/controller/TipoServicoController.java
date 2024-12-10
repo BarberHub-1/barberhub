@@ -66,26 +66,42 @@ public class TipoServicoController extends HttpServlet {
 
 	@Override
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
-		String tipoServicoId = request.getParameter("tipoServicoId");
-		try {
-			if (tipoServicoId != null) {
-				TipoServico tipoServico = gson.fromJson(request.getReader(), TipoServico.class);
-				dao.save(tipoServico);
-				JsonObject json = new JsonObject();
-				json.addProperty("success", true);
-				response.getWriter().write(gson.toJson(json));
-			} else {
-				JsonObject json = new JsonObject();
-				json.addProperty("error", "tipoServicoId is required");
-				response.getWriter().write(gson.toJson(json));
-			}
-		} catch (Exception e) {
-			JsonObject json = new JsonObject();
-			json.addProperty("error", e.getMessage());
-			response.getWriter().write(gson.toJson(json));
-		}
+	    request.setCharacterEncoding("UTF-8"); 
+	    response.setCharacterEncoding("UTF-8");
+	    response.setContentType("application/json; charset=UTF-8");
+
+	    try {
+	        System.out.println("Iniciando doPut..."); // Log inicial
+	        String jsonBody = request.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
+	        System.out.println("JSON recebido: " + jsonBody); // Log do JSON recebido
+
+	        TipoServico tipoServico = gson.fromJson(jsonBody, TipoServico.class);
+	        System.out.println("Objeto mapeado: ID=" + tipoServico.getTipoServicoId() + ", Nome=" + tipoServico.getServicoNome());
+
+	        int updated = dao.update(tipoServico);
+	        System.out.println("Linhas atualizadas no banco: " + updated); // Log do resultado da atualização
+
+	        if (updated > 0) {
+	            JsonObject jsonResponse = new JsonObject();
+	            jsonResponse.addProperty("success", true);
+	            response.getWriter().write(gson.toJson(jsonResponse));
+	            System.out.println("Resposta enviada: sucesso"); // Log de sucesso
+	        } else {
+	            JsonObject jsonResponse = new JsonObject();
+	            jsonResponse.addProperty("error", "Erro ao atualizar o tipo de serviço.");
+	            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	            response.getWriter().write(gson.toJson(jsonResponse));
+	            System.err.println("Erro: Nenhuma linha foi atualizada."); // Log de erro
+	        }
+	    } catch (Exception e) {
+	        JsonObject jsonResponse = new JsonObject();
+	        jsonResponse.addProperty("error", "Erro ao o tipo de serviço: " + e.getMessage());
+	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        response.getWriter().write(gson.toJson(jsonResponse));
+	        e.printStackTrace();
+	    }
 	}
+
 
 	@Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

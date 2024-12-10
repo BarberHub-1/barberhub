@@ -52,7 +52,7 @@
     <a href="cadastrarServico.jsp" class="btn btn-primary mb-3">Adicionar Novo Serviço</a>
 
    
-    <table id="tabelaServicos" class="table table-bordered">
+    <table id="servico" class="table table-bordered">
         <thead>
             <tr>
                 <th>ID</th>

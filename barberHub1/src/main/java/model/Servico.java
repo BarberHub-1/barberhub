@@ -6,8 +6,8 @@ public class Servico {
 	private int servicoId;
 	private String nome;
 	private String descricao;
-	private int tipoServicoId;
-	private String tipoServicoNome;
+	private TipoServico tipoServico;
+//	private String tipoServicoNome;
 	private double preco;
 	private int duracao;
 
@@ -79,19 +79,22 @@ public class Servico {
 		return this.duracao;
 	}
 
-	public int getTipoServicoId() {
-		return this.tipoServicoId;
+	public TipoServico getTipoServico() {
+		 if (tipoServico == null) {
+	            tipoServico = new TipoServico(); // Inicializa o objeto, se for null
+	        }
+	        return tipoServico;
 	}
 
-	public void setTipoServicoId(int tipoServicoId) {
-		this.tipoServicoId = tipoServicoId;
+	public void setTipoServico(TipoServico tipoServico) {
+		this.tipoServico = tipoServico;
 	}
 
-	public String getTipoServicoNome() {
-		return this.tipoServicoNome;
-	}
+//	public String getTipoServicoNome() {
+//		return this.tipoServicoNome;
+//	}
 
-	public void setTipoServicoNome(String tipoServicoNome) {
-		this.tipoServicoNome = tipoServicoNome;
-	}
+//	public void setTipoServicoNome(String tipoServicoNome) {
+//		this.tipoServicoNome = tipoServicoNome;
+//	}
 }

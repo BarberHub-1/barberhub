@@ -29,7 +29,7 @@ public class ServicoDAO {
 
             statement.setString(1, servico.getNome());
             statement.setString(2, servico.getDescricao());
-            statement.setInt(3, servico.getTipoServicoId());
+            statement.setInt(3, servico.getTipoServico().getTipoServicoId());
             statement.setDouble(4, servico.getPreco());
             statement.setInt(5, servico.getDuracao());
             statement.setInt(6, servico.getServicoId());
@@ -47,7 +47,7 @@ public class ServicoDAO {
 
             statement.setString(1, servico.getNome());
             statement.setString(2, servico.getDescricao());
-            statement.setInt(3, servico.getTipoServicoId());
+            statement.setInt(3, servico.getTipoServico().getTipoServicoId());
             statement.setDouble(4, servico.getPreco());
             statement.setInt(5, servico.getDuracao());
 
@@ -91,7 +91,7 @@ public class ServicoDAO {
                 servico.setServicoId(rs.getInt("servicoId"));
                 servico.setNome(rs.getString("nome"));
                 servico.setDescricao(rs.getString("descricao"));
-                servico.setTipoServicoId(rs.getInt("tipoServicoId"));
+                servico.getTipoServico().setTipoServicoId(rs.getInt("tipoServicoId"));
                 servico.setPreco(rs.getDouble("preco"));
                 servico.setDuracao(rs.getInt("duracao"));
                 list.add(servico);
@@ -114,7 +114,7 @@ public class ServicoDAO {
                     servico.setServicoId(rs.getInt("servicoId"));
                     servico.setNome(rs.getString("nome"));
                     servico.setDescricao(rs.getString("descricao"));
-                    servico.setTipoServicoId(rs.getInt("tipoServicoId"));
+                    servico.getTipoServico().setTipoServicoId(rs.getInt("tipoServicoId"));
                     servico.setPreco(rs.getDouble("preco"));
                     servico.setDuracao(rs.getInt("duracao"));
                     return servico;
@@ -141,7 +141,7 @@ public class ServicoDAO {
                 servico.setDescricao(rs.getString("descricao"));
                 servico.setPreco(rs.getDouble("preco"));
                 servico.setDuracao(rs.getInt("duracao"));
-                servico.setTipoServicoNome(rs.getString("tipoServicoNome"));
+                servico.getTipoServico().setServicoNome(rs.getString("tipoServicoNome"));
                 list.add(servico);
             }
         } catch (SQLException e) {
@@ -164,7 +164,7 @@ public class ServicoDAO {
                     servico.setDescricao(rs.getString("descricao"));
                     servico.setPreco(rs.getDouble("preco"));
                     servico.setDuracao(rs.getInt("duracao"));
-                    servico.setTipoServicoNome(rs.getString("tipoServicoNome"));
+                    servico.getTipoServico().setServicoNome(rs.getString("tipoServicoNome"));
                     return servico;
                 }
             }

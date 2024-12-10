@@ -18,7 +18,7 @@ public class Cliente {
 	private String foto;
 
 	public Cliente( int clienteId, String nome, String email, String senha, String telefone, String cep, String rua, String numero, String complemento, String bairro, String cidade, String estado, String foto ) {
-		this.setClienteid( clienteId );
+		this.setClienteId( clienteId );
 		this.setNome( nome );
 		this.setEmail( email );
 		this.setSenha( senha );
@@ -39,7 +39,7 @@ public class Cliente {
 
 	public String[] toArray() {
 		return new String[] {
-			String.valueOf(this.getClienteid()),			
+			String.valueOf(this.getClienteId()),			
 			String.valueOf(this.getNome()),			
 			String.valueOf(this.getEmail()),			
 			String.valueOf(this.getSenha()),			
@@ -59,11 +59,11 @@ public class Cliente {
 		return Arrays.toString(this.toArray());
 	}
 
-	public void setClienteid(int clienteId) {
+	public void setClienteId(int clienteId) {
 		this.clienteId = clienteId;
 	}
 
-	public int getClienteid() {
+	public int getClienteId() {
 		return this.clienteId;
 	}
 

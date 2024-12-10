@@ -38,7 +38,7 @@ public class EstabelecimentoController extends HttpServlet {
                 
                 if (estabelecimento != null) {
                     JsonObject estabelecimentoJson = new JsonObject();
-                    estabelecimentoJson.addProperty("id", estabelecimento.getEstabelecimentoid());
+                    estabelecimentoJson.addProperty("id", estabelecimento.getEstabelecimentoId());
                     estabelecimentoJson.addProperty("nome", estabelecimento.getNome());
                     estabelecimentoJson.addProperty("email", estabelecimento.getEmail());
                     estabelecimentoJson.addProperty("cidade", estabelecimento.getCidade());
@@ -80,7 +80,7 @@ public class EstabelecimentoController extends HttpServlet {
 
                 for (Estabelecimento estabelecimento : estabelecimentos) {
                     JsonObject estabelecimentoJson = new JsonObject();
-                    estabelecimentoJson.addProperty("id", estabelecimento.getEstabelecimentoid());
+                    estabelecimentoJson.addProperty("id", estabelecimento.getEstabelecimentoId());
                     estabelecimentoJson.addProperty("nome", estabelecimento.getNome());
                     estabelecimentoJson.addProperty("email", estabelecimento.getEmail());
                     estabelecimentoJson.addProperty("cidade", estabelecimento.getCidade());
@@ -121,7 +121,7 @@ public class EstabelecimentoController extends HttpServlet {
         try {
             if (estabelecimentoId != null) {
                 Estabelecimento estabelecimento = gson.fromJson(request.getReader(), Estabelecimento.class);
-                estabelecimento.setEstabelecimentoid(Integer.parseInt(estabelecimentoId)); 
+                estabelecimento.setEstabelecimentoId(Integer.parseInt(estabelecimentoId)); 
                 estabelecimentoDAO.save(estabelecimento);
                 JsonObject json = new JsonObject();
                 json.addProperty("success", true);

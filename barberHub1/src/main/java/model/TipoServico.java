@@ -3,12 +3,13 @@ package model;
 import java.util.Arrays;
 
 public class TipoServico {
+	
 	private int tipoServicoId;
-	private String servico;
+	private String tipoServicoNome;
 
-	public TipoServico( int tipoServicoId, String servico ) {
-		this.setTiposervicoid( tipoServicoId );
-		this.setServico( servico );
+	public TipoServico( int tipoServicoId, String tipoServicoNome ) {
+		this.setTipoServicoId( tipoServicoId );
+		this.setServicoNome( tipoServicoNome );
 		
 	}
 
@@ -18,8 +19,8 @@ public class TipoServico {
 
 	public String[] toArray() {
 		return new String[] {
-			String.valueOf(this.getTiposervicoid()),			
-			String.valueOf(this.getServico()),			
+			String.valueOf(this.getTipoServicoId()),			
+			String.valueOf(this.getServicoNome()),			
 		};
 	}
 
@@ -27,20 +28,20 @@ public class TipoServico {
 		return Arrays.toString(this.toArray());
 	}
 
-	public void setTiposervicoid(int tipoServicoId) {
+	public void setTipoServicoId(int tipoServicoId) {
 		this.tipoServicoId = tipoServicoId;
 	}
 
-	public int getTiposervicoid() {
+	public int getTipoServicoId() {
 		return this.tipoServicoId;
 	}
 
-	public void setServico(String servico) {
-		this.servico = servico;
+	public void setServicoNome(String tipoServicoNome) {
+		this.tipoServicoNome = tipoServicoNome;
 	}
 
-	public String getServico() {
-		return this.servico;
+	public String getServicoNome() {
+		return this.tipoServicoNome;
 	}
 
 }

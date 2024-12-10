@@ -13,7 +13,7 @@ public class ClienteDAO extends DBQuery {
 	}
 
 	public int save(Cliente cliente) {
-		if(cliente.getClienteid() >= 0) {
+		if(cliente.getClienteId() >= 0) {
 			return this.update(cliente.toArray());
 		} else {
 			return this.insert(cliente.toArray());
@@ -21,7 +21,7 @@ public class ClienteDAO extends DBQuery {
 	}
 
 	public int delete(Cliente cliente) {
-		if(cliente.getClienteid() != 0) {
+		if(cliente.getClienteId() != 0) {
 			return this.delete(cliente.toArray());
 		} else {
 			return 0;
@@ -38,7 +38,7 @@ public class ClienteDAO extends DBQuery {
 		try {
 			while (rs.next()) {
 				Cliente cliente = new Cliente();
-				cliente.setClienteid(rs.getInt("clienteId"));
+				cliente.setClienteId(rs.getInt("clienteId"));
 				cliente.setNome(rs.getString("nome"));
 				cliente.setEmail(rs.getString("email"));
 				cliente.setSenha(rs.getString("senha"));
@@ -64,7 +64,7 @@ public class ClienteDAO extends DBQuery {
 		try {
 			if (rs.next()) {
 				Cliente cliente = new Cliente();
-				cliente.setClienteid(rs.getInt("clienteId"));
+				cliente.setClienteId(rs.getInt("clienteId"));
 				cliente.setNome(rs.getString("nome"));
 				cliente.setEmail(rs.getString("email"));
 				cliente.setSenha(rs.getString("senha"));

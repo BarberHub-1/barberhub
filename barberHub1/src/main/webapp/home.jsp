@@ -137,7 +137,7 @@
                     var selectHtml = '<option value="">Selecione um serviço</option>';
                     data.forEach(function(servico) {
                         
-                        selectHtml += '<option value="' + servico.tipoServicoId + '">' + servico.servico + '</option>';
+                        selectHtml += '<option value="' + servico.tipoServicoId + '">' + servico.tipoServicoNome + '</option>';
                     });
                     $('#servico').html(selectHtml);
                 },

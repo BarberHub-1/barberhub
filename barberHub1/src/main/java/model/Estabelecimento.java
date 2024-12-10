@@ -1,295 +1,232 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Estabelecimento {
-	private int estabelecimentoId;
-	private String nome;
-	private String email;
-	private String senha;
-	private String telefone;
-	private String cep;
-	private String rua;
-	private String numero;
-	private String complemento;
-	private String bairro;
-	private String cidade;
-	private String estado;
-	private int statusCadastroId;
-	private String dataCadastro;
-	private String foto;
-	private String profissionalNome;
-	private String profissionalServico;
-	private String servicoNome;
-	private double servicoPreco;
-	private int servicoDuracao;
-	private List<Profissional> profissionais;
 
-	public Estabelecimento( int estabelecimentoId, String nome, String email, String senha, String telefone, String cep, String rua, String numero, String complemento, String bairro, String cidade, String estado, int statusCadastroId, String dataCadastro, String foto ) {
-		this.setEstabelecimentoid( estabelecimentoId );
-		this.setNome( nome );
-		this.setEmail( email );
-		this.setSenha( senha );
-		this.setTelefone( telefone );
-		this.setCep( cep );
-		this.setRua( rua );
-		this.setNumero( numero );
-		this.setComplemento( complemento );
-		this.setBairro( bairro );
-		this.setCidade( cidade );
-		this.setEstado( estado );
-		this.setStatuscadastroid( statusCadastroId );
-		this.setDatacadastro( dataCadastro );
-		this.setFoto( foto );
-	}
-	
-	
+    // Atributos principais
+    private int estabelecimentoId;
+    private String nome;
+    private String email;
+    private String senha;
+    private String telefone;
+    private String cep;
+    private String rua;
+    private String numero;
+    private String complemento;
+    private String bairro;
+    private String cidade;
+    private String estado;
+    private String dataCadastro;
+    private String foto;
 
-	public Estabelecimento(int estabelecimentoId, String nome, String email, String senha, String telefone, String cep,
-			String rua, String numero, String complemento, String bairro, String cidade, String estado,
-			int statusCadastroId, String dataCadastro, String foto, String profissionalNome, String profissionalServico,
-			String servicoNome, double servicoPreco, int servicoDuracao) {
-		super();
-		this.estabelecimentoId = estabelecimentoId;
-		this.nome = nome;
-		this.email = email;
-		this.senha = senha;
-		this.telefone = telefone;
-		this.cep = cep;
-		this.rua = rua;
-		this.numero = numero;
-		this.complemento = complemento;
-		this.bairro = bairro;
-		this.cidade = cidade;
-		this.estado = estado;
-		this.statusCadastroId = statusCadastroId;
-		this.dataCadastro = dataCadastro;
-		this.foto = foto;
-		this.profissionalNome = profissionalNome;
-		this.profissionalServico = profissionalServico;
-		this.servicoNome = servicoNome;
-		this.servicoPreco = servicoPreco;
-		this.servicoDuracao = servicoDuracao;
-	}
+    // Relacionamentos e atributos auxiliares
+    private StatusCadastro statusCadastro;
+    private Servico servico;
+    private List<Profissional> profissionais;
 
+    // Construtores
+    public Estabelecimento() {
+        // Inicializando objetos e listas
+        this.statusCadastro = new StatusCadastro();
+        this.servico = new Servico();
+        this.profissionais = new ArrayList<>();
+    }
 
+    public Estabelecimento(int estabelecimentoId, String nome, String email, String senha, String telefone, String cep,
+                           String rua, String numero, String complemento, String bairro, String cidade, String estado,
+                           int statusCadastro, String dataCadastro, String foto) {
+        this(); // Chama o construtor padrão para inicializar objetos relacionados
+        this.estabelecimentoId = estabelecimentoId;
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha;
+        this.telefone = telefone;
+        this.cep = cep;
+        this.rua = rua;
+        this.numero = numero;
+        this.complemento = complemento;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+        this.dataCadastro = dataCadastro;
+        this.foto = foto;
+    }
 
-	public Estabelecimento(String nome, String email, String telefone, String rua, String bairro,
-            String cidade, String estado, String profissionalNome, String profissionalServico,
-            String servicoNome, double servicoPreco, int servicoDuracao) {
-			this.nome = nome;
-			this.email = email;
-			this.telefone = telefone;
-			this.rua = rua;
-			this.bairro = bairro;
-			this.cidade = cidade;
-			this.estado = estado;
-			this.profissionalNome = profissionalNome;
-			this.profissionalServico = profissionalServico;
-			this.servicoNome = servicoNome;
-			this.servicoPreco = servicoPreco;
-			this.servicoDuracao = servicoDuracao;
-		}
+    public Estabelecimento(String nome, String email, String telefone, String rua, String bairro, String cidade,
+                           String estado) {
+        this(); // Inicializa objetos relacionados
+        this.nome = nome;
+        this.email = email;
+        this.telefone = telefone;
+        this.rua = rua;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+    }
 
+    // Métodos auxiliares
+    public String[] toArray() {
+        return new String[]{
+                String.valueOf(this.estabelecimentoId),
+                this.nome,
+                this.email,
+                this.senha,
+                this.telefone,
+                this.cep,
+                this.rua,
+                this.numero,
+                this.complemento,
+                this.bairro,
+                this.cidade,
+                this.estado,
+                this.statusCadastro != null ? this.statusCadastro.toString() : "N/A",
+                this.dataCadastro,
+                this.foto
+        };
+    }
 
-	public Estabelecimento() {
-	
-	}
+    @Override
+    public String toString() {
+        return Arrays.toString(this.toArray());
+    }
 
+    // Getters e Setters
+    public int getEstabelecimentoId() {
+        return estabelecimentoId;
+    }
 
+    public void setEstabelecimentoId(int estabelecimentoId) {
+        this.estabelecimentoId = estabelecimentoId;
+    }
 
-	public String[] toArray() {
-		return new String[] {
-			String.valueOf(this.getEstabelecimentoid()),			
-			String.valueOf(this.getNome()),			
-			String.valueOf(this.getEmail()),			
-			String.valueOf(this.getSenha()),			
-			String.valueOf(this.getTelefone()),			
-			String.valueOf(this.getCep()),			
-			String.valueOf(this.getRua()),			
-			String.valueOf(this.getNumero()),			
-			String.valueOf(this.getComplemento()),			
-			String.valueOf(this.getBairro()),			
-			String.valueOf(this.getCidade()),			
-			String.valueOf(this.getEstado()),			
-			String.valueOf(this.getStatuscadastroid()),			
-			String.valueOf(this.getDatacadastro()),			
-			String.valueOf(this.getFoto())
-		};
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public String toString() {
-		return Arrays.toString(this.toArray());
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public void setEstabelecimentoid(int estabelecimentoId) {
-		this.estabelecimentoId = estabelecimentoId;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public int getEstabelecimentoid() {
-		return this.estabelecimentoId;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public String getSenha() {
+        return senha;
+    }
 
-	public String getNome() {
-		return this.nome;
-	}
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getTelefone() {
+        return telefone;
+    }
 
-	public String getEmail() {
-		return this.email;
-	}
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
 
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+    public String getCep() {
+        return cep;
+    }
 
-	public String getSenha() {
-		return this.senha;
-	}
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
 
-	public void setTelefone(String telefone) {
-		this.telefone = telefone;
-	}
+    public String getRua() {
+        return rua;
+    }
 
-	public String getTelefone() {
-		return this.telefone;
-	}
+    public void setRua(String rua) {
+        this.rua = rua;
+    }
 
-	public void setCep(String cep) {
-		this.cep = cep;
-	}
+    public String getNumero() {
+        return numero;
+    }
 
-	public String getCep() {
-		return this.cep;
-	}
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
 
-	public void setRua(String rua) {
-		this.rua = rua;
-	}
+    public String getComplemento() {
+        return complemento;
+    }
 
-	public String getRua() {
-		return this.rua;
-	}
+    public void setComplemento(String complemento) {
+        this.complemento = complemento;
+    }
 
-	public void setNumero(String numero) {
-		this.numero = numero;
-	}
+    public String getBairro() {
+        return bairro;
+    }
 
-	public String getNumero() {
-		return this.numero;
-	}
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
 
-	public void setComplemento(String complemento) {
-		this.complemento = complemento;
-	}
+    public String getCidade() {
+        return cidade;
+    }
 
-	public String getComplemento() {
-		return this.complemento;
-	}
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
 
-	public void setBairro(String bairro) {
-		this.bairro = bairro;
-	}
+    public String getEstado() {
+        return estado;
+    }
 
-	public String getBairro() {
-		return this.bairro;
-	}
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
-	public void setCidade(String cidade) {
-		this.cidade = cidade;
-	}
+    public String getDataCadastro() {
+        return dataCadastro;
+    }
 
-	public String getCidade() {
-		return this.cidade;
-	}
+    public void setDataCadastro(String dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
 
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
+    public String getFoto() {
+        return foto;
+    }
 
-	public String getEstado() {
-		return this.estado;
-	}
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
 
-	public void setStatuscadastroid(int statusCadastroId) {
-		this.statusCadastroId = statusCadastroId;
-	}
+    public StatusCadastro getStatusCadastro() {
+        return statusCadastro;
+    }
 
-	public int getStatuscadastroid() {
-		return this.statusCadastroId;
-	}
+    public void setStatusCadastro(StatusCadastro statusCadastroId) {
+        this.statusCadastro = statusCadastroId;
+    }
 
-	public void setDatacadastro(String dataCadastro) {
-		this.dataCadastro = dataCadastro;
-	}
+    public Servico getServico() {
+        return servico;
+    }
 
-	public String getDatacadastro() {
-		return this.dataCadastro;
-	}
+    public void setServico(Servico servico) {
+        this.servico = servico;
+    }
 
-	public void setFoto(String foto) {
-		this.foto = foto;
-	}
+    public List<Profissional> getProfissionais() {
+        return profissionais;
+    }
 
-	public String getFoto() {
-		return this.foto;
-	}
-
-	public String getProfissionalNome() {
-		return profissionalNome;
-	}
-
-	public void setProfissionalNome(String profissionalNome) {
-		this.profissionalNome = profissionalNome;
-	}
-
-	public String getProfissionalServico() {
-		return profissionalServico;
-	}
-
-	public void setProfissionalServico(String profissionalServico) {
-		this.profissionalServico = profissionalServico;
-	}
-
-	public String getServicoNome() {
-		return servicoNome;
-	}
-
-	public void setServicoNome(String servicoNome) {
-		this.servicoNome = servicoNome;
-	}
-
-	public double getServicoPreco() {
-		return servicoPreco;
-	}
-
-	public void setServicoPreco(double servicoPreco) {
-		this.servicoPreco = servicoPreco;
-	}
-
-	public int getServicoDuracao() {
-		return servicoDuracao;
-	}
-
-	public void setServicoDuracao(int servicoDuracao) {
-		this.servicoDuracao = servicoDuracao;
-	}
-	
-	public List<Profissional> getProfissionais() {
-	    return profissionais;
-	}
-
-	public void setProfissionais(List<Profissional> profissionais) {
-	    this.profissionais = profissionais;
-	}
-	
-	
+    public void setProfissionais(List<Profissional> profissionais) {
+        this.profissionais = profissionais;
+    }
 }
