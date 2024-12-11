@@ -10,6 +10,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -26,14 +28,21 @@ public class ProfissionalController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         String estabelecimentoIdParam = request.getParameter("estabelecimentoId");
         String profissionalIdParam = request.getParameter("profissionalId");
 
         try {
+            // Obtém a sessão do usuário
+            HttpSession session = request.getSession(false);
+            Integer sessionEstabelecimentoId = (session != null) ? (Integer) session.getAttribute("estabelecimentoId") : null;
+
             if (profissionalIdParam != null) {
                 // Buscar dados de um profissional específico pelo ID
                 int profissionalId = Integer.parseInt(profissionalIdParam);
                 Profissional profissional = dao.findById(profissionalId);
+
                 if (profissional != null) {
                     response.getWriter().write(gson.toJson(profissional));
                 } else {
@@ -43,12 +52,24 @@ public class ProfissionalController extends HttpServlet {
                     response.getWriter().write(gson.toJson(errorJson));
                 }
             } else if (estabelecimentoIdParam != null) {
-                // Buscar profissionais por estabelecimentoId
+                // Buscar profissionais por estabelecimentoId enviado na URL
                 int estabelecimentoId = Integer.parseInt(estabelecimentoIdParam);
                 List<Profissional> profissionais = dao.findProfissionaisByEstabelecimentoId(estabelecimentoId);
+
                 response.getWriter().write(gson.toJson(profissionais));
+            } else if (sessionEstabelecimentoId != null) {
+                // Buscar profissionais pelo estabelecimentoId da sessão
+                List<Profissional> profissionais = dao.findProfissionaisByEstabelecimentoId(sessionEstabelecimentoId);
+
+                if (profissionais.isEmpty()) {
+                    JsonObject errorJson = new JsonObject();
+                    errorJson.addProperty("error", "Nenhum profissional encontrado para este estabelecimento.");
+                    response.getWriter().write(gson.toJson(errorJson));
+                } else {
+                    response.getWriter().write(gson.toJson(profissionais));
+                }
             } else {
-                
+                // Caso nenhuma condição seja atendida, retornar todos os profissionais
                 List<Profissional> todosProfissionais = dao.findAll();
                 response.getWriter().write(gson.toJson(todosProfissionais));
             }

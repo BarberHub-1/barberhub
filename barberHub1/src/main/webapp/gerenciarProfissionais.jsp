@@ -91,8 +91,8 @@
             <input type="hidden" id="profissionalId">
             
             <div class="mb-3">
-                <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                <input type="number" class="form-control" id="estabelecimentoId">
+               <!--  <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label> -->
+                <input type="hidden" class="form-control" id="estabelecimentoId">
             </div>
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome</label>

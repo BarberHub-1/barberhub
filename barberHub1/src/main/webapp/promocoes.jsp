@@ -34,7 +34,7 @@
 	                <a class="nav-link text-dark" href="agendamentosClientes.jsp">Meus Agendamentos</a>
 	            </li>
 	            <li class="nav-item">
-	                <a class="nav-link text-dark" href="login.jsp">Login</a>
+	                <a class="nav-link text-dark" href="login.jsp">Logout</a>
 	            </li>
 	        </ul>
 	    </div>

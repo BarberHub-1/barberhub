@@ -52,11 +52,10 @@
         <div class="row">
             <div class="col-md-6">
                 
-                <div class="mb-3">
-                    <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                    <input type="text" id="estabelecimentoId" name="estabelecimentoId" class="form-control" value="<%= session.getAttribute("estabelecimentoId") %>">
-                </div>
-
+                
+                    <!-- <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label> -->
+                    <input type="hidden" id="estabelecimentoId" name="estabelecimentoId" class="form-control" value="<%= session.getAttribute("estabelecimentoId") %>">
+                
                 <div class="form-group mb-3">
                     <label for="nome" class="form-label">Nome</label>
                     <input type="text" id="nome" name="nome" class="form-control">
