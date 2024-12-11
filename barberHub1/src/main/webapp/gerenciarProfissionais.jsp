@@ -52,7 +52,7 @@
     <h1>Gerenciamento - Profissional</h1>
     <div class="mb-3">
         
-        <button class="btn btn-primary" id="addNew">Add New Profissional</button>
+        <button class="btn btn-primary" id="addNew">Adicionar Novo Profissional</button>
     </div>
     <table id="profissional" class="table table-striped">
         <thead>
@@ -151,7 +151,7 @@ $(document).ready(function() {
                    
                     return {
                         profissionalId: item.profissionalId,
-                        estabelecimentoId: item.estabelecimentoId,
+                        estabelecimentoId: item.estabelecimento?.estabelecimentoId,
                         nome: item.nome,
                         cep: item.cep,
                         rua: item.rua,
@@ -209,7 +209,7 @@ $(document).ready(function() {
             success: function(data) {
                 
                 $('#profissionalId').val(data.profissionalId); 
-                $('#estabelecimentoId').val(data.estabelecimentoId);
+                $('#estabelecimentoId').val(data.estabelecimento?.estabelecimentoId);
                 $('#nome').val(data.nome);
                 $('#cep').val(data.cep);
                 $('#rua').val(data.rua);
@@ -253,18 +253,22 @@ $(document).ready(function() {
 
         var id = $('#profissionalId').val();
         var profissionalData = {
-            profissionalId: id , 
-            estabelecimentoId: $('#estabelecimentoId').val(),
-            nome: $('#nome').val(),
-            cep: $('#cep').val(),
-            rua: $('#rua').val(),
-            numero: $('#numero').val(),
-            complemento: $('#complemento').val(),
-            bairro: $('#bairro').val(),
-            cidade: $('#cidade').val(),
-            estado: $('#estado').val(),
-            foto: $('#foto').val(),
-        };
+        	    profissionalId: id,
+        	    estabelecimento: {
+        	        estabelecimentoId: $('#estabelecimentoId').val()
+        	    },
+        	    nome: $('#nome').val(),
+        	    cep: $('#cep').val(),
+        	    rua: $('#rua').val(),
+        	    numero: $('#numero').val(),
+        	    complemento: $('#complemento').val(),
+        	    bairro: $('#bairro').val(),
+        	    cidade: $('#cidade').val(),
+        	    estado: $('#estado').val(),
+        	    foto: $('#foto').val()
+        	};
+        
+        console.log("Estabelecimento ID:", $('#estabelecimentoId').val());
 
         $.ajax({
             url: "/barberHub1/profissional", 

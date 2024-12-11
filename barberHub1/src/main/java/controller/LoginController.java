@@ -45,7 +45,9 @@ public class LoginController extends HttpServlet {
                     Cliente cliente = (Cliente) usuario;
                     session.setAttribute("usuario", cliente);
                     session.setAttribute("tipoUsuario", "cliente");
+                    session.setAttribute("clienteId", cliente.getClienteId()); // Adiciona o clienteId na sessão
                     jsonResponse.addProperty("tipoUsuario", "cliente");
+                    jsonResponse.addProperty("clienteId", cliente.getClienteId()); // Inclui clienteId no JSON de resposta
                 } else if (usuario instanceof Estabelecimento) {
                     Estabelecimento estabelecimento = (Estabelecimento) usuario;
                     session.setAttribute("usuario", estabelecimento);

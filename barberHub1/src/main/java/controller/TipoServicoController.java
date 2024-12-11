@@ -12,6 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import model.Profissional;
+import model.Servico;
 import model.TipoServico;
 
 import model.TiposervicoDAO;
@@ -49,25 +50,29 @@ public class TipoServicoController extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
-		try {
-			TipoServico tipoServico = gson.fromJson(request.getReader(), TipoServico.class);
-			dao.save(tipoServico);
-			JsonObject json = new JsonObject();
-			json.addProperty("success", true);
-			response.getWriter().write(gson.toJson(json));
-		} catch (Exception e) {
-			JsonObject json = new JsonObject();
-			json.addProperty("error", e.getMessage());
-			response.getWriter().write(gson.toJson(json));
-		}
-	}
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8"); 
+	    response.setContentType("application/json; charset=UTF-8");
+	    
+        try {
+        	TipoServico tipoServico = gson.fromJson(request.getReader(), TipoServico.class);
+            dao.save(tipoServico);
+            JsonObject json = new JsonObject();
+            json.addProperty("success", true);
+            response.getWriter().write(gson.toJson(json));
+        } catch (Exception e) {
+        	e.printStackTrace();
+            JsonObject json = new JsonObject();
+            json.addProperty("error", "Erro ao salvar o tipo de serviço: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson(json));
+        }
+    }
 
 	@Override
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    request.setCharacterEncoding("UTF-8"); 
-	    response.setCharacterEncoding("UTF-8");
+//	    response.setCharacterEncoding("UTF-8");
 	    response.setContentType("application/json; charset=UTF-8");
 
 	    try {

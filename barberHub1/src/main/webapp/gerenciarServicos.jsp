@@ -120,7 +120,7 @@
 
 <script>
 $(document).ready(function() {
-    $('#tabelaServicos').DataTable({
+    $('#servico').DataTable({
         "ajax": {
             "url": "/barberHub1/servico", 
             "type": "GET",
@@ -153,7 +153,7 @@ $(document).ready(function() {
     });
 
     
-    $('#tabelaServicos').on('click', '.editRow', function() {
+    $('#servico').on('click', '.editRow', function() {
         var id = $(this).data('id'); 
 
        

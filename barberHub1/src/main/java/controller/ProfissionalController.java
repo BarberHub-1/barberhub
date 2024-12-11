@@ -1,10 +1,8 @@
 package controller;
 
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
+
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -86,7 +84,7 @@ public class ProfissionalController extends HttpServlet {
             }
 
             int estabelecimentoId = Integer.parseInt(estabelecimentoIdParam);
-            profissional.setEstabelecimentoId(estabelecimentoId);
+            profissional.getEstabelecimento().setEstabelecimentoId(estabelecimentoId);
 
             
             dao.save(profissional);
@@ -104,25 +102,16 @@ public class ProfissionalController extends HttpServlet {
     
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	request.setCharacterEncoding("UTF-8"); // Define UTF-8 para requisição
-        response.setCharacterEncoding("UTF-8"); // Define UTF-8 para resposta
-        response.setContentType("application/json; charset=UTF-8");
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
 
         try {
-            BufferedReader reader = request.getReader();
-            StringBuilder sb = new StringBuilder();
-            String line;
+            Profissional profissional = gson.fromJson(request.getReader(), Profissional.class);
 
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+            if (profissional.getEstabelecimento() == null || profissional.getEstabelecimento().getEstabelecimentoId() <= 0) {
+                throw new IllegalArgumentException("EstabelecimentoId é obrigatório.");
             }
 
-            String jsonData = sb.toString();
-            System.out.println("Dados recebidos no PUT: " + jsonData); // Log dos dados recebidos
-
-            Profissional profissional = gson.fromJson(jsonData, Profissional.class);
-
-            
             int updated = dao.update(profissional);
             if (updated > 0) {
                 JsonObject jsonResponse = new JsonObject();

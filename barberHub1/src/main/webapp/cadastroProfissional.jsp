@@ -54,7 +54,7 @@
                 
                 <div class="mb-3">
                     <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                    <input type="hidden" id="estabelecimentoId" name="estabelecimentoId" class="form-control" value="<%= session.getAttribute("estabelecimentoId") %>">
+                    <input type="text" id="estabelecimentoId" name="estabelecimentoId" class="form-control" value="<%= session.getAttribute("estabelecimentoId") %>">
                 </div>
 
                 <div class="form-group mb-3">

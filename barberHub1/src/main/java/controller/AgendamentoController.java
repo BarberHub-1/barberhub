@@ -1,148 +1,130 @@
 package controller;
 
-import java.io.IOException;
+import model.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import javax.servlet.http.HttpSession;
 
-import model.Agendamento;
-import model.AgendamentoDAO;
+import java.io.IOException;
 
 @WebServlet("/agendamento")
 public class AgendamentoController extends HttpServlet {
 
-	private AgendamentoDAO agendamentoDAO = new AgendamentoDAO();
-	private Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private AgendamentoDAO agendamentoDAO = new AgendamentoDAO();
+    private EstabelecimentoDAO estabelecimentoDAO = new EstabelecimentoDAO();
+    private ProfissionalDAO profissionalDAO = new ProfissionalDAO();
+    private ServicoDAO servicoDAO = new ServicoDAO();
+    private ClienteDAO clienteDAO = new ClienteDAO();
+    private Gson gson = new Gson();
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
-		String agendamentoId = request.getParameter("agendamentoId");
-		try {
-			if (agendamentoId != null) {
-				Agendamento agendamento = agendamentoDAO.findById(Integer.parseInt(agendamentoId));
-				if (agendamento != null) {
-					String json = gson.toJson(agendamento);
-					response.getWriter().write(json);
-				} else {
-					JsonObject json = new JsonObject();
-					json.addProperty("error", "Record not found");
-					response.getWriter().write(gson.toJson(json));
-				}
-			} else {
-				JsonArray jsonArray = gson.toJsonTree(agendamentoDAO.findAll()).getAsJsonArray();
-				response.getWriter().write(gson.toJson(jsonArray));
-			}
-		} catch (Exception e) {
-			JsonObject json = new JsonObject();
-			json.addProperty("error", e.getMessage());
-			response.getWriter().write(gson.toJson(json));
-		}
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    response.setContentType("application/json");
+        try {
+            // Recuperar a sessão existente
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("clienteId") == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Usuário não autenticado.\"}");
+                return;
+            }
 
-	    try {
-	        // Obter os dados enviados no corpo da requisição
-	        StringBuilder sb = new StringBuilder();
-	        String line;
-	        while ((line = request.getReader().readLine()) != null) {
-	            sb.append(line);
-	        }
+            // Obter o clienteId da sessão
+            int clienteId = (int) session.getAttribute("clienteId");
 
-	        String jsonData = sb.toString();
-	        if (jsonData.isEmpty()) {
-	            throw new IllegalArgumentException("Nenhum dado enviado na solicitação.");
-	        }
+            // Capturar os dados do payload
+            JsonObject jsonObject = gson.fromJson(request.getReader(), JsonObject.class);
 
-	        
-	        JsonObject jsonObject = gson.fromJson(jsonData, JsonObject.class);
+            // Validação dos campos obrigatórios
+            if (!jsonObject.has("estabelecimentoId") || !jsonObject.has("profissionalId") || 
+                !jsonObject.has("servicoId") || !jsonObject.has("data") || 
+                !jsonObject.has("hora") || !jsonObject.has("preco")) {
+                throw new IllegalArgumentException("Campos obrigatórios estão faltando ou nulos.");
+            }
 
-	        
-	        if (!jsonObject.has("estabelecimentoId") || jsonObject.get("estabelecimentoId").isJsonNull() ||
-	            !jsonObject.has("profissionalId") || jsonObject.get("profissionalId").isJsonNull() ||
-	            !jsonObject.has("servicoId") || jsonObject.get("servicoId").isJsonNull() ||
-	            !jsonObject.has("data") || jsonObject.get("data").isJsonNull() ||
-	            !jsonObject.has("hora") || jsonObject.get("hora").isJsonNull() ||
-	            !jsonObject.has("preco") || jsonObject.get("preco").isJsonNull()) {
-	            throw new IllegalArgumentException("Campos obrigatórios estão faltando ou nulos.");
-	        }
+            // Obter e validar os dados
+            int estabelecimentoId = jsonObject.get("estabelecimentoId").getAsInt();
+            int profissionalId = jsonObject.get("profissionalId").getAsInt();
+            int servicoId = jsonObject.get("servicoId").getAsInt();
+            String data = jsonObject.get("data").getAsString();
+            String hora = jsonObject.get("hora").getAsString();
+            double preco = jsonObject.get("preco").getAsDouble();
 
-	       
-	        int estabelecimentoId = jsonObject.get("estabelecimentoId").getAsInt();
-	        int profissionalId = jsonObject.get("profissionalId").getAsInt();
-	        int servicoId = jsonObject.get("servicoId").getAsInt();
-	        String data = jsonObject.get("data").getAsString();
-	        String hora = jsonObject.get("hora").getAsString();
-	        double preco = jsonObject.get("preco").getAsDouble();
+            // Validar formato de data e hora
+            if (!data.matches("\\d{4}-\\d{2}-\\d{2}")) {  // Formato YYYY-MM-DD
+                throw new IllegalArgumentException("Formato de data inválido.");
+            }
+            if (!hora.matches("\\d{2}:\\d{2}")) {  // Formato HH:MM
+                throw new IllegalArgumentException("Formato de hora inválido.");
+            }
 
-	       
-	        Agendamento agendamento = new Agendamento(estabelecimentoId, profissionalId, servicoId, data, hora, preco, "Agendada");
+            // Obter objetos relacionados do banco de dados
+            Estabelecimento estabelecimento = estabelecimentoDAO.findById(estabelecimentoId);
+            if (estabelecimento == null) throw new IllegalArgumentException("Estabelecimento inválido.");
 
-	        
-	        int savedId = agendamentoDAO.save(agendamento);
+            Profissional profissional = profissionalDAO.findById(profissionalId);
+            if (profissional == null) throw new IllegalArgumentException("Profissional inválido.");
 
-	       
-	        JsonObject responseJson = new JsonObject();
-	        responseJson.addProperty("success", true);
-	        responseJson.addProperty("id", savedId);
-	        response.getWriter().write(gson.toJson(responseJson));
+            Servico servico = servicoDAO.findById(servicoId);
+            if (servico == null) throw new IllegalArgumentException("Serviço inválido.");
 
-	    } catch (Exception e) {
-	        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-	        JsonObject errorJson = new JsonObject();
-	        errorJson.addProperty("error", e.getMessage());
-	        response.getWriter().write(gson.toJson(errorJson));
-	        e.printStackTrace();
-	    }
-	}
+            Cliente cliente = clienteDAO.findById(clienteId);
+            if (cliente == null) throw new IllegalArgumentException("Cliente inválido.");
 
+            // Criar o objeto Agendamento
+            Agendamento agendamento = new Agendamento(estabelecimento, profissional, servico, cliente, data, hora, preco, "Agendada");
 
-	@Override
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
-		String agendamentoId = request.getParameter("agendamentoId");
-		try {
-			if (agendamentoId != null) {
-				Agendamento agendamento = gson.fromJson(request.getReader(), Agendamento.class);
-				agendamentoDAO.save(agendamento);
-				JsonObject json = new JsonObject();
-				json.addProperty("success", true);
-				response.getWriter().write(gson.toJson(json));
-			} else {
-				JsonObject json = new JsonObject();
-				json.addProperty("error", "agendamentoId is required");
-				response.getWriter().write(gson.toJson(json));
-			}
-		} catch (Exception e) {
-			JsonObject json = new JsonObject();
-			json.addProperty("error", e.getMessage());
-			response.getWriter().write(gson.toJson(json));
-		}
-	}
+            // Salvar no banco de dados
+            int savedId = agendamentoDAO.save(agendamento);
 
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
-		try {
-			Agendamento agendamento = gson.fromJson(request.getReader(), Agendamento.class);
-			agendamentoDAO.delete(agendamento);
-			JsonObject json = new JsonObject();
-			json.addProperty("success", true);
-			response.getWriter().write(gson.toJson(json));
-		} catch (Exception e) {
-			JsonObject json = new JsonObject();
-			json.addProperty("error", e.getMessage());
-			response.getWriter().write(gson.toJson(json));
-		}
-	}
+            // Retornar o ID gerado no JSON de resposta
+            JsonObject responseJson = new JsonObject();
+            responseJson.addProperty("success", true);
+            responseJson.addProperty("id", savedId);
+            response.getWriter().write(gson.toJson(responseJson));
 
+        } catch (IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            JsonObject errorJson = new JsonObject();
+            errorJson.addProperty("error", e.getMessage());
+            response.getWriter().write(gson.toJson(errorJson));
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\": \"Erro ao salvar o agendamento.\"}");
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        String agendamentoId = request.getParameter("agendamentoId");
+
+        try {
+            if (agendamentoId != null) {
+                Agendamento agendamento = agendamentoDAO.findById(Integer.parseInt(agendamentoId));
+                if (agendamento != null) {
+                    response.getWriter().write(gson.toJson(agendamento));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().write("{\"error\": \"Agendamento não encontrado.\"}");
+                }
+            } else {
+                response.getWriter().write(gson.toJson(agendamentoDAO.findAll()));
+            }
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            JsonObject errorJson = new JsonObject();
+            errorJson.addProperty("error", "Erro ao buscar agendamentos.");
+            response.getWriter().write(gson.toJson(errorJson));
+        }
+    }
 }

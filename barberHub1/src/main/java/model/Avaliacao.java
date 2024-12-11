@@ -4,15 +4,14 @@ import java.util.Arrays;
 
 public class Avaliacao {
 	private int avaliacaoId;
-	private int agendamentoId;
+	private Agendamento agendamento;
 	private int avaliado;
 	private int nota;
 	private String comentario;
 	private String dataAvaliacao;
 
-	public Avaliacao( int avaliacaoId, int agendamentoId, int avaliado, int nota, String comentario, String dataAvaliacao ) {
+	public Avaliacao( int avaliacaoId, int avaliado, int nota, String comentario, String dataAvaliacao ) {
 		this.setAvaliacaoid( avaliacaoId );
-		this.setAgendamentoid( agendamentoId );
 		this.setAvaliado( avaliado );
 		this.setNota( nota );
 		this.setComentario( comentario );
@@ -26,7 +25,7 @@ public class Avaliacao {
 	public String[] toArray() {
 		return new String[] {
 			String.valueOf(this.getAvaliacaoid()),		
-			String.valueOf(this.getAgendamentoid()),			
+//			String.valueOf(this.getAgendamentoid()),			
 			String.valueOf(this.getAvaliado()),			
 			String.valueOf(this.getNota()),			
 			String.valueOf(this.getComentario()),			
@@ -46,12 +45,12 @@ public class Avaliacao {
 		return this.avaliacaoId;
 	}
 
-	public void setAgendamentoid(int agendamentoId) {
-		this.agendamentoId = agendamentoId;
+	public void setAgendamento(Agendamento agendamento) {
+		this.agendamento = agendamento;
 	}
 
-	public int getAgendamentoid() {
-		return this.agendamentoId;
+	public Agendamento getAgendamento() {
+		return this.agendamento;
 	}
 
 	public void setAvaliado(int avaliado) {

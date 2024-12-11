@@ -30,7 +30,7 @@ public class ProfissionalDAO {
              PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             
-            if (profissional.getEstabelecimentoId() <= 0) {
+            if (profissional.getEstabelecimento().getEstabelecimentoId() <= 0) {
                 throw new IllegalArgumentException("EstabelecimentoID é obrigatório e deve ser maior que 0.");
             }
             if (profissional.getNome() == null || profissional.getNome().isEmpty()) {
@@ -38,7 +38,7 @@ public class ProfissionalDAO {
             }
 
            
-            statement.setInt(1, profissional.getEstabelecimentoId());
+            statement.setInt(1, profissional.getEstabelecimento().getEstabelecimentoId());
             statement.setString(2, profissional.getNome());
             statement.setString(3, profissional.getCep());
             statement.setString(4, profissional.getRua());
@@ -74,7 +74,11 @@ public class ProfissionalDAO {
 
             System.out.println("Atualizando profissional: " + profissional);
 
-            statement.setInt(1, profissional.getEstabelecimentoId());
+            if (profissional.getEstabelecimento() == null) {
+                profissional.setEstabelecimento(new Estabelecimento()); // Garante que o objeto Estabelecimento existe
+            }
+
+            statement.setInt(1, profissional.getEstabelecimento().getEstabelecimentoId());
             statement.setString(2, profissional.getNome());
             statement.setString(3, profissional.getCep());
             statement.setString(4, profissional.getRua());
@@ -90,6 +94,7 @@ public class ProfissionalDAO {
             System.out.println("Linhas atualizadas: " + rowsUpdated);
             return rowsUpdated;
         } catch (SQLException e) {
+            System.err.println("Erro ao atualizar profissional: " + e.getMessage());
             e.printStackTrace();
             return -1; 
         }
@@ -142,7 +147,8 @@ public class ProfissionalDAO {
             statement.setInt(1, id);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return mapResultSetToProfissional(rs);
+                    Profissional profissional = mapResultSetToProfissional(rs);
+                    return profissional;
                 }
             }
         } catch (SQLException e) {
@@ -156,7 +162,14 @@ public class ProfissionalDAO {
     private Profissional mapResultSetToProfissional(ResultSet rs) throws SQLException {
         Profissional profissional = new Profissional();
         profissional.setProfissionalId(rs.getInt("profissionalId"));
-        profissional.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
+
+        int estabelecimentoId = rs.getInt("estabelecimentoId");
+        if (estabelecimentoId > 0) {
+            Estabelecimento estabelecimento = new Estabelecimento();
+            estabelecimento.setEstabelecimentoId(estabelecimentoId);
+            profissional.setEstabelecimento(estabelecimento);
+        }
+
         profissional.setNome(rs.getString("nome"));
         profissional.setCep(rs.getString("cep"));
         profissional.setRua(rs.getString("rua"));
@@ -166,6 +179,7 @@ public class ProfissionalDAO {
         profissional.setCidade(rs.getString("cidade"));
         profissional.setEstado(rs.getString("estado"));
         profissional.setFoto(rs.getString("foto"));
+
         return profissional;
     }
     
@@ -176,14 +190,19 @@ public class ProfissionalDAO {
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            
             stmt.setInt(1, estabelecimentoId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Profissional profissional = new Profissional();
+
+                    // Inicializar o objeto Estabelecimento
+                    Estabelecimento estabelecimento = new Estabelecimento();
+                    estabelecimento.setEstabelecimentoId(estabelecimentoId);
+                    profissional.setEstabelecimento(estabelecimento);
+
+                    // Mapear outros atributos
                     profissional.setProfissionalId(rs.getInt("profissionalId"));
-                    profissional.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
                     profissional.setNome(rs.getString("nome"));
                     profissional.setCep(rs.getString("cep"));
                     profissional.setRua(rs.getString("rua"));
@@ -194,7 +213,6 @@ public class ProfissionalDAO {
                     profissional.setEstado(rs.getString("estado"));
                     profissional.setFoto(rs.getString("foto"));
 
-                    
                     profissionais.add(profissional);
                 }
             }

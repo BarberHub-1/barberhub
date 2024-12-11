@@ -39,8 +39,8 @@ public class DenunciaDAO extends DBQuery {
 			while (rs.next()) {
 				Denuncia denuncia = new Denuncia();
 				denuncia.setDenunciaid(rs.getInt("denunciaId"));
-				denuncia.setEstabelecimentoid(rs.getInt("estabelecimentoId"));
-				denuncia.setClienteid(rs.getInt("clienteId"));
+				denuncia.getEstabelecimento().  setEstabelecimentoId(rs.getInt("estabelecimentoId"));
+				denuncia.getCliente().setClienteId(rs.getInt("clienteId"));
 				denuncia.setDescricao(rs.getString("descricao"));
 				denuncia.setDatadenuncia(rs.getString("dataDenuncia"));
 				list.add(denuncia);
@@ -57,8 +57,8 @@ public class DenunciaDAO extends DBQuery {
 			if (rs.next()) {
 				Denuncia denuncia = new Denuncia();
 				denuncia.setDenunciaid(rs.getInt("denunciaId"));
-				denuncia.setEstabelecimentoid(rs.getInt("estabelecimentoId"));
-				denuncia.setClienteid(rs.getInt("clienteId"));
+				denuncia.getEstabelecimento().setEstabelecimentoId(rs.getInt("estabelecimentoId"));
+				denuncia.getCliente().setClienteId(rs.getInt("clienteId"));
 				denuncia.setDescricao(rs.getString("descricao"));
 				denuncia.setDatadenuncia(rs.getString("dataDenuncia"));
 				return denuncia;

@@ -13,7 +13,7 @@
 <div class="container my-4">
     <h1>Gerenciamento - Tiposervico</h1>
     <div class="mb-3">
-        <button class="btn btn-primary" id="addNew">Add New Tiposervico</button>
+        <button class="btn btn-primary" id="addNew">Adicionar novo Tipo de serviço</button>
     </div>
     <table id="tipoServico" class="table table-striped">
         <thead>
@@ -75,10 +75,13 @@
                 }
             ]
         });
+        
+        
+        $('#addNew').click(function() {
+            window.location.href = "/barberHub1/cadastroTipoServico.jsp";
+        });
 
       
-
-       
         $('#tipoServico').on('click', '.editRow', function () {
             var id = $(this).data('id');
             console.log("Editando registro com ID:", id);
@@ -142,6 +145,8 @@
             });
         });
     });
+    
+    
 </script>
 </body>
 </html>

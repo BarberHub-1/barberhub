@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import database.DBConnection;
-import database.DBQuery;
+
 
 public class TiposervicoDAO {
 	
@@ -20,7 +20,7 @@ public class TiposervicoDAO {
     }
     
     public int save(TipoServico tipoServico) {
-        if (tipoServico.getTipoServicoId() >= 0) {
+        if (tipoServico.getTipoServicoId() > 0) {
             return this.update(tipoServico);
         } else {
             return this.insert(tipoServico);

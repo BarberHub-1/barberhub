@@ -1,143 +1,139 @@
 package model;
 
 import java.util.Arrays;
-import java.sql.Time;
 
 public class Agendamento {
-	private int agendamentoId;
-	private int estabelecimentoId;
-	private int profissionalId;
-	private int servicoId;
-	private int clienteId;
-	private String data;
-	private String hora;
-	private double preco;
-	private double desconto;
-	private String status;
+    private int agendamentoId;
+    private Estabelecimento estabelecimento;
+    private Profissional profissional;
+    private Servico servico;
+    private Cliente cliente;
+    private String data;
+    private String hora;
+    private double preco;
+    private double desconto;
+    private String status;
 
-	public Agendamento( int agendamentoId, int estabelecimentoId, int profissionalId, int servicoId, int clienteId, String data, String hora, double preco, double desconto, String status ) {
-		this.setAgendamentoid( agendamentoId );
-		this.setEstabelecimentoid( estabelecimentoId );
-		this.setProfissionalid( profissionalId );
-		this.setServicoid( servicoId );
-		this.setClienteid( clienteId );
-		this.setData( data );
-		this.setHora( hora );
-		this.setPreco( preco );
-		this.setDesconto( desconto );
-		this.setStatus( status );
-	}
+    // Construtor com inicialização direta
+    public Agendamento(Estabelecimento estabelecimento, Profissional profissional, Servico servico, Cliente cliente, 
+            String data, String hora, double preco, String status) {
+			this.estabelecimento = estabelecimento;
+			this.profissional = profissional;
+			this.servico = servico;
+			this.cliente = cliente;
+			this.data = data;
+			this.hora = hora;
+			this.preco = preco;
+			this.status = status;
+			}
 
-	public Agendamento() {
-		
-	}
 
-	public Agendamento(int estabelecimentoId, int profissionalId, int servicoId, String data, String hora2, double preco, String status) {
-        this.estabelecimentoId = estabelecimentoId;
-        this.profissionalId = profissionalId;
-        this.servicoId = servicoId;
-        this.data = data;
-        this.hora = hora2;
-        this.preco = preco;
-        this.status = status;
-    }
+    // Construtor vazio
+    public Agendamento() {}
+
+    
+    
 
 	public String[] toArray() {
-		return new String[] {
-			String.valueOf(this.getAgendamentoid()),			
-			String.valueOf(this.getEstabelecimentoid()),			
-			String.valueOf(this.getProfissionalid()),			
-			String.valueOf(this.getServicoid()),			
-			String.valueOf(this.getClienteid()),			
-			String.valueOf(this.getData()),			
-			String.valueOf(this.getHora()),			
-			String.valueOf(this.getPreco()),			
-			String.valueOf(this.getDesconto()),			
-			String.valueOf(this.getStatus())
-		};
+        return new String[] {
+            String.valueOf(this.agendamentoId),
+            this.estabelecimento != null ? this.estabelecimento.toString() : "null",
+            this.profissional != null ? this.profissional.toString() : "null",
+            this.servico != null ? this.servico.toString() : "null",
+            this.cliente != null ? this.cliente.toString() : "null",
+            this.data,
+            this.hora,
+            String.valueOf(this.preco),
+            String.valueOf(this.desconto),
+            this.status
+        };
+    }
+
+    // Método toString
+    @Override
+    public String toString() {
+        return Arrays.toString(this.toArray());
+    }
+
+	public int getAgendamentoId() {
+		return agendamentoId;
 	}
 
-	public String toString() {
-		return Arrays.toString(this.toArray());
-	}
-
-	public void setAgendamentoid(int agendamentoId) {
+	public void setAgendamentoId(int agendamentoId) {
 		this.agendamentoId = agendamentoId;
 	}
 
-	public int getAgendamentoid() {
-		return this.agendamentoId;
+	public Estabelecimento getEstabelecimento() {
+		return estabelecimento;
 	}
 
-	public void setEstabelecimentoid(int estabelecimentoId) {
-		this.estabelecimentoId = estabelecimentoId;
+	public void setEstabelecimento(Estabelecimento estabelecimento) {
+		this.estabelecimento = estabelecimento;
 	}
 
-	public int getEstabelecimentoid() {
-		return this.estabelecimentoId;
+	public Profissional getProfissional() {
+		return profissional;
 	}
 
-	public void setProfissionalid(int profissionalId) {
-		this.profissionalId = profissionalId;
+	public void setProfissional(Profissional profissional) {
+		this.profissional = profissional;
 	}
 
-	public int getProfissionalid() {
-		return this.profissionalId;
+	public Servico getServico() {
+		return servico;
 	}
 
-	public void setServicoid(int servicoId) {
-		this.servicoId = servicoId;
+	public void setServico(Servico servico) {
+		this.servico = servico;
 	}
 
-	public int getServicoid() {
-		return this.servicoId;
+	public Cliente getCliente() {
+		return cliente;
 	}
 
-	public void setClienteid(int clienteId) {
-		this.clienteId = clienteId;
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
 	}
 
-	public int getClienteid() {
-		return this.clienteId;
+	public String getData() {
+		return data;
 	}
 
 	public void setData(String data) {
 		this.data = data;
 	}
 
-	public String getData() {
-		return this.data;
+	public String getHora() {
+		return hora;
 	}
 
 	public void setHora(String hora) {
 		this.hora = hora;
 	}
 
-	public String getHora() {
-		return this.hora;
+	public double getPreco() {
+		return preco;
 	}
 
 	public void setPreco(double preco) {
 		this.preco = preco;
 	}
 
-	public double getPreco() {
-		return this.preco;
+	public double getDesconto() {
+		return desconto;
 	}
 
 	public void setDesconto(double desconto) {
 		this.desconto = desconto;
 	}
 
-	public double getDesconto() {
-		return this.desconto;
+	public String getStatus() {
+		return status;
 	}
 
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	public String getStatus() {
-		return this.status;
-	}
+    
 }

@@ -41,7 +41,7 @@ public class EstabelecimentoDAO {
             statement.setString(9, estabelecimento.getBairro());
             statement.setString(10, estabelecimento.getCidade());
             statement.setString(11, estabelecimento.getEstado());
-            statement.setInt(12, estabelecimento.getStatusCadastro().getStatuscadastroId());
+            statement.setInt(12, estabelecimento.getStatusCadastro().getStatusCadastroId());
             statement.setString(13, estabelecimento.getDataCadastro());
             statement.setString(14, estabelecimento.getFoto());
             statement.setInt(15, estabelecimento.getEstabelecimentoId());
@@ -70,7 +70,7 @@ public class EstabelecimentoDAO {
             statement.setString(9, estabelecimento.getBairro());
             statement.setString(10, estabelecimento.getCidade());
             statement.setString(11, estabelecimento.getEstado());
-            statement.setInt(12, estabelecimento.getStatusCadastro().getStatuscadastroId());
+            statement.setInt(12, estabelecimento.getStatusCadastro().getStatusCadastroId());
             statement.setString(13, estabelecimento.getDataCadastro());
             statement.setString(14, estabelecimento.getFoto());
             
@@ -127,7 +127,7 @@ public class EstabelecimentoDAO {
                 estabelecimento.setBairro(rs.getString("bairro"));
                 estabelecimento.setCidade(rs.getString("cidade"));
                 estabelecimento.setEstado(rs.getString("estado"));
-                estabelecimento.getStatusCadastro().setStatuscadastroId(rs.getInt("statusCadastroId"));
+                estabelecimento.getStatusCadastro().setStatusCadastroId(rs.getInt("statusCadastroId"));
                 estabelecimento.setDataCadastro(rs.getString("dataCadastro"));
                 estabelecimento.setFoto(rs.getString("foto"));
                 list.add(estabelecimento);
@@ -162,7 +162,7 @@ public class EstabelecimentoDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    
+                    // Inicializar o objeto Estabelecimento na primeira iteração
                     if (estabelecimento == null) {
                         estabelecimento = new Estabelecimento();
                         estabelecimento.setEstabelecimentoId(rs.getInt("estabelecimentoId"));
@@ -175,28 +175,27 @@ public class EstabelecimentoDAO {
                         estabelecimento.setEstado(rs.getString("estabelecimentoEstado"));
                     }
 
-                   
+                    // Mapear profissionais
                     int profissionalId = rs.getInt("profissionalId");
-                    if (profissionalId > 0) { 
+                    if (profissionalId > 0) {
                         Profissional profissional = profissionais.stream()
-                                .filter(p -> p.getProfissionalId() == profissionalId)
-                                .findFirst()
-                                .orElseGet(() -> {
-                                    Profissional newProfissional = new Profissional();
-                                    newProfissional.setProfissionalId(profissionalId);
-                                    try {
-										newProfissional.setNome(rs.getString("profissionalNome"));
-									} catch (SQLException e) {
-									
-										e.printStackTrace();
-									}
-                                    profissionais.add(newProfissional);
-                                    return newProfissional;
-                                });
+                            .filter(p -> p.getProfissionalId() == profissionalId)
+                            .findFirst()
+                            .orElseGet(() -> {
+                                Profissional newProfissional = new Profissional();
+                                newProfissional.setProfissionalId(profissionalId);
+                                try {
+                                    newProfissional.setNome(rs.getString("profissionalNome"));
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                                profissionais.add(newProfissional);
+                                return newProfissional;
+                            });
 
-                       
+                        // Mapear serviços
                         int servicoId = rs.getInt("servicoId");
-                        if (servicoId > 0) { 
+                        if (servicoId > 0) {
                             Servico servico = new Servico();
                             servico.setServicoId(servicoId);
                             servico.setNome(rs.getString("servicoNome"));
@@ -207,10 +206,11 @@ public class EstabelecimentoDAO {
                         }
                     }
                 }
-            }
 
-            if (estabelecimento != null) {
-                estabelecimento.setProfissionais(profissionais);
+                // Associar profissionais ao estabelecimento
+                if (estabelecimento != null) {
+                    estabelecimento.setProfissionais(profissionais);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -218,7 +218,6 @@ public class EstabelecimentoDAO {
 
         return estabelecimento;
     }
-
 
     // Buscar serviços por ID do estabelecimento
     public List<Servico> findServicosByEstabelecimentoId(int estabelecimentoId) {

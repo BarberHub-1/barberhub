@@ -39,7 +39,7 @@ public class AvaliacaoDAO extends DBQuery {
 			while (rs.next()) {
 				Avaliacao avaliacao = new Avaliacao();
 				avaliacao.setAvaliacaoid(rs.getInt("avaliacaoId"));
-				avaliacao.setAgendamentoid(rs.getInt("agendamentoId"));
+				avaliacao.getAgendamento().setAgendamentoId(rs.getInt("agendamentoId"));
 				avaliacao.setAvaliado(rs.getInt("avaliado"));
 				avaliacao.setNota(rs.getInt("nota"));
 				avaliacao.setComentario(rs.getString("comentario"));
@@ -58,7 +58,7 @@ public class AvaliacaoDAO extends DBQuery {
 			if (rs.next()) {
 				Avaliacao avaliacao = new Avaliacao();
 				avaliacao.setAvaliacaoid(rs.getInt("avaliacaoId"));
-				avaliacao.setAgendamentoid(rs.getInt("agendamentoId"));
+				avaliacao.getAgendamento().setAgendamentoId(rs.getInt("agendamentoId"));
 				avaliacao.setAvaliado(rs.getInt("avaliado"));
 				avaliacao.setNota(rs.getInt("nota"));
 				avaliacao.setComentario(rs.getString("comentario"));

@@ -29,7 +29,7 @@ public class DisponibilidadeDAO extends DBQuery {
 	}
 
 	public ResultSet select(String where) {
-	    return super.select(where); // Chama o método select da classe base (DBQuery)
+	    return super.select(where); 
 	}
 
 	public ArrayList<Disponibilidade> findAll() {

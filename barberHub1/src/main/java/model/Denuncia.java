@@ -4,15 +4,15 @@ import java.util.Arrays;
 
 public class Denuncia {
 	private int denunciaId;
-	private int estabelecimentoId;
-	private int clienteId;
+	private Estabelecimento estabelecimento;
+	private Cliente cliente;
 	private String descricao;
 	private String dataDenuncia;
 
-	public Denuncia( int denunciaId, int estabelecimentoId, int clienteId, String descricao, String dataDenuncia ) {
+	public Denuncia( int denunciaId, String descricao, String dataDenuncia ) {
 		this.setDenunciaid( denunciaId );
-		this.setEstabelecimentoid( estabelecimentoId );
-		this.setClienteid( clienteId );
+//		this.setEstabelecimentoid( estabelecimentoId );
+//		this.setClienteid( clienteId );
 		this.setDescricao( descricao );
 		this.setDatadenuncia( dataDenuncia );
 	}
@@ -24,8 +24,8 @@ public class Denuncia {
 	public String[] toArray() {
 		return new String[] {
 			String.valueOf(this.getDenunciaid()),			
-			String.valueOf(this.getEstabelecimentoid()),			
-			String.valueOf(this.getClienteid()),			
+			String.valueOf(this.getEstabelecimento()),			
+			String.valueOf(this.getCliente()),			
 			String.valueOf(this.getDescricao()),			
 			String.valueOf(this.getDatadenuncia())
 		};
@@ -43,20 +43,20 @@ public class Denuncia {
 		return this.denunciaId;
 	}
 
-	public void setEstabelecimentoid(int estabelecimentoId) {
-		this.estabelecimentoId = estabelecimentoId;
+	public void setEstabelecimento(Estabelecimento estabelecimento) {
+		this.estabelecimento = estabelecimento;
 	}
 
-	public int getEstabelecimentoid() {
-		return this.estabelecimentoId;
+	public Estabelecimento getEstabelecimento() {
+		return this.estabelecimento;
 	}
 
-	public void setClienteid(int clienteId) {
-		this.clienteId = clienteId;
+	public void setClienteid(Cliente cliente) {
+		this.cliente = cliente;
 	}
 
-	public int getClienteid() {
-		return this.clienteId;
+	public Cliente getCliente() {
+		return this.cliente;
 	}
 
 	public void setDescricao(String descricao) {

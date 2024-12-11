@@ -80,20 +80,28 @@ public class ServicoDAO {
     }
 
     public List<Servico> findAll() {
-        String query = "SELECT * FROM servico";
+        String query = "SELECT servico.*, tiposervico.tipoServicoId, tiposervico.servico AS tipoServicoNome " +
+                       "FROM servico " +
+                       "LEFT JOIN tiposervico ON servico.tipoServicoId = tiposervico.tipoServicoId";
         List<Servico> list = new ArrayList<>();
+
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
+                TipoServico tipoServico = new TipoServico();
+                tipoServico.setTipoServicoId(rs.getInt("tipoServicoId"));
+                tipoServico.setServicoNome(rs.getString("tipoServicoNome"));
+
                 Servico servico = new Servico();
                 servico.setServicoId(rs.getInt("servicoId"));
                 servico.setNome(rs.getString("nome"));
                 servico.setDescricao(rs.getString("descricao"));
-                servico.getTipoServico().setTipoServicoId(rs.getInt("tipoServicoId"));
+                servico.setTipoServico(tipoServico);
                 servico.setPreco(rs.getDouble("preco"));
                 servico.setDuracao(rs.getInt("duracao"));
+
                 list.add(servico);
             }
         } catch (SQLException e) {
@@ -103,20 +111,28 @@ public class ServicoDAO {
     }
 
     public Servico findById(int id) {
-        String query = "SELECT * FROM servico WHERE servicoId = ?";
+        String query = "SELECT servico.*, tiposervico.tipoServicoId, tiposervico.servico AS tipoServicoNome " +
+                       "FROM servico " +
+                       "LEFT JOIN tiposervico ON servico.tipoServicoId = tiposervico.tipoServicoId " +
+                       "WHERE servico.servicoId = ?";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, id);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
+                    TipoServico tipoServico = new TipoServico();
+                    tipoServico.setTipoServicoId(rs.getInt("tipoServicoId"));
+                    tipoServico.setServicoNome(rs.getString("tipoServicoNome"));
+
                     Servico servico = new Servico();
                     servico.setServicoId(rs.getInt("servicoId"));
                     servico.setNome(rs.getString("nome"));
                     servico.setDescricao(rs.getString("descricao"));
-                    servico.getTipoServico().setTipoServicoId(rs.getInt("tipoServicoId"));
+                    servico.setTipoServico(tipoServico);
                     servico.setPreco(rs.getDouble("preco"));
                     servico.setDuracao(rs.getInt("duracao"));
+
                     return servico;
                 }
             }
@@ -127,7 +143,9 @@ public class ServicoDAO {
     }
 
     public List<Servico> findAllWithJoin() {
-        String query = "SELECT servico.*, tiposervico.servico AS tipoServicoNome FROM servico INNER JOIN tiposervico ON servico.tipoServicoId = tiposervico.tipoServicoId";
+        String query = "SELECT servico.*, tiposervico.tipoServicoId, tiposervico.servico AS tipoServicoNome " +
+                       "FROM servico " +
+                       "INNER JOIN tiposervico ON servico.tipoServicoId = tiposervico.tipoServicoId";
         List<Servico> list = new ArrayList<>();
 
         try (Connection connection = dbConnection.getConnection();
@@ -135,13 +153,18 @@ public class ServicoDAO {
              ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
+                TipoServico tipoServico = new TipoServico();
+                tipoServico.setTipoServicoId(rs.getInt("tipoServicoId"));
+                tipoServico.setServicoNome(rs.getString("tipoServicoNome"));
+
                 Servico servico = new Servico();
                 servico.setServicoId(rs.getInt("servicoId"));
                 servico.setNome(rs.getString("nome"));
                 servico.setDescricao(rs.getString("descricao"));
+                servico.setTipoServico(tipoServico);
                 servico.setPreco(rs.getDouble("preco"));
                 servico.setDuracao(rs.getInt("duracao"));
-                servico.getTipoServico().setServicoNome(rs.getString("tipoServicoNome"));
+
                 list.add(servico);
             }
         } catch (SQLException e) {

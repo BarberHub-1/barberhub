@@ -48,69 +48,15 @@
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Cadastro de Tipo de Serviço</h2>
-    <form id="cadastroProfissionalForm" method="POST" action="/profissional">
+    <form id="cadastroTipoServicoForm" method="POST" action="/tipoServico">
         <div class="row">
             <div class="col-md-6">
-                
-                <div class="mb-3">
-                    <label for="estabelecimentoId" class="form-label">Estabelecimento ID</label>
-                    <input type="number" id="estabelecimentoId" name="estabelecimentoId" class="form-control">
-                </div>
 
-                <div class="form-group mb-3">
-                    <label for="nome" class="form-label">Nome</label>
-                    <input type="text" id="nome" name="nome" class="form-control">
-                </div>
-
-              
                 <div class="form-group mb-3">
                     <label for="servico" class="form-label">Serviço</label>
-                    <select id="servico" name="servico" class="form-select">
-                        <option value="">Selecione um serviço</option>
-                    </select>
+                    <input type="text" id="servico" name="servico" class="form-control">
                 </div>
-
-                <div class="form-group mb-3">
-                    <label for="cep" class="form-label">CEP</label>
-                    <input type="text" id="cep" name="cep" class="form-control">
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="foto" class="form-label">Foto</label>
-                    <input type="text" id="foto" name="foto" class="form-control">
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="rua" class="form-label">Rua</label>
-                    <input type="text" id="rua" name="rua" class="form-control">
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-group mb-3">
-                    <label for="numero" class="form-label">Número</label>
-                    <input type="text" id="numero" name="numero" class="form-control">
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="complemento" class="form-label">Complemento</label>
-                    <input type="text" id="complemento" name="complemento" class="form-control">
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="bairro" class="form-label">Bairro</label>
-                    <input type="text" id="bairro" name="bairro" class="form-control">
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="cidade" class="form-label">Cidade</label>
-                    <input type="text" id="cidade" name="cidade" class="form-control">
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="estado" class="form-label">Estado</label>
-                    <input type="text" id="estado" name="estado" class="form-control">
-                </div>
+               
             </div>
         </div>
 
@@ -132,63 +78,27 @@
 <script>
     $(document).ready(function() {
         
-        $.ajax({
-            url: '/barberHub1/servico',  
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-               
-                var servicoHtml = '<option value="">Selecione um serviço</option>';
-                data.forEach(function(servico) {
-                    servicoHtml += '<option value="' + servico.nome + '">' + servico.nome + '</option>';
-                });
-                $('#servico').html(servicoHtml);
-            },
-            error: function(error) {
-                console.error('Erro ao buscar dados dos serviços:', error);
-                alert('Erro ao carregar os serviços. Por favor, tente novamente mais tarde.');
-            }
-        });
         
-     
-        $('#cep').mask('00000-000');
-        
+    	$('#cadastroTipoServicoForm').submit(function(e) {
+    	    e.preventDefault();  
 
-        
-        $('#cadastroProfissionalForm').submit(function(e) {
-            e.preventDefault();  
+    	    let formData = {
+    	        servico: $('#servico').val()  // O campo "serviço" do formulário
+    	    };
 
-           
-            let formData = {
-                nome: $('#nome').val(),
-                servico: $('#servico').val(),
-                cep: $('#cep').val(),
-                rua: $('#rua').val(),
-                numero: $('#numero').val(),
-                complemento: $('#complemento').val(),
-                bairro: $('#bairro').val(),
-                cidade: $('#cidade').val(),
-                estado: $('#estado').val(),
-                foto: $('#foto').val(),
-                estabelecimentoId: $('#estabelecimentoId').val()
-            };
-            
-
-            
-            $.ajax({
-                url: '/barberHub1/profissional', 
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    alert('Profissional cadastrado com sucesso!');
-                   
-                    $('#cadastroProfissionalForm')[0].reset();
-                },
-                error: function(error) {
-                    alert('Erro ao cadastrar o profissional. Tente novamente.');
-                }
-            });
-        });
+    	    $.ajax({
+    	        url: '/barberHub1/tipoServico',
+    	        type: 'POST',
+    	        data: formData,  // Envia como dados do formulário
+    	        success: function(response) {
+    	            alert('Tipo de serviço cadastrado com sucesso!');
+    	            $('#cadastroTipoServicoForm')[0].reset();
+    	        },
+    	        error: function(error) {
+    	            alert('Erro ao cadastrar o tipo de serviço. Tente novamente.');
+    	        }
+    	    });
+    	});
     });
 </script>
 

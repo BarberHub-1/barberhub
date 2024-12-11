@@ -1,65 +1,132 @@
 package model;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
+
+import database.DBConnection;
 import database.DBQuery;
 
 public class StatuscadastroDAO extends DBQuery {
+	
+	private DBConnection dbConnection;
 
-	public StatuscadastroDAO() {
-		this.setTableName("statusCadastro");
-		this.setFieldsName("statusCadastroId, descricao");
-		this.setFieldKey("statusCadastroId");
-	}
+    public StatuscadastroDAO() {
+        this.dbConnection = new DBConnection();
+    }
+    
+    public int save(StatusCadastro statusCadastro) {
+        if (statusCadastro.getStatusCadastroId() >= 0) {
+            return this.update(statusCadastro);
+        } else {
+            return this.insert(statusCadastro);
+        }
+    }
+    
+    public int update(StatusCadastro statusCadastro) {
+        String query = "UPDATE statuscadastro SET descricao = ? WHERE statusCadastroId = ?";
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+        	
+        	System.out.println("Atualizando statusCadastro: " + statusCadastro);
 
-	public int save(StatusCadastro statusCadastro) {
-		if(statusCadastro.getStatuscadastroId() >= 0) {
-			return this.update(statusCadastro.toArray());
-		} else {
-			return this.insert(statusCadastro.toArray());
-		}
-	}
+            statement.setString(1, statusCadastro.getDescricao());
+            statement.setInt(2, statusCadastro.getStatusCadastroId());
+            
+           
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
+    private int insert(StatusCadastro statusCadastro) {
+        String query = "INSERT INTO statuscadastro (descricao) VALUES (?)";
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
-	public int delete(StatusCadastro statusCadastro) {
-		if(statusCadastro.getStatuscadastroId() != 0) {
-			return this.delete(statusCadastro.toArray());
-		} else {
-			return 0;
-		}
-	}
+            statement.setString(1, statusCadastro.getDescricao());
+           
 
-	public ResultSet select(String where) {
-	    return super.select(where); 
-	}
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        return generatedKeys.getInt(1);
+                    }
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
 
-	public ArrayList<StatusCadastro> findAll() {
-		ResultSet rs = this.select("");
-		ArrayList<StatusCadastro> list = new ArrayList<>();
-		try {
-			while (rs.next()) {
-				StatusCadastro statusCadastro = new StatusCadastro();
-				statusCadastro.setStatuscadastroId(rs.getInt("statusCadastroId"));
-				statusCadastro.setDescricao(rs.getString("descricao"));
-				list.add(statusCadastro);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
+    public int delete(StatusCadastro statusCadastro) {
+        return deleteById(statusCadastro.getStatusCadastroId());
+    }
+    
+    public List<StatusCadastro> findAll() {
+        String query = "SELECT * FROM statuscadastro";
+        List<StatusCadastro> list = new ArrayList<>();
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet rs = statement.executeQuery()) {
 
-	public StatusCadastro findById(int id) {
-		ResultSet rs = this.select("WHERE " + this.getFieldKey() + " = " + id);
-		try {
-			if (rs.next()) {
-				StatusCadastro statusCadastro = new StatusCadastro();
-				statusCadastro.setStatuscadastroId(rs.getInt("statusCadastroId"));
-				statusCadastro.setDescricao(rs.getString("descricao"));
-				return statusCadastro;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+            while (rs.next()) {
+            	StatusCadastro statusCadastro = new StatusCadastro();
+            	statusCadastro.setStatusCadastroId(rs.getInt("statusCadastroId"));
+            	statusCadastro.setDescricao(rs.getString("descricao"));
+                list.add(statusCadastro);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public StatusCadastro findById(int id) {
+        String query = "SELECT * FROM statuscadastro WHERE statusCadastroId = ?";
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, id);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                	StatusCadastro statusCadastro = new StatusCadastro();
+                	statusCadastro.setStatusCadastroId(rs.getInt("statusCadastroId"));
+                	statusCadastro.setDescricao(rs.getString("descricao")); 
+                    
+                    return statusCadastro;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public int deleteById(int id) {
+        String query = "DELETE FROM statuscadastro WHERE statusCadastroId = ?";
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Erro ao deletar profissional: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+
+
+	
 }

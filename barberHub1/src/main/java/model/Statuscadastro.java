@@ -7,7 +7,7 @@ public class StatusCadastro {
 	private String descricao;
 
 	public StatusCadastro( int statusCadastroId, String descricao ) {
-		this.setStatuscadastroId( statusCadastroId );
+		this.setStatusCadastroId( statusCadastroId );
 		this.setDescricao( descricao );
 	}
 
@@ -17,7 +17,7 @@ public class StatusCadastro {
 
 	public String[] toArray() {
 		return new String[] {
-			String.valueOf(this.getStatuscadastroId()),			
+			String.valueOf(this.getStatusCadastroId()),			
 			String.valueOf(this.getDescricao())
 		};
 	}
@@ -26,11 +26,11 @@ public class StatusCadastro {
 		return Arrays.toString(this.toArray());
 	}
 
-	public void setStatuscadastroId(int statusCadastroId) {
+	public void setStatusCadastroId(int statusCadastroId) {
 		this.statusCadastroId = statusCadastroId;
 	}
 
-	public int getStatuscadastroId() {
+	public int getStatusCadastroId() {
 		return this.statusCadastroId;
 	}
 

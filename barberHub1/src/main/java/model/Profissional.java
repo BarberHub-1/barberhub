@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Profissional {
     private int profissionalId;
-    private int estabelecimentoId;
+    private Estabelecimento estabelecimento;
     private String nome;
     private String cep;
     private String rua;
@@ -16,14 +16,16 @@ public class Profissional {
     private String cidade;
     private String estado;
     private String foto;
-    private List<Servico> servicos = new ArrayList<>();
+    private List<Servico> servicos;
 
-    public Profissional() {}
+    public Profissional() {
+        this.servicos = new ArrayList<>(); 
+    }
 
-    public Profissional(int profissionalId, int estabelecimentoId, String nome, String cep, String rua, String numero, 
-                        String complemento, String bairro, String cidade, String estado, String foto) {
+    public Profissional(int profissionalId, Estabelecimento estabelecimento, String nome, String cep, String rua, String numero, 
+            String complemento, String bairro, String cidade, String estado, String foto) {
         this.profissionalId = profissionalId;
-        this.estabelecimentoId = estabelecimentoId;
+        this.estabelecimento = estabelecimento;
         this.nome = nome;
         this.cep = cep;
         this.rua = rua;
@@ -33,12 +35,13 @@ public class Profissional {
         this.cidade = cidade;
         this.estado = estado;
         this.foto = foto;
+        this.servicos = new ArrayList<>(); 
     }
 
     public String[] toArray() {
         return new String[] {
             String.valueOf(this.profissionalId),
-            String.valueOf(this.estabelecimentoId),
+            this.estabelecimento != null ? String.valueOf(this.estabelecimento.getEstabelecimentoId()) : "N/A",
             this.nome,
             this.cep,
             this.rua,
@@ -65,12 +68,15 @@ public class Profissional {
         this.profissionalId = profissionalId;
     }
 
-    public int getEstabelecimentoId() {
-        return estabelecimentoId;
+    public Estabelecimento getEstabelecimento() {
+        if (this.estabelecimento == null) {
+            this.estabelecimento = new Estabelecimento();
+        }
+        return this.estabelecimento;
     }
 
-    public void setEstabelecimentoId(int estabelecimentoId) {
-        this.estabelecimentoId = estabelecimentoId;
+    public void setEstabelecimento(Estabelecimento estabelecimento) {
+        this.estabelecimento = estabelecimento;
     }
 
     public String getNome() {
@@ -144,12 +150,19 @@ public class Profissional {
     public void setFoto(String foto) {
         this.foto = foto;
     }
-    
+
     public List<Servico> getServicos() {
         return servicos;
     }
 
+    public void setServicos(List<Servico> servicos) {
+        this.servicos = servicos;
+    }
+
     public void addServico(Servico servico) {
+        if (this.servicos == null) {
+            this.servicos = new ArrayList<>();
+        }
         this.servicos.add(servico);
     }
 }

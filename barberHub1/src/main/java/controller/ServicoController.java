@@ -36,7 +36,16 @@ public class ServicoController extends HttpServlet {
                 List<Servico> servicos = dao.findByProfissionalId(id);
 
                 if (!servicos.isEmpty()) {
-                    JsonArray jsonArray = gson.toJsonTree(servicos).getAsJsonArray();
+                    JsonArray jsonArray = new JsonArray();
+                    for (Servico servico : servicos) {
+                        JsonObject jsonObject = new JsonObject();
+                        jsonObject.addProperty("servicoId", servico.getServicoId());
+                        jsonObject.addProperty("nome", servico.getNome());
+                        jsonObject.addProperty("descricao", servico.getDescricao());
+                        jsonObject.addProperty("tipoServicoNome", servico.getTipoServico().getServicoNome());
+                        jsonObject.addProperty("preco", servico.getPreco());
+                        jsonArray.add(jsonObject);
+                    }
                     response.getWriter().write(gson.toJson(jsonArray));
                 } else {
                     JsonObject json = new JsonObject();
@@ -46,15 +55,30 @@ public class ServicoController extends HttpServlet {
             } else if (servicoId != null) {
                 Servico servico = dao.findById(Integer.parseInt(servicoId));
                 if (servico != null) {
-                    response.getWriter().write(gson.toJson(servico));
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("servicoId", servico.getServicoId());
+                    jsonObject.addProperty("nome", servico.getNome());
+                    jsonObject.addProperty("descricao", servico.getDescricao());
+                    jsonObject.addProperty("tipoServicoNome", servico.getTipoServico().getServicoNome());
+                    jsonObject.addProperty("preco", servico.getPreco());
+                    response.getWriter().write(gson.toJson(jsonObject));
                 } else {
                     JsonObject json = new JsonObject();
                     json.addProperty("error", "Serviço não encontrado.");
                     response.getWriter().write(gson.toJson(json));
                 }
             } else {
-                List<Servico> servicos = dao.findAll();
-                JsonArray jsonArray = gson.toJsonTree(servicos).getAsJsonArray();
+                List<Servico> servicos = dao.findAllWithJoin();
+                JsonArray jsonArray = new JsonArray();
+                for (Servico servico : servicos) {
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("servicoId", servico.getServicoId());
+                    jsonObject.addProperty("nome", servico.getNome());
+                    jsonObject.addProperty("descricao", servico.getDescricao());
+                    jsonObject.addProperty("tipoServicoNome", servico.getTipoServico().getServicoNome());
+                    jsonObject.addProperty("preco", servico.getPreco());
+                    jsonArray.add(jsonObject);
+                }
                 response.getWriter().write(gson.toJson(jsonArray));
             }
         } catch (NumberFormatException e) {

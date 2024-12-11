@@ -34,7 +34,6 @@
     </div>
 </nav>
 
-
 <div class="container my-5">
     <h2 class="text-center mb-4">Gerenciamento de Agendamentos</h2>
 
@@ -47,7 +46,7 @@
                     <th scope="col">ID Profissional</th>
                     <th scope="col">ID Cliente</th>
                     <th scope="col">ID Serviço</th>
-                    <th scope="col">Serviço</th>
+                    <!-- <th scope="col">Serviço</th> -->
                     <th scope="col">Data</th>
                     <th scope="col">Hora</th>
                     <th scope="col">Preço</th>
@@ -57,7 +56,6 @@
                 </tr>
             </thead>
             <tbody>
-               
             </tbody>
         </table>
     </div>
@@ -72,38 +70,39 @@
     $(document).ready(function() {
         var table = $('#agendamento').DataTable({
             ajax: {
-                url: '/barberHub1/agendamento', 
-                dataSrc: ''  
+                url: '/barberHub1/agendamento',
+                dataSrc: '',
+                error: function(xhr, status, error) {
+                    console.error('Erro ao carregar dados:', error);
+                }
             },
-            "columnDefs": [
-	            {
-	                "targets": "_all", 
-	                "defaultContent": "null" 
-	            }
-	        ],
+            columnDefs: [
+                {
+                    targets: "_all",
+                    defaultContent: "null"
+                }
+            ],
             columns: [
-                { data: 'agendamentoId' },  
-                { data: 'estabelecimentoId' },
-                { data: 'profissionalId' },
-                { data: 'clienteId' },
-                { data: 'servicoId' },
-                { data: 'servico' },  
-                { data: 'data' },  
-                { data: 'hora' },  
-                { data: 'preco' },  
-                { data: 'desconto' },  
-                { data: 'status' },  
+                { data: 'agendamentoId' },
+                { data: 'estabelecimento.estabelecimentoId' },
+                { data: 'profissional.profissionalId' },
+                { data: 'cliente.clienteId' },
+                { data: 'servico.servicoId' },
+              /*   { data: 'servico.nome' }, */ // Acessa o nome dentro do objeto 'servico'
+                { data: 'data' },
+                { data: 'hora' },
+                { data: 'preco' },
+                { data: 'desconto' },
+                { data: 'status' },
                 {
                     data: null,
                     render: function(data, type, row) {
-                        return '<button class="btn btn-danger btn-sm deleteRow" data-id=' + row.agendamentoId + '>Cancelar</button>';
+                        return '<button class="btn btn-danger btn-sm deleteRow" data-id="' + row.agendamentoId + '">Cancelar</button>';
                     }
                 }
             ]
         });
 
-       
-        
         $('#agendamento').on('click', '.deleteRow', function() {
             var id = $(this).data('id');
             if (confirm('Você tem certeza que deseja cancelar este agendamento?')) {
@@ -112,6 +111,11 @@
                     method: 'DELETE',
                     success: function() {
                         table.ajax.reload();
+                        alert('Agendamento cancelado com sucesso.');
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Erro ao cancelar agendamento: ' + xhr.responseText);
+                        console.error('Erro:', error);
                     }
                 });
             }

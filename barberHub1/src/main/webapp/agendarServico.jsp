@@ -115,7 +115,7 @@
                     if (response.length > 0) {
                         profissionalSelect.append('<option value="">Selecione um profissional...</option>');
                         response.forEach(profissional => {
-                            profissionalSelect.append('<option value=' + profissional.profissionalId + '>' + profissional.nome + '</option>S');
+                            profissionalSelect.append('<option value=' + profissional.profissionalId + '>' + profissional.nome + '</option>');
                         });
                         $('#mensagemStatus').hide();
                         $('#dadosServico').show();
