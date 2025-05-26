@@ -1,5 +1,5 @@
 import { FadeIn, StaggeredContainer } from "./Transitions";
-import { Scissors, CircleUser, Droplets, MessageSquare, Clock, Users } from "lucide-react";
+import { Scissors, CircleUser, Droplets, Sparkles, Palette, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CategoryCardProps {
@@ -41,19 +41,19 @@ const categories = [
     description: "Obtenha o visual perfeito para qualquer ocasião com produtos premium."
   },
   {
-    icon: <MessageSquare size={24} />,
-    title: "Consultas",
-    description: "Receba orientação especializada sobre o melhor estilo para seu tipo de rosto e preferências."
+    icon: <Sparkles size={24} />,
+    title: "Luzes e Descoloração",
+    description: "Transforme seu visual com técnicas modernas de coloração e efeitos de luz."
   },
   {
-    icon: <Clock size={24} />,
-    title: "Serviços Express",
-    description: "Ajustes rápidos e manutenção quando você está com pouco tempo."
+    icon: <Palette size={24} />,
+    title: "Progressiva",
+    description: "Tratamento profissional para cabelos crespos ou ondulados, com resultados duradouros."
   },
   {
-    icon: <Users size={24} />,
-    title: "Serviços em Grupo",
-    description: "Pacotes especiais para casamentos, eventos e agendamentos em grupo."
+    icon: <Star size={24} />,
+    title: "Sobrancelha",
+    description: "Design e modelagem de sobrancelhas para realçar sua expressão facial."
   }
 ];
 

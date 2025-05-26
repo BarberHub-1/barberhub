@@ -1,8 +1,51 @@
 import { Button } from "@/components/ui/button";
-import { Search, MapPin } from "lucide-react";
 import { FadeIn } from "./Transitions";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import SearchAutocomplete from "./SearchAutocomplete";
+
+// Dados mockados para demonstração
+const availableLocations = [
+  "Centro, São Paulo",
+  "Jardins, São Paulo",
+  "Vila Madalena, São Paulo",
+  "Moema, São Paulo",
+  "Pinheiros, São Paulo",
+  "Itaim Bibi, São Paulo",
+  "Vila Mariana, São Paulo",
+  "Campo Belo, São Paulo"
+];
+
+const availableBarbershops = [
+  "The Classic Cut",
+  "Modern Barber",
+  "Elite Barbershop",
+  "Premium Cuts",
+  "Vintage Barber",
+  "Urban Style",
+  "Gentleman's Cut",
+  "Royal Barber"
+];
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [location, setLocation] = useState("");
+
+  const handleSearch = () => {
+    const searchParams = new URLSearchParams();
+    if (searchTerm) searchParams.set("search", searchTerm);
+    if (location) searchParams.set("location", location);
+    
+    navigate(`/barbershops?${searchParams.toString()}`);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden pt-20">
       {/* Background image */}
@@ -24,7 +67,7 @@ const Hero = () => {
             BARBEARIAS PREMIUM NA PALMA DA SUA MÃO
           </span>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Encontre o barbeiro perfeito para o seu estilo único
+            Encontre o lugar certo pro seu estilo único
           </h1>
           <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
             Descubra as melhores barbearias perto de você, agende horários com facilidade e mostre seu novo visual.
@@ -33,24 +76,32 @@ const Hero = () => {
         
         <FadeIn delay={300} direction="up" className="w-full max-w-2xl">
           <div className="bg-white/95 backdrop-blur-md p-2 rounded-lg flex items-center shadow-lg">
-            <div className="flex-1 flex items-center pl-4 border-r">
-              <Search size={18} className="text-barber-400 mr-2" />
-              <input
-                type="text"
+            <div className="flex-1 border-r">
+              <SearchAutocomplete
+                type="search"
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSelect={setSearchTerm}
                 placeholder="Procure pelas barbearias ou serviços que mais combinam com você!"
-                className="w-full py-3 px-2 bg-transparent text-barber-900 placeholder-barber-400 outline-none"
+                suggestions={availableBarbershops}
               />
             </div>
-            <div className="flex-1 flex items-center px-4">
-              <MapPin size={18} className="text-barber-400 mr-2" />
-              <input
-                type="text"
+            <div className="flex-1 px-4">
+              <SearchAutocomplete
+                type="location"
+                value={location}
+                onChange={setLocation}
+                onSelect={setLocation}
                 placeholder="Localização"
-                className="w-full py-3 px-2 bg-transparent text-barber-900 placeholder-barber-400 outline-none"
+                suggestions={availableLocations}
               />
             </div>
-            <Button size="lg" className="bg-barber-900 hover:bg-barber-800 text-white">
-              Encontrar Barbeiros
+            <Button 
+              size="lg" 
+              className="bg-barber-900 hover:bg-barber-800 text-white"
+              onClick={handleSearch}
+            >
+              Encontrar Barbearias
             </Button>
           </div>
         </FadeIn>

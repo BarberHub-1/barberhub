@@ -2,6 +2,9 @@ import { Star, MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface ShopCardProps {
   id: string;
@@ -24,6 +27,36 @@ const ShopCard = ({
   services,
   className
 }: ShopCardProps) => {
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleBookingClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Login necessário",
+        description: "Por favor, faça login para realizar um agendamento.",
+        variant: "destructive",
+      });
+      navigate("/login", { state: { from: "/barbershops" } });
+      return;
+    }
+
+    if (user?.type !== "client") {
+      toast({
+        title: "Acesso restrito",
+        description: "Apenas clientes podem realizar agendamentos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Se passou pelas verificações, permite a navegação
+    navigate(`/barbershops?shop=${id}`);
+  };
+
   return (
     <div className={cn(
       "group relative bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md",
@@ -71,13 +104,11 @@ const ShopCard = ({
             <span>Disponível hoje</span>
           </div>
           <Button 
-            asChild
             size="sm"
             className="bg-barber-900 hover:bg-barber-800 text-white"
+            onClick={handleBookingClick}
           >
-            <Link to={`/barbershops?shop=${id}`}>
-              Agendar agora
-            </Link>
+            Agendar agora
           </Button>
         </div>
       </div>
