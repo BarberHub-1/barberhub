@@ -19,34 +19,7 @@ type Appointment = {
 
 const ClientHistory = () => {
   const { toast } = useToast();
-  const [appointments] = useState<Appointment[]>([
-    {
-      id: "1",
-      barberShop: "Barbearia do João",
-      service: "Corte + Barba",
-      date: new Date(2024, 2, 15, 14, 30),
-      status: "completed",
-      price: 50.00,
-      rating: 5,
-    },
-    {
-      id: "2",
-      barberShop: "Barbearia do Pedro",
-      service: "Corte",
-      date: new Date(2024, 2, 10, 10, 0),
-      status: "completed",
-      price: 30.00,
-      rating: 4,
-    },
-    {
-      id: "3",
-      barberShop: "Barbearia do Carlos",
-      service: "Barba",
-      date: new Date(2024, 2, 5, 16, 0),
-      status: "cancelled",
-      price: 20.00,
-    },
-  ]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   const getStatusBadge = (status: Appointment["status"]) => {
     const statusConfig = {

@@ -27,17 +27,4 @@ const Toaster = ({ ...props }: ToasterProps) => {
   )
 }
 
-// Componente Sonner usando React.forwardRef
-// Integra com o componente Sonner do Radix UI
-// Permite customização através de classes adicionais
-const Sonner = () => {
-  return (
-    <div className="fixed bottom-0 right-0 z-50">
-      <div className="flex flex-col gap-2 p-4">
-        {toast.message}
-      </div>
-    </div>
-  )
-}
-
-export { Toaster, Sonner }
+export { Toaster }

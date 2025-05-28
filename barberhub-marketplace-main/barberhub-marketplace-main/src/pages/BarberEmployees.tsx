@@ -33,25 +33,7 @@ interface Employee {
 
 const BarberEmployees = () => {
   const { toast } = useToast();
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: "1",
-      name: "João Silva",
-      role: "Barbeiro",
-      services: ["Corte de Cabelo", "Barba"],
-      email: "joao@barbearia.com",
-      phone: "(11) 98765-4321",
-    },
-    {
-      id: "2",
-      name: "Maria Santos",
-      role: "Barbeira",
-      services: ["Corte de Cabelo", "Sobrancelha", "Luzes"],
-      email: "maria@barbearia.com",
-      phone: "(11) 98765-4322",
-    },
-  ]);
-
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | undefined>();

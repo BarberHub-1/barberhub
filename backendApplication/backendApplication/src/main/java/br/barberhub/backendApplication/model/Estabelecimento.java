@@ -9,14 +9,17 @@ import java.util.List;
 
 @Data
 @Entity
+@DiscriminatorValue("ESTABELECIMENTO")
 public class Estabelecimento extends Usuario {
 
     @NotBlank(message = "O nome do proprietário é obrigatório")
     @Size(min = 3, max = 100)
+    @Column(name = "nome_proprietario")
     private String nomeProprietario;
 
     @NotBlank(message = "O nome do estabelecimento é obrigatório")
     @Size(min = 3, max = 100)
+    @Column(name = "nome_estabelecimento")
     private String nomeEstabelecimento;
 
     @NotBlank(message = "O CNPJ é obrigatório")

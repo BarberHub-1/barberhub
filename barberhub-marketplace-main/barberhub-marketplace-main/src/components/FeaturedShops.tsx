@@ -1,6 +1,7 @@
 import { Star, MapPin, Clock, Scissors } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ServiceId, getServiceLabel } from '@/constants/services';
+import { useState } from 'react';
 
 interface FeaturedShop {
   id: string;
@@ -13,40 +14,9 @@ interface FeaturedShop {
   image: string;
 }
 
-const featuredShops: FeaturedShop[] = [
-  {
-    id: "1",
-    name: "The Classic Cut",
-    rating: 4.8,
-    reviews: 124,
-    location: "Centro, São Paulo",
-    services: ["corte-cabelo", "barba", "sobrancelha"],
-    priceRange: [50, 100],
-    image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
-  },
-  {
-    id: "2",
-    name: "Modern Barber",
-    rating: 4.9,
-    reviews: 98,
-    location: "Jardins, São Paulo",
-    services: ["corte-cabelo", "barba", "luzes"],
-    priceRange: [60, 120],
-    image: "https://img.freepik.com/fotos-gratis/cadeiras-na-barbearia-masculina-verde-em-estilo-retro_627829-8284.jpg?t=st=1745341620~exp=1745345220~hmac=52dc1a3fdbcbfebf95474eb3df0d1b43ce1c7bcbecec6aed323691375577eb0b&w=996"
-  },
-  {
-    id: "3",
-    name: "Elite Barbershop",
-    rating: 4.7,
-    reviews: 156,
-    location: "Vila Madalena, São Paulo",
-    services: ["corte-cabelo", "barba", "descoloração"],
-    priceRange: [70, 150],
-    image: "https://images.unsplash.com/photo-1534297635766-a262cdcb8ee4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-  }
-];
-
 const FeaturedShops = () => {
+  const [featuredShops, setFeaturedShops] = useState<FeaturedShop[]>([]);
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">

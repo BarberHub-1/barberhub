@@ -1,6 +1,5 @@
 package br.barberhub.backendApplication.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@DiscriminatorValue("CLIENTE")
 public class Cliente extends Usuario {
 
     private String nome;

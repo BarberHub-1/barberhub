@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "horarios_funcionamento")
+@Table(name = "horario_funcionamento")
 public class HorarioFuncionamento {
 
     @Id

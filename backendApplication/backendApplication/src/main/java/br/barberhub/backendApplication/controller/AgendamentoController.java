@@ -52,7 +52,7 @@ public class AgendamentoController {
     @PutMapping("/{id}/status")
     public ResponseEntity<AgendamentoDTO> atualizarStatus(
             @PathVariable Long id,
-            @RequestParam @Pattern(regexp = "AGENDADO|CANCELADO|CONCLUIDO", message = "Status inválido") String status) {
+            @RequestParam @Pattern(regexp = "AGENDADA|CANCELADA|CONCLUIDA", message = "Status inválido") String status) {
         return ResponseEntity.ok(agendamentoService.atualizarStatus(id, StatusAgendamento.valueOf(status)));
     }
 

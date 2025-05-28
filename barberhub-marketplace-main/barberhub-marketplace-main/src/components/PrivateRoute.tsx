@@ -1,22 +1,20 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
 
-type PrivateRouteProps = {
+interface PrivateRouteProps {
   children: React.ReactNode;
-  requiredUserType?: "client" | "barber";
-};
+  role: string;
+}
 
-export function PrivateRoute({ children, requiredUserType }: PrivateRouteProps) {
+export default function PrivateRoute({ children, role }: PrivateRouteProps) {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Redireciona para o login e salva a rota que tentou acessar
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requiredUserType && user?.type !== requiredUserType) {
-    // Redireciona para a página inicial se o tipo de usuário não corresponder
+  if (user?.tipo !== role) {
     return <Navigate to="/" replace />;
   }
 

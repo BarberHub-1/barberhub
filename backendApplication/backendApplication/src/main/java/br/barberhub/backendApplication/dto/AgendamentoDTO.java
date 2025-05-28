@@ -8,11 +8,6 @@ import br.barberhub.backendApplication.model.Cliente;
 import br.barberhub.backendApplication.model.Estabelecimento;
 import br.barberhub.backendApplication.model.Profissional;
 import br.barberhub.backendApplication.model.StatusAgendamento;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -25,14 +20,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AgendamentoDTO {
 	public enum Status{
-		AGENDADO, CANCELADO, CONCLUIDO
+		AGENDADA, CANCELADA, CONCLUIDA
     }
 	
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-
+	private Long id;
     private LocalDateTime dateTime;
     private double price;
     private double discount;
@@ -53,7 +44,6 @@ public class AgendamentoDTO {
     @Future(message = "A data e hora devem ser futuras")
     private LocalDateTime dataHora;
 
-    @Enumerated(EnumType.STRING)
     private StatusAgendamento statusAgendamento;
 
 }

@@ -33,7 +33,7 @@ public class Servico {
     @Column(nullable = false)
     private double preco;
     
-    @Column(nullable = false)
+    @Column(name = "duracao_minutos", nullable = false)
     private int duracaoMinutos;
     
     @ManyToOne
