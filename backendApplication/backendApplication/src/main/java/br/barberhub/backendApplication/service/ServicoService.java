@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import br.barberhub.backendApplication.dto.ServicoDTO;
 import br.barberhub.backendApplication.model.Estabelecimento;
+import br.barberhub.backendApplication.model.Profissional;
 import br.barberhub.backendApplication.model.Servico;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
+import br.barberhub.backendApplication.repository.ProfissionalRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
 
 @Service
@@ -21,6 +23,9 @@ public class ServicoService {
 
     @Autowired
     private EstabelecimentoRepository estabelecimentoRepository;
+
+    @Autowired
+    private ProfissionalRepository profissionalRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -39,6 +44,15 @@ public class ServicoService {
     public List<ServicoDTO> listarServicosPorEstabelecimento(Long estabelecimentoId) {
         List<Servico> servicos = servicoRepository.findByEstabelecimentoId(estabelecimentoId);
         return servicos.stream()
+                .map(servico -> modelMapper.map(servico, ServicoDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<ServicoDTO> listarServicosPorProfissional(Long profissionalId) {
+        Profissional profissional = profissionalRepository.findById(profissionalId)
+                .orElseThrow(() -> new RuntimeException("Profissional não encontrado"));
+        
+        return profissional.getServicos().stream()
                 .map(servico -> modelMapper.map(servico, ServicoDTO.class))
                 .collect(Collectors.toList());
     }

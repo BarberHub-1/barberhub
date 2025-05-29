@@ -34,6 +34,11 @@ public class ServicoController {
         return ResponseEntity.ok(servicoService.listarServicosPorEstabelecimento(barbeariaId));
     }
 
+    @GetMapping("/profissional/{profissionalId}")
+    public ResponseEntity<List<ServicoDTO>> listarServicosPorProfissional(@PathVariable Long profissionalId) {
+        return ResponseEntity.ok(servicoService.listarServicosPorProfissional(profissionalId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ServicoDTO> buscarServicoPorId(@PathVariable Long id) {
         return ResponseEntity.ok(servicoService.buscarServicoPorId(id));

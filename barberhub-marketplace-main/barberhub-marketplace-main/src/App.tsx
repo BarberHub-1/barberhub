@@ -61,6 +61,10 @@ function App() {
                   <Route path="history" element={<ClientHistory />} />
               </Route>
 
+              <Route path="/barber/profile" element={<BarberProfile />} />
+              <Route path="/barber/edit-profile" element={<BarberEditProfile />} />
+              <Route path="/barber/employees" element={<BarberEmployees />} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

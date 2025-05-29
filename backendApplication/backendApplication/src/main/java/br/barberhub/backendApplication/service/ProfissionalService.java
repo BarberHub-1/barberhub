@@ -98,15 +98,35 @@ public class ProfissionalService {
         return modelMapper.map(profissional, ProfissionalDTO.class);
     }
 
+    @Transactional
     public ProfissionalDTO atualizarProfissional(Long id, ProfissionalDTO profissionalDTO) {
         Profissional profissional = profissionalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Profissional não encontrado"));
         
-        modelMapper.map(profissionalDTO, profissional);
+        // Atualizar dados básicos
+        profissional.setNome(profissionalDTO.getNome());
+        profissional.setEmail(profissionalDTO.getEmail());
+        profissional.setTelefone(profissionalDTO.getTelefone());
 
+        // Atualizar estabelecimento
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(profissionalDTO.getEstabelecimentoId())
                 .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
         profissional.setEstabelecimento(estabelecimento);
+
+        // Atualizar serviços
+        if (profissionalDTO.getServicosIds() != null) {
+            List<Servico> servicos = servicoRepository.findAllById(profissionalDTO.getServicosIds());
+
+            // Validar se todos os serviços pertencem ao mesmo estabelecimento
+            boolean todosValidos = servicos.stream()
+                .allMatch(servico -> servico.getEstabelecimento().getId().equals(estabelecimento.getId()));
+
+            if (!todosValidos) {
+                throw new IllegalArgumentException("Todos os serviços devem pertencer ao mesmo estabelecimento do profissional.");
+            }
+
+            profissional.setServicos(servicos);
+        }
 
         Profissional profissionalAtualizado = profissionalRepository.save(profissional);
         return modelMapper.map(profissionalAtualizado, ProfissionalDTO.class);
