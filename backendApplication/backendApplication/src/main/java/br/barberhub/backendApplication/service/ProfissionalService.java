@@ -42,6 +42,8 @@ public class ProfissionalService {
     public ProfissionalDTO cadastrarProfissional(ProfissionalDTO profissionalDTO) {
         Profissional profissional = new Profissional();
         profissional.setNome(profissionalDTO.getNome());
+        profissional.setEmail(profissionalDTO.getEmail());
+        profissional.setTelefone(profissionalDTO.getTelefone());
 
         // Buscar e setar o estabelecimento
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(profissionalDTO.getEstabelecimentoId())

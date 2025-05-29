@@ -18,6 +18,7 @@ import ResetPassword from "@/pages/ResetPassword";
 import BarberAppointments from "@/pages/BarberAppointments";
 import BarberProfile from "@/pages/BarberProfile";
 import BarberEditProfile from "@/pages/BarberEditProfile";
+import BarberEditHours from "@/pages/BarberEditHours";
 import BarberLayout from "@/components/BarberLayout";
 import BarberEmployees from "@/pages/BarberEmployees";
 import ClientLayout from "@/components/ClientLayout";
@@ -50,8 +51,9 @@ function App() {
               <Route path="/barber" element={<PrivateRoute role="ESTABELECIMENTO"><BarberLayout /></PrivateRoute>}>
                   <Route path="profile" element={<BarberProfile />} />
                   <Route path="edit-profile" element={<BarberEditProfile />} />
-                  <Route path="appointments" element={<BarberAppointments />} />
+                  <Route path="edit-hours" element={<BarberEditHours />} />
                   <Route path="employees" element={<BarberEmployees />} />
+                  <Route path="appointments" element={<BarberAppointments />} />
               </Route>
 
               {/* Rotas do Cliente */}

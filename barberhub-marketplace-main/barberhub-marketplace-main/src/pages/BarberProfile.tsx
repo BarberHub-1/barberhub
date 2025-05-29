@@ -404,9 +404,18 @@ const BarberProfile = () => {
 
             <TabsContent value="hours">
               <Card>
-                <CardHeader>
-                  <CardTitle>Horários de Funcionamento</CardTitle>
-                  <CardDescription>Defina seus horários de atendimento para cada dia da semana.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Horário de Funcionamento</CardTitle>
+                    <CardDescription>Configure os horários de funcionamento da sua barbearia.</CardDescription>
+                  </div>
+                  <Button 
+                    onClick={() => navigate("/barber/edit-hours")} 
+                    className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
+                  >
+                    <Edit2 size={16} />
+                    Editar Horários
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {workingHours.map(dayData => (
