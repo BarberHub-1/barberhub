@@ -68,18 +68,9 @@ const barberProfileSchema = z.object({
   phone: z.string().min(10, { message: "Por favor, insira um número de telefone válido" }),
   address: z.string().min(5, { message: "O endereço deve ter pelo menos 5 caracteres" }),
   city: z.string().min(2, { message: "A cidade deve ter pelo menos 2 caracteres" }),
+  cep: z.string().min(8, { message: "CEP inválido" }).max(9, { message: "CEP inválido" }),
   description: z.string().min(20, { message: "A descrição deve ter pelo menos 20 caracteres" }),
 });
-
-interface BarberProfileFormValues {
-  ownerName: string;
-  shopName: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  cep: string;
-}
 
 type BarberProfileFormValues = z.infer<typeof barberProfileSchema>;
 
@@ -128,6 +119,7 @@ const BarberProfile = () => {
         throw new Error("Establishment ID not available");
       }
       const response = await api.get<Service[]>(`/api/servicos/barbearia/${establishmentId}`);
+      console.log('Serviços recebidos:', response.data);
       return response.data;
     },
     enabled: !!establishmentId,
@@ -146,6 +138,7 @@ const BarberProfile = () => {
         phone: establishmentData.telefone || "",
         address: establishmentData.endereco || "",
         city: establishmentData.cidade || "",
+        cep: establishmentData.cep || "",
       });
       
       if (establishmentData.horario) {
@@ -196,29 +189,68 @@ const BarberProfile = () => {
     ));
   };
 
-  const handleAddService = () => {
-    if (newService.descricao && newService.preco && newService.duracaoMinutos) {
-      setServices([...services, { 
-        id: Date.now(), 
-        ...newService as Service,
-        estabelecimentoId: establishmentId!,
-        tipo: "CORTE" // Valor padrão, ajuste conforme necessário
-      }]);
-      setNewService({});
-      setShowAddService(false);
+  const handleAddService = async () => {
+    try {
+      if (!establishmentId) {
+        toast({
+          title: "Erro",
+          description: "ID do estabelecimento não encontrado",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (newService.descricao && newService.preco && newService.duracaoMinutos && newService.tipo) {
+        const serviceData = {
+          descricao: newService.descricao,
+          preco: newService.preco,
+          duracaoMinutos: newService.duracaoMinutos,
+          tipo: newService.tipo,
+          estabelecimentoId: establishmentId
+        };
+
+        const response = await api.post('/api/servicos', serviceData);
+
+        if (response.status === 201) {
+          toast({
+            title: "Sucesso",
+            description: "Serviço adicionado com sucesso!",
+          });
+          setNewService({});
+          // Atualiza a lista de serviços
+          queryClient.invalidateQueries({ queryKey: ['services', establishmentId] });
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar serviço:", error);
       toast({
-        title: "Serviço adicionado",
-        description: "O novo serviço foi adicionado com sucesso.",
+        title: "Erro",
+        description: "Erro ao adicionar serviço. Tente novamente.",
+        variant: "destructive",
       });
     }
   };
 
-  const handleDeleteService = (serviceId: number) => {
-    setServices(services.filter(s => s.id !== serviceId));
-    toast({
-      title: "Serviço removido",
-      description: "O serviço foi removido com sucesso.",
-    });
+  const handleDeleteService = async (serviceId: number) => {
+    try {
+      const response = await api.delete(`/api/servicos/${serviceId}`);
+      
+      if (response.status === 200) {
+        toast({
+          title: "Sucesso",
+          description: "Serviço removido com sucesso!",
+        });
+        // Atualiza a lista de serviços
+        queryClient.invalidateQueries({ queryKey: ['services', establishmentId] });
+      }
+    } catch (error) {
+      console.error("Erro ao remover serviço:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover serviço. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -417,65 +449,119 @@ const BarberProfile = () => {
             </TabsContent>
 
             <TabsContent value="services">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Serviços Oferecidos</CardTitle>
-                        <CardDescription>Liste os serviços que sua barbearia oferece.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {services.map(service => (
-                            <div key={service.id} className="flex items-center justify-between border-b pb-2 last:border-b-0">
-                                <div>
-                                    <div className="font-semibold">{service.descricao}</div>
-                                    <div className="text-sm text-barber-600">R$ {service.preco.toFixed(2)} - {service.duracaoMinutos} min</div>
-                                </div>
-                                {isEditing && (
-                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteService(service.id)}>
-                                        <Trash2 size={16} className="text-red-500"/>
-                                    </Button>
-                                )}
-                            </div>
-                        ))}
-
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Serviços Oferecidos</CardTitle>
+                    <CardDescription>Liste os serviços que sua barbearia oferece.</CardDescription>
+                  </div>
+                  {isEditing && (
+                    <Button 
+                      onClick={() => setShowAddService(true)} 
+                      className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
+                    >
+                      <Plus size={16} />
+                      Adicionar Serviço
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {isLoadingServices ? (
+                    <div>Carregando serviços...</div>
+                  ) : isErrorServices ? (
+                    <div className="text-red-500">Erro ao carregar serviços: {errorServices?.message}</div>
+                  ) : servicesData && servicesData.length > 0 ? (
+                    servicesData.map(service => (
+                      <div key={service.id} className="flex items-center justify-between border-b pb-2 last:border-b-0">
+                        <div>
+                          <div className="font-semibold">{service.descricao}</div>
+                          <div className="text-sm text-barber-600">R$ {service.preco.toFixed(2)} - {service.duracaoMinutos} min</div>
+                        </div>
                         {isEditing && (
-                            <Card className="p-4">
-                                <CardTitle className="text-lg mb-4">Adicionar Novo Serviço</CardTitle>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="new-service-name">Descrição</Label>
-                                        <Input 
-                                            id="new-service-name"
-                                            value={newService.descricao || ''}
-                                            onChange={(e) => setNewService({...newService, descricao: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="new-service-price">Preço (R$)</Label>
-                                        <Input 
-                                            id="new-service-price"
-                                            type="number"
-                                            value={newService.preco || ''}
-                                            onChange={(e) => setNewService({...newService, preco: parseFloat(e.target.value) || undefined})}
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="new-service-duration">Duração (min)</Label>
-                                        <Input 
-                                            id="new-service-duration"
-                                            type="number"
-                                            value={newService.duracaoMinutos || ''}
-                                            onChange={(e) => setNewService({...newService, duracaoMinutos: parseInt(e.target.value) || undefined})}
-                                        />
-                                    </div>
-                                </div>
-                                <Button onClick={handleAddService} className="mt-4 flex items-center gap-2 bg-barber-900 hover:bg-barber-800">
-                                    <Plus size={16} />
-                                    Adicionar Serviço
-                                </Button>
-                            </Card>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteService(service.id)}>
+                            <Trash2 size={16} className="text-red-500"/>
+                          </Button>
                         )}
-                    </CardContent>
-                </Card>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-barber-600">Nenhum serviço cadastrado</div>
+                  )}
+
+                  {isEditing && showAddService && (
+                    <Card className="p-4">
+                      <CardTitle className="text-lg mb-4">Adicionar Novo Serviço</CardTitle>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="space-y-1">
+                          <Label htmlFor="new-service-type">Tipo de Serviço</Label>
+                          <Select
+                            value={newService.tipo || ''}
+                            onValueChange={(value) => setNewService({...newService, tipo: value})}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="CORTE">Corte</SelectItem>
+                              <SelectItem value="BARBA">Barba</SelectItem>
+                              <SelectItem value="CORTE_E_BARBA">Corte e Barba</SelectItem>
+                              <SelectItem value="HIDRATACAO">Hidratação</SelectItem>
+                              <SelectItem value="COLORACAO">Coloração</SelectItem>
+                              <SelectItem value="PINTURA">Pintura</SelectItem>
+                              <SelectItem value="OUTROS">Outros</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="new-service-name">Descrição</Label>
+                          <Input 
+                            id="new-service-name"
+                            value={newService.descricao || ''}
+                            onChange={(e) => setNewService({...newService, descricao: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="new-service-price">Preço (R$)</Label>
+                          <Input 
+                            id="new-service-price"
+                            type="number"
+                            value={newService.preco || ''}
+                            onChange={(e) => setNewService({...newService, preco: parseFloat(e.target.value) || undefined})}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="new-service-duration">Duração (min)</Label>
+                          <Input 
+                            id="new-service-duration"
+                            type="number"
+                            value={newService.duracaoMinutos || ''}
+                            onChange={(e) => setNewService({...newService, duracaoMinutos: parseInt(e.target.value) || undefined})}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => {
+                            setShowAddService(false);
+                            setNewService({});
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button 
+                          onClick={handleAddService} 
+                          className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
+                          disabled={!newService.tipo || !newService.descricao || !newService.preco || !newService.duracaoMinutos}
+                        >
+                          <Plus size={16} />
+                          Adicionar Serviço
+                        </Button>
+                      </div>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
           </Tabs>

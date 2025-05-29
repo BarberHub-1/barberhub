@@ -14,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import br.barberhub.backendApplication.dto.EstabelecimentoDTO;
 import br.barberhub.backendApplication.model.Estabelecimento;
 import br.barberhub.backendApplication.model.HorarioFuncionamento;
+import br.barberhub.backendApplication.model.Servico;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
+import br.barberhub.backendApplication.repository.ServicoRepository;
 import jakarta.validation.Valid;
 
 @Service
@@ -23,6 +25,9 @@ public class EstabelecimentoService {
 
     @Autowired
     private EstabelecimentoRepository estabelecimentoRepository;
+
+    @Autowired
+    private ServicoRepository servicoRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -84,6 +89,24 @@ public class EstabelecimentoService {
             estabelecimentoDTO.getHorario().forEach(horarioDTO -> {
                 HorarioFuncionamento horario = modelMapper.map(horarioDTO, HorarioFuncionamento.class);
                 estabelecimento.addHorario(horario);
+            });
+        }
+
+        // Atualiza os serviços
+        if (estabelecimentoDTO.getServicos() != null) {
+            // Remove todos os serviços existentes
+            estabelecimento.getServicos().clear();
+            
+            // Adiciona os novos serviços
+            estabelecimentoDTO.getServicos().forEach(servicoId -> {
+                try {
+                    Servico servico = servicoRepository.findById(Long.parseLong(servicoId))
+                        .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+                    estabelecimento.getServicos().add(servico);
+                } catch (NumberFormatException e) {
+                    // Se não for um número, ignora o serviço
+                    System.out.println("ID de serviço inválido: " + servicoId);
+                }
             });
         }
         
