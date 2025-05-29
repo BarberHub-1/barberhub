@@ -16,6 +16,9 @@ public class EstabelecimentoDTO extends UsuarioDTO {
     private String cidade;
     private String cep;
     private String telefone;
+    private String foto;
     private StatusCadastro status;
     private List<HorarioFuncionamentoDTO> horario;
+    private String descricao;
+    private List<String> servicos;
 }

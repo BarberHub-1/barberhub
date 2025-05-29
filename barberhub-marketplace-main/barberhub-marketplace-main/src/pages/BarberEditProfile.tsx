@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,33 @@ import * as z from "zod";
 import { Scissors, MapPin, User, Mail, Phone, Store, Clock, Image, Calendar, Upload, Building2, Hash, Home, Map } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AVAILABLE_SERVICES } from "@/constants/services";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import api from "@/lib/axios";
+
+interface HorarioFuncionamentoDTO {
+  id: number;
+  diaSemana: string;
+  horarioAbertura: string;
+  horarioFechamento: string;
+}
+
+interface EstabelecimentoDTO {
+  id: number;
+  nomeProprietario: string;
+  nomeEstabelecimento: string;
+  cnpj: string;
+  endereco: string;
+  cidade: string;
+  cep: string;
+  telefone: string;
+  email: string;
+  foto?: string;
+  status: string;
+  horario: HorarioFuncionamentoDTO[];
+  descricao?: string;
+  servicos?: string[];
+}
 
 const barberShopSchema = z.object({
   shopName: z.string().min(2, { message: "O nome da barbearia deve ter pelo menos 2 caracteres" }),
@@ -25,7 +52,11 @@ const barberShopSchema = z.object({
   zipCode: z.string().min(8, { message: "CEP inválido" }).max(9, { message: "CEP inválido" }),
   description: z.string().min(20, { message: "A descrição deve ter pelo menos 20 caracteres" }),
   services: z.array(z.string()).min(1, { message: "Selecione pelo menos um serviço" }),
-  workingHours: z.string().min(5, { message: "Por favor, insira seus horários de funcionamento" }),
+  horarios: z.array(z.object({
+    diaSemana: z.string(),
+    horarioAbertura: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Formato inválido (HH:mm)"),
+    horarioFechamento: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Formato inválido (HH:mm)")
+  }))
 });
 
 type BarberShopFormValues = z.infer<typeof barberShopSchema>;
@@ -33,26 +64,151 @@ type BarberShopFormValues = z.infer<typeof barberShopSchema>;
 const BarberEditProfile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [shopImage, setShopImage] = useState<string | null>("https://placehold.co/400x300/e2e8f0/64748b?text=Foto+da+Barbearia");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   const form = useForm<BarberShopFormValues>({
     resolver: zodResolver(barberShopSchema),
     defaultValues: {
-      shopName: "Barbearia do João",
-      ownerName: "João Silva",
-      cnpj: "12.345.678/0001-90",
-      email: "joao@barbearia.com",
-      phone: "(11) 98765-4321",
-      street: "Rua das Flores",
-      number: "123",
-      neighborhood: "Centro",
-      city: "São Paulo",
-      zipCode: "01234-567",
-      description: "Barbearia tradicional com mais de 10 anos de experiência. Especializada em cortes modernos e barba.",
-      services: ["corte", "barba"],
-      workingHours: "Seg-Sex: 9h-19h\nSáb: 10h-17h\nDom: Fechado",
+      shopName: "",
+      ownerName: "",
+      cnpj: "",
+      email: "",
+      phone: "",
+      street: "",
+      number: "",
+      neighborhood: "",
+      city: "",
+      zipCode: "",
+      description: "",
+      services: [],
+      horarios: [],
     },
   });
+
+  const { data: estabelecimento, isLoading } = useQuery<EstabelecimentoDTO | undefined>({
+    queryKey: ['estabelecimento', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return undefined;
+      const response = await api.get<EstabelecimentoDTO>(`/api/estabelecimentos/${user.id}`);
+      console.log('Dados do estabelecimento:', response.data);
+      return response.data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: BarberShopFormValues) => {
+      const formData = new FormData();
+      
+      // Adiciona os dados do estabelecimento como JSON
+      const estabelecimentoData = {
+        nomeEstabelecimento: data.shopName,
+        nomeProprietario: data.ownerName,
+        cnpj: data.cnpj,
+        email: data.email,
+        telefone: data.phone,
+        endereco: `${data.street}, ${data.number} - ${data.neighborhood}`,
+        cidade: data.city,
+        cep: data.zipCode,
+        descricao: data.description,
+        servicos: data.services,
+        horario: data.horarios
+      };
+      
+      formData.append('estabelecimento', new Blob([JSON.stringify(estabelecimentoData)], {
+        type: 'application/json'
+      }));
+      
+      // Adiciona a foto se existir
+      if (imageFile) {
+        formData.append('foto', imageFile);
+      }
+
+      const response = await api.put(`/api/estabelecimentos/${user?.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Perfil Atualizado",
+        description: "Suas informações foram atualizadas com sucesso!",
+      });
+      navigate("/barber/profile");
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o perfil. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (estabelecimento) {
+      console.log('Foto do estabelecimento:', estabelecimento.foto);
+      
+      let street = "";
+      let number = "";
+      let neighborhood = "";
+      let city = estabelecimento.cidade || "";
+      let zipCode = estabelecimento.cep || "";
+
+      if (estabelecimento.endereco) {
+        const parts = estabelecimento.endereco.split(',');
+        street = parts[0]?.trim() || "";
+        const rest = parts[1]?.trim();
+
+        if (rest) {
+          const restParts = rest.split('-');
+          number = restParts[0]?.trim() || "";
+          neighborhood = restParts[1]?.trim() || "";
+        }
+      }
+
+      let workingHoursText = "";
+      if (estabelecimento.horario && estabelecimento.horario.length > 0) {
+          workingHoursText = estabelecimento.horario.map(h => `${h.diaSemana}: ${h.horarioAbertura}-${h.horarioFechamento}`).join('\n');
+      }
+
+      form.reset({
+        shopName: estabelecimento.nomeEstabelecimento || "",
+        ownerName: estabelecimento.nomeProprietario || "",
+        cnpj: estabelecimento.cnpj || "",
+        email: estabelecimento.email || "",
+        phone: estabelecimento.telefone || "",
+        street: street,
+        number: number,
+        neighborhood: neighborhood,
+        city: city,
+        zipCode: zipCode,
+        description: estabelecimento.descricao || "",
+        services: estabelecimento.servicos || [],
+        horarios: estabelecimento.horario || []
+      });
+
+      // Atualizar a foto se existir
+      if (estabelecimento.foto) {
+        console.log('Atualizando foto para:', estabelecimento.foto);
+        // Verifica se a foto já está no formato data:image
+        if (estabelecimento.foto.startsWith('data:image')) {
+          setShopImage(estabelecimento.foto);
+        } else {
+          // Se não estiver, adiciona o prefixo data:image/jpeg;base64,
+          setShopImage(`data:image/jpeg;base64,${estabelecimento.foto}`);
+        }
+      } else {
+        console.log('Nenhuma foto encontrada, usando placeholder');
+        setShopImage("https://placehold.co/400x300/e2e8f0/64748b?text=Foto+da+Barbearia");
+      }
+    }
+  }, [estabelecimento, form]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -66,22 +222,40 @@ const BarberEditProfile = () => {
         return;
       }
 
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setShopImage(reader.result as string);
+        const base64String = reader.result as string;
+        setShopImage(base64String);
       };
       reader.readAsDataURL(file);
     }
   };
 
   function onSubmit(data: BarberShopFormValues) {
-    console.log({ ...data, shopImage });
-    toast({
-      title: "Perfil Atualizado",
-      description: "Suas informações foram atualizadas com sucesso!",
-    });
-    
-    setTimeout(() => navigate("/barber/profile"), 2000);
+    // Formatar CNPJ e Telefone para o formato esperado pelo backend
+    const formattedData = {
+      ...data,
+      cnpj: data.cnpj.replace(/\D/g, '').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5'),
+      phone: data.phone.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3'),
+    };
+    updateMutation.mutate(formattedData);
+  }
+
+  const diasSemana = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-barber-50 pt-24 pb-12">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="text-center">
+              <p>Carregando...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -109,6 +283,10 @@ const BarberEditProfile = () => {
                       src={shopImage || "https://placehold.co/400x300/e2e8f0/64748b?text=Foto+da+Barbearia"}
                       alt="Foto da Barbearia"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Erro ao carregar imagem:', e);
+                        e.currentTarget.src = "https://placehold.co/400x300/e2e8f0/64748b?text=Foto+da+Barbearia";
+                      }}
                     />
                   </div>
                   <div className="w-full max-w-md">
@@ -118,7 +296,7 @@ const BarberEditProfile = () => {
                         <p className="mb-2 text-sm text-barber-700">
                           <span className="font-semibold">Clique para alterar a foto</span> ou arraste e solte
                         </p>
-                        <p className="text-xs text-barber-500">PNG, JPG ou WEBP (MÁX. 5MB)</p>
+                        <p className="text-xs text-barber-500">PNG, JPG ou WEBP (MÁX. 5MB cada)</p>
                       </div>
                       <input
                         type="file"
@@ -253,16 +431,12 @@ const BarberEditProfile = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Número</FormLabel>
-                        <div className="relative">
-                          <Hash className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                          <FormControl>
-                            <Input
-                              placeholder="Número"
-                              className="pl-10"
-                              {...field}
-                            />
-                          </FormControl>
-                        </div>
+                        <FormControl>
+                          <Input
+                            placeholder="123"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -274,16 +448,12 @@ const BarberEditProfile = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Bairro</FormLabel>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                          <FormControl>
-                            <Input
-                              placeholder="Nome do bairro"
-                              className="pl-10"
-                              {...field}
-                            />
-                          </FormControl>
-                        </div>
+                        <FormControl>
+                          <Input
+                            placeholder="Centro"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -295,16 +465,12 @@ const BarberEditProfile = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Cidade</FormLabel>
-                        <div className="relative">
-                          <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                          <FormControl>
-                            <Input
-                              placeholder="Nome da cidade"
-                              className="pl-10"
-                              {...field}
-                            />
-                          </FormControl>
-                        </div>
+                        <FormControl>
+                          <Input
+                            placeholder="Sua cidade"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -316,16 +482,12 @@ const BarberEditProfile = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>CEP</FormLabel>
-                        <div className="relative">
-                          <Map className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                          <FormControl>
-                            <Input
-                              placeholder="00000-000"
-                              className="pl-10"
-                              {...field}
-                            />
-                          </FormControl>
-                        </div>
+                        <FormControl>
+                          <Input
+                            placeholder="00000-000"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -400,19 +562,50 @@ const BarberEditProfile = () => {
                 
                 <FormField
                   control={form.control}
-                  name="workingHours"
-                  render={({ field }) => (
+                  name="horarios"
+                  render={() => (
                     <FormItem>
-                      <FormLabel>Horário de Funcionamento</FormLabel>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Seg-Sex: 9h-19h, Sáb: 10h-17h, etc."
-                            className="pl-10 min-h-[100px]"
-                            {...field} 
-                          />
-                        </FormControl>
+                      <FormLabel>Horários de Funcionamento</FormLabel>
+                      <div className="space-y-4">
+                        {diasSemana.map((dia, index) => (
+                          <div key={dia} className="grid grid-cols-3 gap-4 items-center">
+                            <div className="font-medium">{dia}</div>
+                            <FormField
+                              control={form.control}
+                              name={`horarios.${index}.horarioAbertura`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type="time"
+                                      {...field}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value);
+                                        form.setValue(`horarios.${index}.diaSemana`, dia);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`horarios.${index}.horarioFechamento`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type="time"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        ))}
                       </div>
                       <FormMessage />
                     </FormItem>
@@ -438,20 +631,16 @@ const BarberEditProfile = () => {
                 </p>
               </div>
               
-              <div className="flex gap-4 pt-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="flex-1"
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => navigate("/barber/profile")}
                 >
                   Cancelar
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="flex-1 bg-barber-900 hover:bg-barber-800"
-                >
-                  Salvar Alterações
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Salvando..." : "Salvar Alterações"}
                 </Button>
               </div>
             </form>
