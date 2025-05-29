@@ -1,451 +1,306 @@
-import { useState, useEffect } from 'react';
-import { Star, MapPin, Clock, Scissors, X } from 'lucide-react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import SearchFilters from "@/components/SearchFilters";
-import { ServiceId, AVAILABLE_SERVICES, getServiceLabel } from "@/constants/services";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { estabelecimentoService } from '../services/estabelecimento.service';
+import { FaSearch, FaMapMarkerAlt, FaStar, FaFilter } from 'react-icons/fa';
+import { Spinner } from '../components/Spinner';
+import { toast } from 'react-toastify';
+import Navigation from '../components/Navigation';
 
 interface BarberShop {
-  id: string;
-  name: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  services: ServiceId[];
-  priceRange: [number, number];
-  image: string;
-  workingHours: {
-    monday: { start: string; end: string } | null;
-    tuesday: { start: string; end: string } | null;
-    wednesday: { start: string; end: string } | null;
-    thursday: { start: string; end: string } | null;
-    friday: { start: string; end: string } | null;
-    saturday: { start: string; end: string } | null;
-    sunday: { start: string; end: string } | null;
-  };
-  availableTimes: string[];
+  id: number;
+  nomeEstabelecimento: string;
+  nomeProprietario: string;
+  endereco: string;
+  cidade: string;
+  cep: string;
+  telefone: string;
+  foto?: string;
+  status: string;
+  descricao?: string;
+  horario: {
+    id: number;
+    diaSemana: string;
+    horarioAbertura: string;
+    horarioFechamento: string;
+  }[];
+  servicos: string[];
 }
 
-const Barbershops = () => {
-  const { isAuthenticated, user } = useAuth();
-  const { toast } = useToast();
+export default function Barbershops() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedShop, setSelectedShop] = useState<BarberShop | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedServices, setSelectedServices] = useState<ServiceId[]>([]);
-  const [filters, setFilters] = useState({
-    services: [] as ServiceId[],
-    location: searchParams.get("location") || "",
-    rating: 0,
-    priceRange: [0, 200] as [number, number],
-    searchTerm: searchParams.get("search") || "",
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedService, setSelectedService] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedRating, setSelectedRating] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 200]);
+
+  const { data: barbershops, isLoading, error } = useQuery({
+    queryKey: ['barbershops'],
+    queryFn: async () => {
+      try {
+        const response = await estabelecimentoService.getAll();
+        console.log('Dados recebidos do backend:', response);
+        console.log('Primeira barbearia:', response[0]);
+        return response as BarberShop[];
+      } catch (error) {
+        console.error('Erro ao buscar barbearias:', error);
+        throw error;
+      }
+    }
   });
 
-  const barbershops: BarberShop[] = [
-    {
-      id: "1",
-      name: "The Classic Cut",
-      rating: 4.8,
-      reviews: 124,
-      location: "Centro, São Paulo",
-      services: ["corte-cabelo", "barba", "sobrancelha"],
-      priceRange: [50, 100],
-      image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
-      workingHours: {
-        monday: { start: "09:00", end: "19:00" },
-        tuesday: { start: "09:00", end: "19:00" },
-        wednesday: { start: "09:00", end: "19:00" },
-        thursday: { start: "09:00", end: "19:00" },
-        friday: { start: "09:00", end: "19:00" },
-        saturday: { start: "10:00", end: "17:00" },
-        sunday: null
-      },
-      availableTimes: [
-        "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
-      ]
-    },
-    {
-      id: "2",
-      name: "Modern Barber",
-      rating: 4.9,
-      reviews: 98,
-      location: "Jardins, São Paulo",
-      services: ["corte-cabelo", "barba", "luzes"],
-      priceRange: [60, 120],
-      image: "https://img.freepik.com/fotos-gratis/cadeiras-na-barbearia-masculina-verde-em-estilo-retro_627829-8284.jpg?t=st=1745341620~exp=1745345220~hmac=52dc1a3fdbcbfebf95474eb3df0d1b43ce1c7bcbecec6aed323691375577eb0b&w=996",
-      workingHours: {
-        monday: { start: "09:00", end: "19:00" },
-        tuesday: { start: "09:00", end: "19:00" },
-        wednesday: { start: "09:00", end: "19:00" },
-        thursday: { start: "09:00", end: "19:00" },
-        friday: { start: "09:00", end: "19:00" },
-        saturday: { start: "10:00", end: "17:00" },
-        sunday: null
-      },
-      availableTimes: [
-        "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
-      ]
-    },
-    {
-      id: "3",
-      name: "Elite Barbershop",
-      rating: 4.7,
-      reviews: 156,
-      location: "Vila Madalena, São Paulo",
-      services: ["corte-cabelo", "barba", "descoloração"],
-      priceRange: [70, 150],
-      image: "https://images.unsplash.com/photo-1534297635766-a262cdcb8ee4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      workingHours: {
-        monday: { start: "09:00", end: "19:00" },
-        tuesday: { start: "09:00", end: "19:00" },
-        wednesday: { start: "09:00", end: "19:00" },
-        thursday: { start: "09:00", end: "19:00" },
-        friday: { start: "09:00", end: "19:00" },
-        saturday: { start: "10:00", end: "17:00" },
-        sunday: null
-      },
-      availableTimes: [
-        "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
-      ]
-    },
-    {
-      id: "4",
-      name: "Premium Cuts",
-      rating: 4.9,
-      reviews: 87,
-      location: "Moema, São Paulo",
-      services: ["corte-cabelo", "barba", "progressiva"],
-      priceRange: [80, 160],
-      image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
-      workingHours: {
-        monday: { start: "09:00", end: "19:00" },
-        tuesday: { start: "09:00", end: "19:00" },
-        wednesday: { start: "09:00", end: "19:00" },
-        thursday: { start: "09:00", end: "19:00" },
-        friday: { start: "09:00", end: "19:00" },
-        saturday: { start: "10:00", end: "17:00" },
-        sunday: null
-      },
-      availableTimes: [
-        "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
-      ]
-    }
-  ];
+  // Extrair cidades únicas das barbearias
+  const uniqueCities = React.useMemo(() => {
+    if (!barbershops) return [];
+    return Array.from(new Set(barbershops.map(shop => shop.cidade))).sort();
+  }, [barbershops]);
 
   useEffect(() => {
-    const shopId = searchParams.get('shop');
-    if (shopId) {
-      if (!isAuthenticated) {
-        toast({
-          title: "Login necessário",
-          description: "Por favor, faça login para realizar um agendamento.",
-          variant: "destructive",
-        });
-        navigate("/login", { state: { from: "/barbershops" } });
-        return;
-      }
-
-      if (user?.type !== "client") {
-        toast({
-          title: "Acesso restrito",
-          description: "Apenas clientes podem realizar agendamentos.",
-          variant: "destructive",
-        });
-        navigate("/");
-        return;
-      }
-
-      const shop = barbershops.find(s => s.id === shopId);
-      if (shop) {
-        setSelectedShop(shop);
-      }
+    if (user?.tipo === 'ESTABELECIMENTO') {
+      navigate('/dashboard');
     }
-  }, [searchParams, isAuthenticated, user]);
+  }, [user, navigate]);
 
   useEffect(() => {
-    const location = searchParams.get("location");
-    const search = searchParams.get("search");
+    console.log('Estado atual das barbearias:', barbershops);
+    if (barbershops && barbershops.length > 0) {
+      console.log('Primeira barbearia:', barbershops[0]);
+      console.log('Serviços da primeira barbearia:', barbershops[0].servicos);
+    }
+  }, [barbershops]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Erro ao carregar barbearias:', error);
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-red-500">Erro ao carregar as barbearias. Tente novamente mais tarde.</p>
+      </div>
+    );
+  }
+
+  const filteredBarbershops = barbershops?.filter(shop => {
+    if (!shop) return false;
+
+    // Se não houver filtros ativos, retorna true
+    if (!searchTerm && !selectedCity && !selectedService && !selectedLocation && !selectedRating) {
+      return true;
+    }
+
+    // Verifica cada filtro apenas se estiver ativo
+    const matchesSearch = !searchTerm || 
+      (shop.nomeEstabelecimento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       shop.endereco?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesCity = !selectedCity || shop.cidade === selectedCity;
     
-    setFilters(prev => ({
-      ...prev,
-      location: location || "",
-      searchTerm: search || "",
-    }));
-  }, [searchParams]);
+    const matchesService = !selectedService || 
+      (shop.servicos && shop.servicos.some(service => {
+        const tipoMatch = service.match(/tipo=([^,]+)/);
+        return tipoMatch && tipoMatch[1] === selectedService;
+      }));
+    
+    const matchesLocation = !selectedLocation || shop.cidade === selectedLocation;
+    
+    const matchesRating = !selectedRating || shop.status === 'APROVADO';
 
-  const filteredBarbershops = barbershops.filter(shop => {
-    // Filtro por termo de busca
-    if (filters.searchTerm && !shop.name.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
-      return false;
-    }
-
-    // Filtro por serviços
-    if (filters.services.length > 0) {
-      const hasAllServices = filters.services.every((service) =>
-        shop.services.includes(service)
-      );
-      if (!hasAllServices) return false;
-    }
-
-    // Filtro por localização
-    if (filters.location && !shop.location.toLowerCase().includes(filters.location.toLowerCase())) {
-      return false;
-    }
-
-    // Filtro por avaliação
-    if (filters.rating > 0 && shop.rating < filters.rating) {
-      return false;
-    }
-
-    // Filtro por preço
-    if (
-      shop.priceRange[0] < filters.priceRange[0] ||
-      shop.priceRange[1] > filters.priceRange[1]
-    ) {
-      return false;
-    }
-
-    return true;
+    // Retorna true se todos os filtros ativos corresponderem
+    return matchesSearch && matchesCity && matchesService && matchesLocation && matchesRating;
   });
 
-  const handleServiceChange = (service: ServiceId) => {
-    setSelectedServices(prev => {
-      if (prev.includes(service)) {
-        return prev.filter(s => s !== service);
-      } else {
-        return [...prev, service];
-      }
-    });
-  };
-
-  const handleBooking = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Login necessário",
-        description: "Por favor, faça login para realizar um agendamento.",
-        variant: "destructive",
-      });
-      navigate("/login", { state: { from: "/barbershops" } });
-      return;
-    }
-
-    if (user?.type !== "client") {
-      toast({
-        title: "Acesso restrito",
-        description: "Apenas clientes podem realizar agendamentos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (selectedDate && selectedTime && selectedServices.length > 0) {
-      const servicesList = selectedServices.map(service => getServiceLabel(service)).join(", ");
-      toast({
-        title: "Agendamento realizado!",
-        description: `Barbearia: ${selectedShop?.name}\nServiços: ${servicesList}\nData: ${format(selectedDate, "dd/MM/yyyy")}\nHorário: ${selectedTime}`,
-      });
-      setSelectedShop(null);
-      setSelectedDate(null);
-      setSelectedTime(null);
-      setSelectedServices([]);
-    }
-  };
+  console.log('Barbearias filtradas:', filteredBarbershops);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm py-4">
-        <div className="container mx-auto px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Scissors size={28} className="text-barber-900" />
-            <span className="text-xl font-semibold tracking-tight text-barber-900">BarberHub</span>
-          </Link>
-        </div>
-      </nav>
-
+      <Navigation />
       <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-barber-900 mb-2">Barbearias</h1>
-            <p className="text-gray-600">Encontre a barbearia perfeita para você</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Encontre sua Barbearia</h1>
+          
+          {/* Barra de Pesquisa */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar por nome ou endereço..."
+              className="w-full p-4 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <SearchFilters onFiltersChange={setFilters} />
-          </div>
+          {/* Filtros */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <select
+              className="p-2 border rounded-lg"
+              value={selectedService}
+              onChange={(e) => setSelectedService(e.target.value)}
+            >
+              <option value="">Todos os Serviços</option>
+              <option value="CORTE_DE_CABELO">Corte de Cabelo</option>
+              <option value="BARBA">Barba</option>
+              <option value="HIDRATACAO">Hidratação</option>
+              <option value="LUZES">Luzes</option>
+              <option value="SOBRANCELHA">Sobrancelha</option>
+            </select>
 
-          <div className="md:col-span-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBarbershops.map((shop) => (
-                <div key={shop.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-48">
-                    <img
-                      src={shop.image}
-                      alt={shop.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-medium">{shop.rating}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4">
-                    <h3 className="text-xl font-semibold text-barber-900 mb-2">{shop.name}</h3>
-                    
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <MapPin className="w-4 h-4" />
-                      <span className="text-sm">{shop.location}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-gray-600 mb-4">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-sm">R$ {shop.priceRange[0]} - R$ {shop.priceRange[1]}</span>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {shop.services.map((service, index) => (
-                        <span
-                          key={index}
-                          className="bg-barber-100 text-barber-800 text-xs px-2 py-1 rounded-full"
-                        >
-                          {getServiceLabel(service)}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">{shop.reviews} avaliações</span>
-                      <Button 
-                        className="bg-barber-900 hover:bg-barber-800"
-                        onClick={() => setSelectedShop(shop)}
-                      >
-                        Ver Detalhes
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+            <select
+              className="p-2 border rounded-lg"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+            >
+              <option value="">Todas as Localizações</option>
+              {uniqueCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
               ))}
+            </select>
+
+            <select
+              className="p-2 border rounded-lg"
+              value={selectedRating}
+              onChange={(e) => setSelectedRating(e.target.value)}
+            >
+              <option value="">Todas as Avaliações</option>
+              <option value="4">4+ Estrelas</option>
+              <option value="3">3+ Estrelas</option>
+              <option value="2">2+ Estrelas</option>
+            </select>
+
+            <div className="flex items-center space-x-2">
+              <span>Preço:</span>
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={priceRange[1]}
+                onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+                className="w-full"
+              />
+              <span>R$ {priceRange[1]}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <Dialog open={selectedShop !== null} onOpenChange={() => setSelectedShop(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-barber-900">
-              {selectedShop?.name}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <div>
-              <img
-                src={selectedShop?.image}
-                alt={selectedShop?.name}
-                className="w-full h-64 object-cover rounded-lg"
-              />
-              
-              <div className="mt-4">
-                <h3 className="font-semibold text-lg mb-2">Informações</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-600" />
-                    <span>{selectedShop?.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-600" />
-                    <span>R$ {selectedShop?.priceRange[0]} - R$ {selectedShop?.priceRange[1]}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <h3 className="font-semibold text-lg mb-2">Horário de Funcionamento</h3>
-                <div className="space-y-1 text-sm">
-                  <p>Segunda a Sexta: {selectedShop?.workingHours?.monday?.start} - {selectedShop?.workingHours?.monday?.end}</p>
-                  <p>Sábado: {selectedShop?.workingHours?.saturday?.start} - {selectedShop?.workingHours?.saturday?.end}</p>
-                  <p>Domingo: Fechado</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Selecione os Serviços</h3>
-                <div className="space-y-2">
-                  {selectedShop?.services.map((service) => (
-                    <div key={service} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={service}
-                        checked={selectedServices.includes(service)}
-                        onCheckedChange={() => handleServiceChange(service)}
-                      />
-                      <Label htmlFor={service}>{getServiceLabel(service)}</Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Selecione a Data</h3>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  locale={ptBR}
-                  disabled={(date) => {
-                    const day = date.getDay();
-                    return day === 0 || (day === 6 && !selectedShop?.workingHours?.saturday);
+        {/* Lista de Barbearias */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredBarbershops?.map((shop) => (
+            <div
+              key={shop.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="relative h-48">
+                <img
+                  src={shop.foto || 'https://via.placeholder.com/300x200?text=Barbearia'}
+                  alt={shop.nomeEstabelecimento}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Barbearia';
                   }}
-                  className="rounded-md border"
                 />
+                {shop.status === 'APROVADO' && (
+                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-sm">
+                    Verificado
+                  </div>
+                )}
               </div>
 
-              {selectedDate && (
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">Selecione o Horário</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedShop?.availableTimes.map((time) => (
-                      <Button
-                        key={time}
-                        variant={selectedTime === time ? "default" : "outline"}
-                        className="w-full"
-                        onClick={() => setSelectedTime(time)}
-                      >
-                        {time}
-                      </Button>
-                    ))}
+              <div className="p-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">{shop.nomeEstabelecimento}</h2>
+                
+                <div className="flex items-center text-gray-600 mb-2">
+                  <FaMapMarkerAlt className="mr-2" />
+                  <span>{shop.endereco}, {shop.cidade}</span>
+                </div>
+
+                <div className="flex items-center text-gray-600 mb-4">
+                  <FaStar className="mr-2 text-yellow-400" />
+                  <span>4.5 (120 avaliações)</span>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {shop.servicos && shop.servicos.length > 0 ? (
+                    <>
+                      {shop.servicos.slice(0, 3).map((serviceStr, index) => {
+                        const tipoMatch = serviceStr.match(/tipo=([^,]+)/);
+                        const tipo = tipoMatch ? tipoMatch[1] : '';
+
+                        return (
+                          <span
+                            key={`${shop.id}-service-${index}`}
+                            className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
+                          >
+                            {tipo === 'CORTE_DE_CABELO' && 'Corte de Cabelo'}
+                            {tipo === 'BARBA' && 'Barba'}
+                            {tipo === 'HIDRATACAO' && 'Hidratação'}
+                            {tipo === 'LUZES' && 'Luzes'}
+                            {tipo === 'SOBRANCELHA' && 'Sobrancelha'}
+                            {!['CORTE_DE_CABELO', 'BARBA', 'HIDRATACAO', 'LUZES', 'SOBRANCELHA'].includes(tipo) && tipo}
+                          </span>
+                        );
+                      })}
+                      {shop.servicos.length > 3 && (
+                        <span 
+                          key={`${shop.id}-more-services-${shop.servicos.length}`}
+                          className="bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded"
+                        >
+                          +{shop.servicos.length - 3} serviços
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-gray-500 text-sm">Nenhum serviço cadastrado</span>
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Horário:</span>{' '}
+                    {shop.horario?.[0]?.horarioAbertura ? (
+                      `${shop.horario[0].horarioAbertura} - ${shop.horario[0].horarioFechamento}`
+                    ) : (
+                      'Horário não definido'
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Duração:</span>{' '}
+                    {shop.servicos?.[0]?.duracaoMinutos ? (
+                      `${shop.servicos[0].duracaoMinutos}min`
+                    ) : (
+                      'Não definida'
+                    )}
                   </div>
                 </div>
-              )}
 
-              <Button
-                className="w-full bg-barber-900 hover:bg-barber-800"
-                onClick={handleBooking}
-                disabled={!selectedDate || !selectedTime || selectedServices.length === 0}
-              >
-                Agendar Horário
-              </Button>
+                <button
+                  onClick={() => navigate(`/barbershops/${shop.id}`)}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+                >
+                  Ver Detalhes
+                </button>
+              </div>
             </div>
+          ))}
+        </div>
+
+        {filteredBarbershops?.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-500 text-lg">Nenhuma barbearia encontrada com os filtros selecionados.</p>
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
     </div>
   );
-};
-
-export default Barbershops; 
+} 

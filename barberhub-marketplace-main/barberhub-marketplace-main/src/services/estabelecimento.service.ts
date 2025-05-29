@@ -1,15 +1,21 @@
-import api from '../lib/api';
+import api from '../lib/axios';
 import { Estabelecimento } from '../types';
 
 export const estabelecimentoService = {
     async getAll() {
         const response = await api.get<Estabelecimento[]>('/api/estabelecimentos');
-        return response.data;
+        return response.data.map(estabelecimento => ({
+            ...estabelecimento,
+            foto: estabelecimento.foto ? `data:image/jpeg;base64,${estabelecimento.foto}` : undefined
+        }));
     },
 
     async getById(id: number) {
         const response = await api.get<Estabelecimento>(`/api/estabelecimentos/${id}`);
-        return response.data;
+        return {
+            ...response.data,
+            foto: response.data.foto ? `data:image/jpeg;base64,${response.data.foto}` : undefined
+        };
     },
 
     async create(estabelecimento: Partial<Estabelecimento>) {

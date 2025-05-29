@@ -23,11 +23,20 @@ public class ModelMapperConfig {
             .setSkipNullEnabled(true);
         
         // Configuração específica para Estabelecimento
-        modelMapper.createTypeMap(EstabelecimentoDTO.class, Estabelecimento.class)
+        modelMapper.createTypeMap(Estabelecimento.class, EstabelecimentoDTO.class)
             .addMappings(mapper -> {
-                mapper.skip(Estabelecimento::setHorario);
-                mapper.skip(Estabelecimento::setServicos);
-                mapper.skip(Estabelecimento::setProfissionais);
+                mapper.map(Estabelecimento::getNomeEstabelecimento, EstabelecimentoDTO::setNomeEstabelecimento);
+                mapper.map(Estabelecimento::getNomeProprietario, EstabelecimentoDTO::setNomeProprietario);
+                mapper.map(Estabelecimento::getCnpj, EstabelecimentoDTO::setCnpj);
+                mapper.map(Estabelecimento::getEndereco, EstabelecimentoDTO::setEndereco);
+                mapper.map(Estabelecimento::getCidade, EstabelecimentoDTO::setCidade);
+                mapper.map(Estabelecimento::getCep, EstabelecimentoDTO::setCep);
+                mapper.map(Estabelecimento::getTelefone, EstabelecimentoDTO::setTelefone);
+                mapper.map(Estabelecimento::getFoto, EstabelecimentoDTO::setFoto);
+                mapper.map(Estabelecimento::getStatus, EstabelecimentoDTO::setStatus);
+                mapper.map(Estabelecimento::getHorario, EstabelecimentoDTO::setHorario);
+                mapper.map(Estabelecimento::getDescricao, EstabelecimentoDTO::setDescricao);
+                mapper.map(Estabelecimento::getServicos, EstabelecimentoDTO::setServicos);
             });
         
         // Configuração específica para Cliente

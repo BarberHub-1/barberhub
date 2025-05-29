@@ -1,9 +1,9 @@
 -- Inserir usuários
 INSERT INTO usuario (id, email, senha, tipo, nome, cpf, telefone, status, nome_proprietario, nome_estabelecimento, cnpj, endereco, cidade, cep) VALUES
-(1, 'admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Admin', '123.456.789-00', '11999999999', 'ATIVO', NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 'cliente@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'CLIENTE', 'Cliente', '987.654.321-00', '11988888888', 'ATIVO', NULL, NULL, NULL, 'Centro', 'São Paulo', '01234-567'),
-(3, 'estabelecimento@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11977777777', 'ATIVO', 'Proprietário', 'Barbearia Teste', '12.345.678/0001-95', 'Rua Teste, 123', 'São Paulo', '01234-567'),
-(4, 'novo.admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Novo Admin', '999.999.999-99', '11944444444', 'ATIVO', NULL, NULL, NULL, NULL, NULL, NULL);
+(1, 'admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Admin', '123.456.789-00', '11999999999', 'APROVADO', NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 'cliente@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'CLIENTE', 'Cliente', '987.654.321-00', '11988888888', 'APROVADO', NULL, NULL, NULL, 'Centro', 'São Paulo', '01234-567'),
+(3, 'estabelecimento@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11977777777', 'APROVADO', 'Proprietário', 'Barbearia Teste', '12.345.678/0001-95', 'Rua Teste, 123', 'São Paulo', '01234-567'),
+(4, 'novo.admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Novo Admin', '999.999.999-99', '11944444444', 'APROVADO', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- Inserir serviços
 INSERT INTO servico (id, descricao, preco, duracao_minutos, tipo, estabelecimento_id) VALUES

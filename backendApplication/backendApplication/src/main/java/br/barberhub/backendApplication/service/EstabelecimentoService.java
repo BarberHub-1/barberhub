@@ -119,4 +119,13 @@ public class EstabelecimentoService {
                 .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
         estabelecimentoRepository.delete(estabelecimento);
     }
+
+    public EstabelecimentoDTO toDTO(Estabelecimento estabelecimento) {
+        EstabelecimentoDTO dto = modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
+        return dto;
+    }
+
+    public Estabelecimento toEntity(EstabelecimentoDTO dto) {
+        return modelMapper.map(dto, Estabelecimento.class);
+    }
 } 

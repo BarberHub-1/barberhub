@@ -121,7 +121,7 @@ CREATE TABLE `estabelecimento` (
   `nome_estabelecimento` varchar(100) NOT NULL,
   `nome_proprietario` varchar(100) NOT NULL,
   `senha` varchar(255) NOT NULL,
-  `status` enum('AGUARDANDO_APROVACAO','ATIVO','BLOQUEADO','REJEITADO') DEFAULT NULL,
+  `status` enum('PENDENTE','APROVADO','REJEITADO') DEFAULT NULL,
   `telefone` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -130,7 +130,7 @@ CREATE TABLE `estabelecimento` (
 --
 
 INSERT INTO `estabelecimento` (`id`, `cep`, `cidade`, `cnpj`, `email`, `endereco`, `foto`, `nome_estabelecimento`, `nome_proprietario`, `senha`, `status`, `telefone`) VALUES
-(1, 'string', 'string', '12.345.678/0001-95', 'string', 'string', NULL, 'string', 'string', 'string', 'AGUARDANDO_APROVACAO', '(11) 98765-4321');
+(1, 'string', 'string', '12.345.678/0001-95', 'string', 'string', NULL, 'string', 'string', 'string', 'PENDENTE', '(11) 98765-4321');
 
 -- --------------------------------------------------------
 
@@ -435,3 +435,23 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- Inserir estabelecimentos de exemplo
+INSERT INTO estabelecimento (nome_proprietario, nome_estabelecimento, cnpj, endereco, cidade, cep, telefone, foto, status, horario, descricao)
+VALUES 
+('João Silva', 'Barbearia do João', '12345678901234', 'Rua das Flores, 123', 'São Paulo', '01234-567', '(11) 99999-9999', 'https://via.placeholder.com/300x200?text=Barbearia+do+Joao', 'APROVADO', '{"diaSemana": "SEGUNDA", "horarioAbertura": "09:00", "horarioFechamento": "18:00"}', 'Barbearia tradicional com mais de 10 anos de experiência'),
+('Maria Santos', 'Barbearia Moderna', '98765432109876', 'Av. Paulista, 1000', 'São Paulo', '01310-100', '(11) 98888-8888', 'https://via.placeholder.com/300x200?text=Barbearia+Moderna', 'APROVADO', '{"diaSemana": "SEGUNDA", "horarioAbertura": "10:00", "horarioFechamento": "19:00"}', 'Barbearia moderna com ambiente climatizado'),
+('Pedro Oliveira', 'Barbearia Clássica', '45678912345678', 'Rua Augusta, 500', 'São Paulo', '01304-000', '(11) 97777-7777', 'https://via.placeholder.com/300x200?text=Barbearia+Classica', 'APROVADO', '{"diaSemana": "SEGUNDA", "horarioAbertura": "08:00", "horarioFechamento": "17:00"}', 'Barbearia clássica com atendimento personalizado');
+
+-- Inserir serviços para os estabelecimentos
+INSERT INTO servico (descricao, preco, duracao_minutos, tipo, estabelecimento_id)
+VALUES 
+('Corte de Cabelo', 50.00, 30, 'CORTE_DE_CABELO', 1),
+('Barba', 30.00, 20, 'BARBA', 1),
+('Hidratação', 40.00, 40, 'HIDRATACAO', 1),
+('Corte de Cabelo', 45.00, 30, 'CORTE_DE_CABELO', 2),
+('Barba', 35.00, 20, 'BARBA', 2),
+('Luzes', 120.00, 120, 'LUZES', 2),
+('Corte de Cabelo', 55.00, 30, 'CORTE_DE_CABELO', 3),
+('Barba', 40.00, 20, 'BARBA', 3),
+('Sobrancelha', 20.00, 15, 'SOBRANCELHA', 3);

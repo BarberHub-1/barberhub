@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -40,10 +40,15 @@ const clientProfileSchema = z.object({
 
 type ClientProfileFormValues = z.infer<typeof clientProfileSchema>;
 
+interface ClienteFormData extends Omit<ClientProfileFormValues, 'rua' | 'numero'> {
+  rua: number | null;
+  numero: number | null;
+}
+
 const ClientProfile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   
@@ -57,7 +62,7 @@ const ClientProfile = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: ClientProfileFormValues) => {
+    mutationFn: async (data: ClienteFormData) => {
       const response = await api.put(`/api/clientes/${user?.id}`, data);
       return response.data;
     },
@@ -110,7 +115,7 @@ const ClientProfile = () => {
   }, [cliente, form]);
 
   function onSubmit(data: ClientProfileFormValues) {
-    const formData = {
+    const formData: ClienteFormData = {
       ...data,
       rua: parseInt(data.rua) || null,
       numero: parseInt(data.numero) || null
@@ -131,218 +136,250 @@ const ClientProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-barber-50 pt-24 pb-12">
-      <div className="container mx-auto max-w-3xl px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-barber-50">
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
               <Scissors size={28} className="text-barber-900" />
               <span className="text-xl font-semibold tracking-tight text-barber-900">BarberHub</span>
             </div>
-            <div className="flex gap-2">
-              {!isEditing ? (
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Edit2 size={16} />
-                  Editar Perfil
-                </Button>
-              ) : (
-                <>
+            
+            <nav className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-6">
+              <Link to="/" className="text-barber-600 hover:text-barber-900 transition-colors">
+                Descobrir
+              </Link>
+              <Link to="/services" className="text-barber-600 hover:text-barber-900 transition-colors">
+                Serviços
+              </Link>
+              <Link to="/about" className="text-barber-600 hover:text-barber-900 transition-colors">
+                Sobre
+              </Link>
+            </nav>
+
+            <Button 
+              variant="ghost" 
+              className="text-barber-600 hover:text-barber-900 hover:bg-barber-50"
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
+            >
+              Sair
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="pt-24 pb-12">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-end mb-8">
+              <div className="flex gap-2">
+                {!isEditing ? (
                   <Button 
                     variant="outline" 
                     className="flex items-center gap-2"
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => setIsEditing(true)}
                   >
-                    <X size={16} />
-                    Cancelar
+                    <Edit2 size={16} />
+                    Editar Perfil
                   </Button>
-                  <Button 
-                    className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
-                    onClick={form.handleSubmit(onSubmit)}
-                    disabled={updateMutation.isPending}
-                  >
-                    <Save size={16} />
-                    {updateMutation.isPending ? "Salvando..." : "Salvar Alterações"}
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-barber-900">Meu Perfil</h1>
-            <p className="mt-2 text-barber-600">
-              Gerencie suas informações pessoais
-            </p>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
-                      <div className="relative">
-                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="Seu nome completo" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-mail</FormLabel>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="seu@email.com" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="telefone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Telefone</FormLabel>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="(11) 98765-4321" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cpf"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CPF</FormLabel>
-                      <div className="relative">
-                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="000.000.000-00" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="rua"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rua</FormLabel>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="Nome da rua" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numero"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número</FormLabel>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="Número" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="bairro"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bairro</FormLabel>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="Seu bairro" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade</FormLabel>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Input placeholder="Sua cidade" className="pl-10" {...field} disabled={!isEditing} />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="estado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <FormControl>
-                        <Input placeholder="Seu estado" className="pl-10" {...field} disabled={!isEditing} />
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      <X size={16} />
+                      Cancelar
+                    </Button>
+                    <Button 
+                      className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
+                      onClick={form.handleSubmit(onSubmit)}
+                      disabled={updateMutation.isPending}
+                    >
+                      <Save size={16} />
+                      {updateMutation.isPending ? "Salvando..." : "Salvar Alterações"}
+                    </Button>
+                  </>
                 )}
-              />
-            </form>
-          </Form>
+              </div>
+            </div>
+
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-barber-900">Meu Perfil</h1>
+              <p className="mt-2 text-barber-600">
+                Gerencie suas informações pessoais
+              </p>
+            </div>
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome Completo</FormLabel>
+                        <div className="relative">
+                          <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="Seu nome completo" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-mail</FormLabel>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="seu@email.com" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="telefone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone</FormLabel>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="(11) 98765-4321" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cpf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CPF</FormLabel>
+                        <div className="relative">
+                          <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="000.000.000-00" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="rua"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Rua</FormLabel>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="Nome da rua" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="numero"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número</FormLabel>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="Número" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="bairro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="Seu bairro" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <FormControl>
+                            <Input placeholder="Sua cidade" className="pl-10" {...field} disabled={!isEditing} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="Seu estado" className="pl-10" {...field} disabled={!isEditing} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </div>
         </div>
       </div>
     </div>

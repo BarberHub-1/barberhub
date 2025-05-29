@@ -19,12 +19,28 @@ export interface Profissional extends Usuario {
 
 export interface Estabelecimento {
     id: number;
-    nome: string;
+    nomeEstabelecimento: string;
+    nomeProprietario: string;
     endereco: string;
+    cidade: string;
+    cep: string;
     telefone: string;
     foto?: string;
-    status: 'ATIVO' | 'AGUARDANDO_APROVACAO' | 'REJEITADO' | 'BLOQUEADO';
-    horariosFuncionamento: HorarioFuncionamento[];
+    status: string;
+    descricao?: string;
+    horario: {
+        id: number;
+        diaSemana: string;
+        horarioAbertura: string;
+        horarioFechamento: string;
+    }[];
+    servicos: {
+        id: number;
+        descricao: string;
+        preco: number;
+        duracaoMinutos: number;
+        tipo: string;
+    }[];
 }
 
 export interface HorarioFuncionamento {

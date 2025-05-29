@@ -1,16 +1,25 @@
-export const AVAILABLE_SERVICES = [
-  { id: "corte-cabelo", label: "Corte de Cabelo" },
-  { id: "barba", label: "Barba" },
-  { id: "sobrancelha", label: "Sobrancelha" },
-  { id: "luzes", label: "Luzes" },
-  { id: "descoloração", label: "Descoloração" },
-  { id: "progressiva", label: "Progressiva" },
-] as const;
+export type ServiceId = 
+  | 'CORTE_DE_CABELO'
+  | 'BARBA'
+  | 'SOBRANCELHA'
+  | 'HIDRATACAO'
+  | 'LUZES';
 
-export type ServiceId = typeof AVAILABLE_SERVICES[number]["id"];
-export type ServiceLabel = typeof AVAILABLE_SERVICES[number]["label"];
+export const AVAILABLE_SERVICES: ServiceId[] = [
+  'CORTE_DE_CABELO',
+  'BARBA',
+  'SOBRANCELHA',
+  'HIDRATACAO',
+  'LUZES'
+];
 
-export const getServiceLabel = (id: ServiceId): ServiceLabel => {
-  const service = AVAILABLE_SERVICES.find(s => s.id === id);
-  return service?.label || "";
+export const getServiceLabel = (service: ServiceId): string => {
+  const labels: Record<ServiceId, string> = {
+    'CORTE_DE_CABELO': 'Corte de Cabelo',
+    'BARBA': 'Barba',
+    'SOBRANCELHA': 'Sobrancelha',
+    'HIDRATACAO': 'Hidratação',
+    'LUZES': 'Luzes'
+  };
+  return labels[service];
 }; 

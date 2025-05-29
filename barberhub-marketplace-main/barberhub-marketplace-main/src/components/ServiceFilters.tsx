@@ -1,4 +1,4 @@
-import { AVAILABLE_SERVICES, ServiceId } from "@/constants/services";
+import { AVAILABLE_SERVICES, ServiceId, getServiceLabel } from "@/constants/services";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,11 +7,6 @@ interface ServiceFiltersProps {
   selectedServices: ServiceId[];
   onServiceChange: (services: ServiceId[]) => void;
 }
-
-const getServiceLabel = (serviceId: ServiceId): string => {
-  const service = AVAILABLE_SERVICES.find(s => s.id === serviceId);
-  return service ? service.label : serviceId;
-};
 
 const ServiceFilters = ({ selectedServices, onServiceChange }: ServiceFiltersProps) => {
   const handleServiceChange = (serviceId: ServiceId, checked: boolean) => {
@@ -39,19 +34,19 @@ const ServiceFilters = ({ selectedServices, onServiceChange }: ServiceFiltersPro
       <ScrollArea className="h-[300px] pr-4">
         <div className="space-y-3">
           {AVAILABLE_SERVICES.map((service) => (
-            <div key={service.id} className="flex items-center space-x-2">
+            <div key={service} className="flex items-center space-x-2">
               <Checkbox
-                id={service.id}
-                checked={selectedServices.includes(service.id)}
+                id={service}
+                checked={selectedServices.includes(service)}
                 onCheckedChange={(checked) => 
-                  handleServiceChange(service.id, checked as boolean)
+                  handleServiceChange(service, checked as boolean)
                 }
               />
               <Label
-                htmlFor={service.id}
+                htmlFor={service}
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                {service.label}
+                {getServiceLabel(service)}
               </Label>
             </div>
           ))}
