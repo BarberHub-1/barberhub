@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,34 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Scissors, User, Mail, Phone, MapPin, Edit2, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/axios";
+
+interface Cliente {
+  id: number;
+  nome: string;
+  email: string;
+  telefone: string;
+  cpf: string;
+  rua: number | null;
+  numero: number | null;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  foto?: string;
+}
 
 const clientProfileSchema = z.object({
-  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
+  nome: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
   email: z.string().email({ message: "Por favor, insira um endereço de e-mail válido" }),
-  phone: z.string().min(10, { message: "Por favor, insira um número de telefone válido" }),
-  address: z.string().min(5, { message: "O endereço deve ter pelo menos 5 caracteres" }),
-  city: z.string().min(2, { message: "A cidade deve ter pelo menos 2 caracteres" }),
+  telefone: z.string().min(10, { message: "Por favor, insira um número de telefone válido" }),
+  cpf: z.string().min(11, { message: "CPF inválido" }),
+  rua: z.string().min(1, { message: "Rua inválida" }),
+  numero: z.string().min(1, { message: "Número inválido" }),
+  bairro: z.string().min(2, { message: "Bairro inválido" }),
+  cidade: z.string().min(2, { message: "A cidade deve ter pelo menos 2 caracteres" }),
+  estado: z.string().min(2, { message: "Estado inválido" }),
 });
 
 type ClientProfileFormValues = z.infer<typeof clientProfileSchema>;
@@ -22,26 +43,91 @@ type ClientProfileFormValues = z.infer<typeof clientProfileSchema>;
 const ClientProfile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  
+  const { data: cliente, isLoading } = useQuery({
+    queryKey: ['cliente', user?.id],
+    queryFn: async () => {
+      const response = await api.get<Cliente>(`/api/clientes/${user?.id}`);
+      return response.data;
+    },
+    enabled: !!user?.id
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: ClientProfileFormValues) => {
+      const response = await api.put(`/api/clientes/${user?.id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cliente', user?.id] });
+      toast({
+        title: "Perfil Atualizado",
+        description: "Suas informações foram atualizadas com sucesso!",
+      });
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao Atualizar",
+        description: "Não foi possível atualizar suas informações. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  });
   
   const form = useForm<ClientProfileFormValues>({
     resolver: zodResolver(clientProfileSchema),
     defaultValues: {
-      name: "João Silva",
-      email: "joao@email.com",
-      phone: "(11) 98765-4321",
-      address: "Rua das Flores, 123",
-      city: "São Paulo",
+      nome: "",
+      email: "",
+      telefone: "",
+      cpf: "",
+      rua: "",
+      numero: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
     },
   });
 
+  useEffect(() => {
+    if (cliente) {
+      form.reset({
+        nome: cliente.nome || "",
+        email: cliente.email || "",
+        telefone: cliente.telefone || "",
+        cpf: cliente.cpf || "",
+        rua: cliente.rua?.toString() || "",
+        numero: cliente.numero?.toString() || "",
+        bairro: cliente.bairro || "",
+        cidade: cliente.cidade || "",
+        estado: cliente.estado || "",
+      });
+    }
+  }, [cliente, form]);
+
   function onSubmit(data: ClientProfileFormValues) {
-    console.log(data);
-    toast({
-      title: "Perfil Atualizado",
-      description: "Suas informações foram atualizadas com sucesso!",
-    });
-    setIsEditing(false);
+    const formData = {
+      ...data,
+      rua: parseInt(data.rua) || null,
+      numero: parseInt(data.numero) || null
+    };
+    updateMutation.mutate(formData);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-barber-50 pt-24 pb-12">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <p>Carregando...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -76,9 +162,10 @@ const ClientProfile = () => {
                   <Button 
                     className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
                     onClick={form.handleSubmit(onSubmit)}
+                    disabled={updateMutation.isPending}
                   >
                     <Save size={16} />
-                    Salvar Alterações
+                    {updateMutation.isPending ? "Salvando..." : "Salvar Alterações"}
                   </Button>
                 </>
               )}
@@ -97,7 +184,7 @@ const ClientProfile = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="nome"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nome Completo</FormLabel>
@@ -133,7 +220,7 @@ const ClientProfile = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="telefone"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
@@ -150,7 +237,79 @@ const ClientProfile = () => {
 
                 <FormField
                   control={form.control}
-                  name="city"
+                  name="cpf"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CPF</FormLabel>
+                      <div className="relative">
+                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="000.000.000-00" className="pl-10" {...field} disabled={!isEditing} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="rua"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rua</FormLabel>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="Nome da rua" className="pl-10" {...field} disabled={!isEditing} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="numero"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número</FormLabel>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="Número" className="pl-10" {...field} disabled={!isEditing} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="bairro"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bairro</FormLabel>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input placeholder="Seu bairro" className="pl-10" {...field} disabled={!isEditing} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cidade"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Cidade</FormLabel>
@@ -168,14 +327,14 @@ const ClientProfile = () => {
 
               <FormField
                 control={form.control}
-                name="address"
+                name="estado"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Endereço</FormLabel>
+                    <FormLabel>Estado</FormLabel>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                       <FormControl>
-                        <Input placeholder="Seu endereço completo" className="pl-10" {...field} disabled={!isEditing} />
+                        <Input placeholder="Seu estado" className="pl-10" {...field} disabled={!isEditing} />
                       </FormControl>
                     </div>
                     <FormMessage />

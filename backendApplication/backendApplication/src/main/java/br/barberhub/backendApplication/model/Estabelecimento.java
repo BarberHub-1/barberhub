@@ -27,7 +27,7 @@ public class Estabelecimento extends Usuario {
 
     @NotBlank(message = "O CNPJ é obrigatório")
     @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}", message = "CNPJ inválido")
-    @Column(unique = true)
+    @Column(unique = true, columnDefinition = "VARCHAR(18)")
     private String cnpj;
 
     @NotBlank

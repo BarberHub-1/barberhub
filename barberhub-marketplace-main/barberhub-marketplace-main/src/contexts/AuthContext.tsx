@@ -38,10 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('Tentando login com:', { email, password });
+      console.log('Tentando login com:', { email, senha: password });
       const response = await api.post<LoginResponse>('/auth/login', { 
         email, 
-        senha: password
+        senha: password 
       });
       console.log('Resposta do servidor:', response.data);
       const { token, tipo, id } = response.data;

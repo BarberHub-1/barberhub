@@ -11,7 +11,8 @@ import lombok.*;
 public class Cliente extends Usuario {
 
     private String nome;
-    private Long cpf;
+    @Column(columnDefinition = "VARCHAR(14)")
+    private String cpf;
     private String telefone;
     private Integer numero;
     private Integer rua;

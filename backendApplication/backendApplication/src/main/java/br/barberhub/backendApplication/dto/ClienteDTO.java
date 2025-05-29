@@ -1,6 +1,5 @@
 package br.barberhub.backendApplication.dto;
 
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,7 +7,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ClienteDTO extends UsuarioDTO {
     private String nome;
-    private Long cpf;
+    private String cpf;
     private String telefone;
     private Integer numero;
     private Integer rua;
