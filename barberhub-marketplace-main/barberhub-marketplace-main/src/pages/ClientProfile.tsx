@@ -52,18 +52,35 @@ const ClientProfile = () => {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   
-  const { data: cliente, isLoading } = useQuery({
+  const { data: cliente, isLoading, error } = useQuery({
     queryKey: ['cliente', user?.id],
     queryFn: async () => {
-      const response = await api.get<Cliente>(`/api/clientes/${user?.id}`);
-      return response.data;
+      if (!user?.id) {
+        throw new Error('ID do usuário não disponível');
+      }
+      try {
+        const response = await api.get<Cliente>(`/api/clientes/${user.id}`);
+        if (!response.data) {
+          throw new Error('Dados do cliente não encontrados');
+        }
+        return response.data;
+      } catch (error) {
+        console.error('Erro ao buscar dados do cliente:', error);
+        throw error;
+      }
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    cacheTime: 1000 * 60 * 30, // 30 minutos
   });
 
   const updateMutation = useMutation({
     mutationFn: async (data: ClienteFormData) => {
-      const response = await api.put(`/api/clientes/${user?.id}`, data);
+      if (!user?.id) {
+        throw new Error('ID do usuário não disponível');
+      }
+      const response = await api.put(`/api/clientes/${user.id}`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -75,6 +92,7 @@ const ClientProfile = () => {
       setIsEditing(false);
     },
     onError: (error) => {
+      console.error('Erro ao atualizar perfil:', error);
       toast({
         title: "Erro ao Atualizar",
         description: "Não foi possível atualizar suas informações. Tente novamente.",
@@ -99,28 +117,58 @@ const ClientProfile = () => {
   });
 
   useEffect(() => {
-    if (cliente) {
-      form.reset({
-        nome: cliente.nome || "",
-        email: cliente.email || "",
-        telefone: cliente.telefone || "",
-        cpf: cliente.cpf || "",
-        rua: cliente.rua?.toString() || "",
-        numero: cliente.numero?.toString() || "",
-        bairro: cliente.bairro || "",
-        cidade: cliente.cidade || "",
-        estado: cliente.estado || "",
-      });
+    if (cliente && Object.keys(cliente).length > 0) {
+      try {
+        form.reset({
+          nome: cliente.nome || "",
+          email: cliente.email || "",
+          telefone: cliente.telefone || "",
+          cpf: cliente.cpf || "",
+          rua: cliente.rua?.toString() || "",
+          numero: cliente.numero?.toString() || "",
+          bairro: cliente.bairro || "",
+          cidade: cliente.cidade || "",
+          estado: cliente.estado || "",
+        });
+      } catch (error) {
+        console.error('Erro ao preencher formulário:', error);
+        toast({
+          title: "Erro ao Carregar Dados",
+          description: "Não foi possível carregar seus dados. Por favor, tente novamente.",
+          variant: "destructive"
+        });
+      }
     }
-  }, [cliente, form]);
+  }, [cliente, form, toast]);
 
   function onSubmit(data: ClientProfileFormValues) {
-    const formData: ClienteFormData = {
-      ...data,
-      rua: parseInt(data.rua) || null,
-      numero: parseInt(data.numero) || null
-    };
-    updateMutation.mutate(formData);
+    try {
+      const formData: ClienteFormData = {
+        ...data,
+        rua: parseInt(data.rua) || null,
+        numero: parseInt(data.numero) || null
+      };
+      updateMutation.mutate(formData);
+    } catch (error) {
+      console.error('Erro ao preparar dados do formulário:', error);
+      toast({
+        title: "Erro ao Enviar Dados",
+        description: "Não foi possível processar seus dados. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-barber-50 pt-24 pb-12">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <p className="text-center text-red-600">Usuário não autenticado</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (isLoading) {
@@ -128,7 +176,33 @@ const ClientProfile = () => {
       <div className="min-h-screen bg-barber-50 pt-24 pb-12">
         <div className="container mx-auto max-w-3xl px-4">
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <p>Carregando...</p>
+            <p className="text-center">Carregando perfil...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-barber-50 pt-24 pb-12">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <p className="text-center text-red-600">
+              Erro ao carregar perfil: {error instanceof Error ? error.message : 'Erro desconhecido'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cliente) {
+    return (
+      <div className="min-h-screen bg-barber-50 pt-24 pb-12">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <p className="text-center text-red-600">Dados do cliente não encontrados</p>
           </div>
         </div>
       </div>

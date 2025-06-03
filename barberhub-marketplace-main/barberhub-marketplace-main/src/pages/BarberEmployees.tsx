@@ -56,18 +56,25 @@ const BarberEmployees = () => {
         const response = await api.get<Profissional[]>(`/api/profissionais/estabelecimento/${user.id}`);
         console.log('Resposta da API:', response.data);
 
-        // Buscar serviços para cada profissional
+        // Buscar serviços para cada profissional e garantir o estabelecimentoId
         const profissionaisComServicos = await Promise.all(
           response.data.map(async (profissional) => {
             try {
               const servicosResponse = await api.get<Servico[]>(`/api/servicos/profissional/${profissional.id}`);
               return {
                 ...profissional,
-                servicos: servicosResponse.data
+                estabelecimentoId: user.id, // Garantindo que o estabelecimentoId seja o ID do usuário atual
+                servicos: servicosResponse.data,
+                servicosIds: servicosResponse.data.map(s => s.id) // Mapeando os IDs dos serviços
               };
             } catch (error) {
               console.error('Erro ao buscar serviços do profissional:', error);
-              return profissional;
+              return {
+                ...profissional,
+                estabelecimentoId: user.id, // Garantindo que o estabelecimentoId seja o ID do usuário atual
+                servicos: [],
+                servicosIds: []
+              };
             }
           })
         );
@@ -152,6 +159,7 @@ const BarberEmployees = () => {
       const profissionalData = {
         ...editingEmployee,
         telefone: telefoneFormatado,
+        estabelecimentoId: user?.id,
         servicosIds: [] // Lista vazia de serviços por enquanto
       };
 
@@ -201,7 +209,7 @@ const BarberEmployees = () => {
   };
 
   const handleServicosChange = async (servicoId: number, checked: boolean) => {
-    if (!selectedProfissional) return;
+    if (!selectedProfissional || !user?.id) return;
 
     try {
       // Manter os serviços existentes ou usar array vazio se não houver
@@ -225,7 +233,7 @@ const BarberEmployees = () => {
         nome: selectedProfissional.nome,
         email: selectedProfissional.email,
         telefone: telefoneFormatado,
-        estabelecimentoId: selectedProfissional.estabelecimentoId,
+        estabelecimentoId: user.id, // Usando o ID do usuário atual
         servicosIds: novosServicosIds
       });
 
@@ -235,6 +243,7 @@ const BarberEmployees = () => {
         // Atualizar o profissional selecionado com os novos serviços
         const profissionalAtualizado = {
           ...response.data,
+          estabelecimentoId: user.id, // Garantindo que o estabelecimentoId seja o ID do usuário atual
           servicosIds: novosServicosIds
         };
         setSelectedProfissional(profissionalAtualizado);

@@ -8,6 +8,14 @@ import { Spinner } from '../components/Spinner';
 import { toast } from 'react-toastify';
 import Navigation from '../components/Navigation';
 
+interface Servico {
+  id: number;
+  tipo: string;
+  descricao: string;
+  preco: number;
+  duracaoMinutos: number;
+}
+
 interface BarberShop {
   id: number;
   nomeEstabelecimento: string;
@@ -25,7 +33,7 @@ interface BarberShop {
     horarioAbertura: string;
     horarioFechamento: string;
   }[];
-  servicos: string[];
+  servicos: Servico[];
 }
 
 export default function Barbershops() {
@@ -44,8 +52,27 @@ export default function Barbershops() {
       try {
         const response = await estabelecimentoService.getAll();
         console.log('Dados recebidos do backend:', response);
-        console.log('Primeira barbearia:', response[0]);
-        return response as BarberShop[];
+        
+        // Converter os serviços de string para objeto
+        const barbershopsProcessados = response.map(shop => ({
+          ...shop,
+          servicos: shop.servicos.map(servicoStr => {
+            // Garantir que estamos lidando com uma string
+            const servicoString = typeof servicoStr === 'string' ? servicoStr : JSON.stringify(servicoStr);
+            
+            const servicoObj = {
+              id: parseInt(servicoString.match(/id=(\d+)/)?.[1] || '0'),
+              tipo: servicoString.match(/tipo=([^,]+)/)?.[1] || '',
+              descricao: servicoString.match(/descricao=([^,]+)/)?.[1] || '',
+              preco: parseFloat(servicoString.match(/preco=([^,]+)/)?.[1] || '0'),
+              duracaoMinutos: parseInt(servicoString.match(/duracaoMinutos=(\d+)/)?.[1] || '0')
+            };
+            return servicoObj;
+          })
+        }));
+        
+        console.log('Barbearias processadas:', barbershopsProcessados);
+        return barbershopsProcessados as BarberShop[];
       } catch (error) {
         console.error('Erro ao buscar barbearias:', error);
         throw error;
@@ -106,10 +133,7 @@ export default function Barbershops() {
     const matchesCity = !selectedCity || shop.cidade === selectedCity;
     
     const matchesService = !selectedService || 
-      (shop.servicos && shop.servicos.some(service => {
-        const tipoMatch = service.match(/tipo=([^,]+)/);
-        return tipoMatch && tipoMatch[1] === selectedService;
-      }));
+      (shop.servicos && shop.servicos.some(service => service.tipo === selectedService));
     
     const matchesLocation = !selectedLocation || shop.cidade === selectedLocation;
     
@@ -203,11 +227,11 @@ export default function Barbershops() {
             >
               <div className="relative h-48">
                 <img
-                  src={shop.foto || 'https://via.placeholder.com/300x200?text=Barbearia'}
+                  src={shop.foto || 'https://placehold.co/300x200/e2e8f0/1e293b?text=Barbearia'}
                   alt={shop.nomeEstabelecimento}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Barbearia';
+                    e.currentTarget.src = 'https://placehold.co/300x200/e2e8f0/1e293b?text=Barbearia';
                   }}
                 />
                 {shop.status === 'APROVADO' && (
@@ -233,24 +257,14 @@ export default function Barbershops() {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {shop.servicos && shop.servicos.length > 0 ? (
                     <>
-                      {shop.servicos.slice(0, 3).map((serviceStr, index) => {
-                        const tipoMatch = serviceStr.match(/tipo=([^,]+)/);
-                        const tipo = tipoMatch ? tipoMatch[1] : '';
-
-                        return (
-                          <span
-                            key={`${shop.id}-service-${index}`}
-                            className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
-                          >
-                            {tipo === 'CORTE_DE_CABELO' && 'Corte de Cabelo'}
-                            {tipo === 'BARBA' && 'Barba'}
-                            {tipo === 'HIDRATACAO' && 'Hidratação'}
-                            {tipo === 'LUZES' && 'Luzes'}
-                            {tipo === 'SOBRANCELHA' && 'Sobrancelha'}
-                            {!['CORTE_DE_CABELO', 'BARBA', 'HIDRATACAO', 'LUZES', 'SOBRANCELHA'].includes(tipo) && tipo}
-                          </span>
-                        );
-                      })}
+                      {shop.servicos.slice(0, 3).map((service) => (
+                        <span
+                          key={`${shop.id}-service-${service.id}`}
+                          className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
+                        >
+                          {service.descricao} - R$ {service.preco.toFixed(2)}
+                        </span>
+                      ))}
                       {shop.servicos.length > 3 && (
                         <span 
                           key={`${shop.id}-more-services-${shop.servicos.length}`}

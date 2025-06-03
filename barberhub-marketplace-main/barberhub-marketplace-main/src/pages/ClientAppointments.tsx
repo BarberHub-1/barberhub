@@ -1,160 +1,181 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Scissors, Plus, Calendar as CalendarIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
-type Appointment = {
-  id: string;
-  barberShop: string;
-  service: string;
-  date: Date;
-  status: "scheduled" | "completed" | "cancelled";
-  price: number;
-};
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../contexts/AuthContext';
+import { agendamentoService, Agendamento } from '../services/agendamento.service';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '../components/Spinner';
+import { toast } from 'react-toastify';
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const ClientAppointments = () => {
-  const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [appointments] = useState<Appointment[]>([
-    {
-      id: "1",
-      barberShop: "Barbearia do João",
-      service: "Corte + Barba",
-      date: new Date(2024, 3, 15, 14, 30),
-      status: "scheduled",
-      price: 50.00,
-    },
-    {
-      id: "2",
-      barberShop: "Barbearia do Pedro",
-      service: "Corte",
-      date: new Date(2024, 3, 10, 10, 0),
-      status: "completed",
-      price: 30.00,
-    },
-  ]);
 
-  const getStatusBadge = (status: Appointment["status"]) => {
-    const statusConfig = {
-      scheduled: { label: "Agendado", variant: "default" },
-      completed: { label: "Concluído", variant: "success" },
-      cancelled: { label: "Cancelado", variant: "destructive" },
-    };
+  const { data: agendamentos, isLoading, error } = useQuery<Agendamento[]>({
+    queryKey: ['agendamentos'],
+    queryFn: agendamentoService.getAgendamentosCliente,
+    enabled: !!user,
+    retry: 1
+  });
 
-    const config = statusConfig[status];
-    return (
-      <Badge variant={config.variant as any}>
-        {config.label}
-      </Badge>
-    );
+  const cancelarAgendamento = useMutation({
+    mutationFn: agendamentoService.cancelarAgendamento,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agendamentos'] });
+      toast.success('Agendamento cancelado com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao cancelar agendamento:', error);
+      toast.error('Erro ao cancelar agendamento. Por favor, tente novamente.');
+    }
+  });
+
+  const handleCancelar = async (id: number) => {
+    if (window.confirm('Tem certeza que deseja cancelar este agendamento?')) {
+      try {
+        await cancelarAgendamento.mutateAsync(id);
+      } catch (error) {
+        console.error('Erro ao cancelar agendamento:', error);
+      }
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-barber-50 pt-24 pb-12">
-      <div className="container mx-auto max-w-4xl px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-barber-900">Meus Agendamentos</h1>
-            <p className="mt-2 text-barber-600">
-              Gerencie seus agendamentos e visualize seu histórico
-            </p>
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600">Acesso Negado</h1>
+            <p className="mt-2 text-gray-600">Você precisa estar logado para ver seus agendamentos.</p>
+            <Button
+              onClick={() => navigate('/login')}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              Fazer Login
+            </Button>
           </div>
-          <Button 
-            className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
-            onClick={() => navigate("/barbershops")}
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-[60vh]">
+            <Spinner />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600">Erro ao carregar agendamentos</h1>
+            <p className="mt-2 text-gray-600">Por favor, tente novamente mais tarde.</p>
+            <Button
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['agendamentos'] })}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              Tentar Novamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Meus Agendamentos</h1>
+          <Button
+            onClick={() => navigate('/barbershops')}
+            className="bg-blue-600 hover:bg-blue-700"
           >
-            <Plus size={16} />
             Novo Agendamento
           </Button>
         </div>
 
-        <div className="space-y-4">
-          {appointments.map((appointment) => (
-            <Card key={appointment.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl">{appointment.barberShop}</CardTitle>
-                    <CardDescription className="mt-1">
-                      <div className="flex items-center gap-2">
-                        <Scissors size={16} />
-                        {appointment.service}
+        {agendamentos && agendamentos.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {agendamentos.map((agendamento) => (
+              <Card key={agendamento.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <FaCalendarAlt className="text-blue-600" />
+                      {new Date(agendamento.data).toLocaleDateString('pt-BR')}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-sm ${
+                      agendamento.status === 'AGENDADO' ? 'bg-green-100 text-green-800' :
+                      agendamento.status === 'CONCLUIDO' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {agendamento.status === 'AGENDADO' ? 'Agendado' :
+                       agendamento.status === 'CONCLUIDO' ? 'Concluído' :
+                       'Cancelado'}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium text-gray-800">{agendamento.estabelecimento.nomeEstabelecimento}</h3>
+                      <div className="flex items-center text-gray-600 mt-1">
+                        <FaMapMarkerAlt className="mr-2" />
+                        <span>{agendamento.estabelecimento.endereco}, {agendamento.estabelecimento.cidade}</span>
                       </div>
-                    </CardDescription>
-                  </div>
-                  {getStatusBadge(appointment.status)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-barber-600">
-                      <Calendar size={16} />
-                      <span>
-                        {format(appointment.date, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                      </span>
                     </div>
-                    <div className="flex items-center gap-2 text-barber-600">
-                      <Clock size={16} />
-                      <span>
-                        {format(appointment.date, "HH:mm")}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-barber-600">
-                      <MapPin size={16} />
-                      <span>Rua das Flores, 123 - São Paulo</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-lg font-semibold text-barber-900">
-                        R$ {appointment.price.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                {appointment.status === "scheduled" && (
-                  <div className="mt-4 flex justify-end gap-2">
-                    <Button variant="outline" size="sm">
-                      Reagendar
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      Cancelar
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
 
-          {appointments.length === 0 && (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center">
-                  <CalendarIcon size={48} className="mx-auto text-barber-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-barber-900 mb-2">
-                    Nenhum agendamento encontrado
-                  </h3>
-                  <p className="text-barber-600 mb-4">
-                    Você ainda não possui agendamentos. Clique no botão abaixo para agendar um horário.
-                  </p>
-                  <Button 
-                    className="flex items-center gap-2 bg-barber-900 hover:bg-barber-800"
-                    onClick={() => navigate("/barbershops")}
-                  >
-                    <Plus size={16} />
-                    Novo Agendamento
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                    <div>
+                      <h4 className="font-medium text-gray-800">Serviço</h4>
+                      <p className="text-gray-600">{agendamento.servico.descricao}</p>
+                      <p className="text-gray-600">R$ {agendamento.servico.preco.toFixed(2)}</p>
+                    </div>
+
+                    <div className="flex items-center text-gray-600">
+                      <FaClock className="mr-2" />
+                      <span>{agendamento.horario} ({agendamento.servico.duracaoMinutos} min)</span>
+                    </div>
+
+                    {agendamento.status === 'AGENDADO' && (
+                      <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={() => handleCancelar(agendamento.id)}
+                        disabled={cancelarAgendamento.isPending}
+                      >
+                        <FaTrash className="mr-2" />
+                        Cancelar Agendamento
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h2 className="text-xl font-medium text-gray-600">Você não possui agendamentos</h2>
+            <p className="mt-2 text-gray-500">Faça seu primeiro agendamento em uma de nossas barbearias parceiras!</p>
+            <Button
+              onClick={() => navigate('/barbershops')}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              Ver Barbearias
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

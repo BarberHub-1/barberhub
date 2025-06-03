@@ -3,9 +3,11 @@ package br.barberhub.backendApplication.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +17,8 @@ import br.barberhub.backendApplication.dto.EstabelecimentoDTO;
 import br.barberhub.backendApplication.model.Estabelecimento;
 import br.barberhub.backendApplication.model.HorarioFuncionamento;
 import br.barberhub.backendApplication.model.Servico;
+import br.barberhub.backendApplication.model.StatusCadastro;
+import br.barberhub.backendApplication.model.TipoServico;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
 import jakarta.validation.Valid;
@@ -32,10 +36,90 @@ public class EstabelecimentoService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Transactional
     public EstabelecimentoDTO cadastrarEstabelecimento(@Valid EstabelecimentoDTO estabelecimentoDTO) {
         Estabelecimento estabelecimento = modelMapper.map(estabelecimentoDTO, Estabelecimento.class);
+        
+        // Configura o status inicial como PENDENTE
+        estabelecimento.setStatus(StatusCadastro.PENDENTE);
+        
+        // Gera uma senha temporária
+        String senhaTemporaria = UUID.randomUUID().toString().substring(0, 8);
+        estabelecimento.setSenha(passwordEncoder.encode(senhaTemporaria));
+        
+        // Salva o estabelecimento primeiro para ter o ID
         Estabelecimento estabelecimentoSalvo = estabelecimentoRepository.save(estabelecimento);
-        return modelMapper.map(estabelecimentoSalvo, EstabelecimentoDTO.class);
+        
+        // Processa os serviços
+        if (estabelecimentoDTO.getServicos() != null) {
+            estabelecimentoDTO.getServicos().forEach(tipoServico -> {
+                Servico servico = new Servico();
+                servico.setTipo(TipoServico.valueOf(tipoServico));
+                servico.setDescricao(getDescricaoServico(TipoServico.valueOf(tipoServico)));
+                servico.setPreco(getPrecoPadraoServico(TipoServico.valueOf(tipoServico)));
+                servico.setDuracaoMinutos(getDuracaoPadraoServico(TipoServico.valueOf(tipoServico)));
+                servico.setEstabelecimento(estabelecimentoSalvo);
+                servicoRepository.save(servico);
+            });
+        }
+        
+        EstabelecimentoDTO response = modelMapper.map(estabelecimentoSalvo, EstabelecimentoDTO.class);
+        response.setSenha(senhaTemporaria); // Inclui a senha temporária na resposta
+        return response;
+    }
+
+    private String getDescricaoServico(TipoServico tipo) {
+        switch (tipo) {
+            case CORTE_DE_CABELO:
+                return "Corte de cabelo personalizado";
+            case BARBA:
+                return "Aparo e modelagem de barba";
+            case SOBRANCELHA:
+                return "Design e modelagem de sobrancelhas";
+            case HIDRATACAO:
+                return "Hidratação capilar profunda";
+            case LUZES:
+                return "Aplicação de luzes no cabelo";
+            default:
+                return "Serviço personalizado";
+        }
+    }
+
+    private double getPrecoPadraoServico(TipoServico tipo) {
+        switch (tipo) {
+            case CORTE_DE_CABELO:
+                return 50.0;
+            case BARBA:
+                return 30.0;
+            case SOBRANCELHA:
+                return 20.0;
+            case HIDRATACAO:
+                return 40.0;
+            case LUZES:
+                return 120.0;
+            default:
+                return 0.0;
+        }
+    }
+
+    private int getDuracaoPadraoServico(TipoServico tipo) {
+        switch (tipo) {
+            case CORTE_DE_CABELO:
+                return 30;
+            case BARBA:
+                return 20;
+            case SOBRANCELHA:
+                return 15;
+            case HIDRATACAO:
+                return 40;
+            case LUZES:
+                return 120;
+            default:
+                return 30;
+        }
     }
 
     public List<EstabelecimentoDTO> listarEstabelecimentos() {
@@ -89,24 +173,6 @@ public class EstabelecimentoService {
             estabelecimentoDTO.getHorario().forEach(horarioDTO -> {
                 HorarioFuncionamento horario = modelMapper.map(horarioDTO, HorarioFuncionamento.class);
                 estabelecimento.addHorario(horario);
-            });
-        }
-
-        // Atualiza os serviços
-        if (estabelecimentoDTO.getServicos() != null) {
-            // Remove todos os serviços existentes
-            estabelecimento.getServicos().clear();
-            
-            // Adiciona os novos serviços
-            estabelecimentoDTO.getServicos().forEach(servicoId -> {
-                try {
-                    Servico servico = servicoRepository.findById(Long.parseLong(servicoId))
-                        .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
-                    estabelecimento.getServicos().add(servico);
-                } catch (NumberFormatException e) {
-                    // Se não for um número, ignora o serviço
-                    System.out.println("ID de serviço inválido: " + servicoId);
-                }
             });
         }
         

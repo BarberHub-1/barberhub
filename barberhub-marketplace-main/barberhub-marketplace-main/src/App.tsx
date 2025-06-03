@@ -25,6 +25,8 @@ import ClientLayout from "@/components/ClientLayout";
 import ClientProfile from "@/pages/ClientProfile";
 import ClientAppointments from "@/pages/ClientAppointments";
 import ClientHistory from "@/pages/ClientHistory";
+import BarberShopDetails from './pages/BarberShopDetails';
+import Appointment from './pages/Appointment';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/barbers" element={<Barbers />} />
               <Route path="/barbershops" element={<Barbershops />} />
+              <Route path="/barbershops/:id" element={<BarberShopDetails />} />
+              <Route path="/agendamento/:id" element={<Appointment />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -66,7 +70,6 @@ function App() {
               <Route path="/barber/profile" element={<BarberProfile />} />
               <Route path="/barber/edit-profile" element={<BarberEditProfile />} />
               <Route path="/barber/employees" element={<BarberEmployees />} />
-
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

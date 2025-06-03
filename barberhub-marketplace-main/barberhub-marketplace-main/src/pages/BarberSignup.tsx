@@ -11,6 +11,28 @@ import * as z from "zod";
 import { Scissors, MapPin, User, Mail, Phone, Store, Clock, Image, Calendar, Upload, Building2, Hash, Home, Map } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AVAILABLE_SERVICES } from "@/constants/services";
+import { estabelecimentoService } from "@/services/estabelecimento.service";
+import api from "@/lib/axios";
+
+interface EstabelecimentoResponse {
+  id: number;
+  nomeEstabelecimento: string;
+  nomeProprietario: string;
+  cnpj: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cidade: string;
+  cep: string;
+  descricao: string;
+  foto: string;
+  status: string;
+  horario: Array<{
+    diaSemana: string;
+    horarioAbertura: string;
+    horarioFechamento: string;
+  }>;
+}
 
 const barberShopSchema = z.object({
   shopName: z.string().min(2, { message: "O nome da barbearia deve ter pelo menos 2 caracteres" }),
@@ -25,13 +47,16 @@ const barberShopSchema = z.object({
   zipCode: z.string().min(8, { message: "CEP inválido" }).max(9, { message: "CEP inválido" }),
   description: z.string().min(20, { message: "A descrição deve ter pelo menos 20 caracteres" }),
   services: z.array(z.string()).min(1, { message: "Selecione pelo menos um serviço" }),
-  workingHours: z.string().min(5, { message: "Por favor, insira seus horários de funcionamento" }),
-  termsAndConditions: z.literal(true, {
-    errorMap: () => ({ message: "Você deve aceitar os termos e condições" }),
-  }),
+  horarios: z.array(z.object({
+    diaSemana: z.string(),
+    horarioAbertura: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Formato inválido (HH:mm)"),
+    horarioFechamento: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Formato inválido (HH:mm)")
+  }))
 });
 
 type BarberShopFormValues = z.infer<typeof barberShopSchema>;
+
+const diasSemana = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'] as const;
 
 const BarberSignup = () => {
   const { toast } = useToast();
@@ -39,6 +64,7 @@ const BarberSignup = () => {
   const [termsRead, setTermsRead] = useState(false);
   const [privacyRead, setPrivacyRead] = useState(false);
   const [shopImage, setShopImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   const form = useForm<BarberShopFormValues>({
     resolver: zodResolver(barberShopSchema),
@@ -55,8 +81,7 @@ const BarberSignup = () => {
       zipCode: "",
       description: "",
       services: [],
-      workingHours: "",
-      termsAndConditions: undefined,
+      horarios: []
     },
   });
 
@@ -72,6 +97,7 @@ const BarberSignup = () => {
         return;
       }
 
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setShopImage(reader.result as string);
@@ -80,7 +106,7 @@ const BarberSignup = () => {
     }
   };
 
-  function onSubmit(data: BarberShopFormValues) {
+  async function onSubmit(data: BarberShopFormValues) {
     if (!shopImage) {
       toast({
         title: "Erro",
@@ -90,13 +116,86 @@ const BarberSignup = () => {
       return;
     }
 
-    console.log({ ...data, shopImage });
-    toast({
-      title: "Inscrição Enviada",
-      description: "Obrigado por se inscrever! Analisaremos suas informações e entraremos em contato em breve.",
-    });
-    
-    setTimeout(() => navigate("/barbers"), 2000);
+    try {
+      // Converte a imagem para base64
+      const base64Image = shopImage.split(',')[1];
+      
+      // Formata o telefone (remove caracteres não numéricos e garante formato correto)
+      const telefoneFormatado = data.phone.replace(/\D/g, '');
+      if (telefoneFormatado.length !== 11) {
+        toast({
+          title: "Erro",
+          description: "O telefone deve conter 11 dígitos (DDD + número)",
+          variant: "destructive",
+        });
+        return;
+      }
+      const telefoneComFormato = `(${telefoneFormatado.substring(0, 2)}) ${telefoneFormatado.substring(2, 7)}-${telefoneFormatado.substring(7)}`;
+      
+      // Formata o CNPJ (remove caracteres não numéricos e garante formato correto)
+      const cnpjFormatado = data.cnpj.replace(/\D/g, '');
+      if (cnpjFormatado.length !== 14) {
+        toast({
+          title: "Erro",
+          description: "O CNPJ deve conter 14 dígitos",
+          variant: "destructive",
+        });
+        return;
+      }
+      const cnpjComFormato = `${cnpjFormatado.substring(0, 2)}.${cnpjFormatado.substring(2, 5)}.${cnpjFormatado.substring(5, 8)}/${cnpjFormatado.substring(8, 12)}-${cnpjFormatado.substring(12)}`;
+      
+      // Prepara os dados do estabelecimento
+      const estabelecimentoData = {
+        nomeEstabelecimento: data.shopName,
+        nomeProprietario: data.ownerName,
+        cnpj: cnpjComFormato,
+        email: data.email,
+        telefone: telefoneComFormato,
+        endereco: `${data.street}, ${data.number} - ${data.neighborhood}`,
+        cidade: data.city,
+        cep: data.zipCode,
+        descricao: data.description,
+        foto: base64Image,
+        horario: data.horarios.map(horario => ({
+          diaSemana: horario.diaSemana,
+          horarioAbertura: horario.horarioAbertura,
+          horarioFechamento: horario.horarioFechamento
+        }))
+      };
+
+      const response = await api.post<EstabelecimentoResponse>('/api/estabelecimentos', estabelecimentoData);
+      
+      // Após criar o estabelecimento, criar os serviços selecionados
+      if (response.data && response.data.id) {
+        const servicosPromises = data.services.map(async (serviceId) => {
+          const servicoData = {
+            tipo: serviceId,
+            descricao: AVAILABLE_SERVICES.find(s => s.id === serviceId)?.label || '',
+            preco: 0, // Preço padrão inicial
+            duracaoMinutos: 30, // Duração padrão inicial
+            estabelecimentoId: response.data.id
+          };
+          
+          return api.post('/api/servicos', servicoData);
+        });
+        
+        await Promise.all(servicosPromises);
+      }
+      
+      toast({
+        title: "Inscrição Enviada",
+        description: "Obrigado por se inscrever! Analisaremos suas informações e entraremos em contato em breve.",
+      });
+      
+      setTimeout(() => navigate("/barbers"), 2000);
+    } catch (error: any) {
+      console.error('Erro ao cadastrar:', error);
+      toast({
+        title: "Erro",
+        description: error.response?.data?.message || "Não foi possível realizar o cadastro. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   }
 
   const handleTermsClick = () => {
@@ -376,68 +475,34 @@ const BarberSignup = () => {
                 )}
               />
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Serviços Oferecidos</h3>
                 <FormField
                   control={form.control}
                   name="services"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Serviços Oferecidos</FormLabel>
-                      <div className="grid grid-cols-2 gap-4 mt-2">
-                        {AVAILABLE_SERVICES.map((service) => (
-                          <FormField
-                            key={service.id}
-                            control={form.control}
-                            name="services"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  key={service.id}
-                                  className="flex flex-row items-start space-x-3 space-y-0"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(service.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...field.value, service.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== service.id
-                                              )
-                                            )
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {service.label}
-                                  </FormLabel>
-                                </FormItem>
-                              )
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="workingHours"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Horário de Funcionamento</FormLabel>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Seg-Sex: 9h-19h, Sáb: 10h-17h, etc."
-                            className="pl-10 min-h-[100px]"
-                            {...field} 
-                          />
-                        </FormControl>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {AVAILABLE_SERVICES.map((service) => (
+                          <div key={service.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={service.id}
+                              checked={field.value?.includes(service.id)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value || []), service.id]
+                                  : (field.value || []).filter(id => id !== service.id);
+                                field.onChange(newValue);
+                              }}
+                            />
+                            <label
+                              htmlFor={service.id}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {service.label}
+                            </label>
+                          </div>
+                        ))}
                       </div>
                       <FormMessage />
                     </FormItem>
@@ -445,48 +510,114 @@ const BarberSignup = () => {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="termsAndConditions"
-                render={({ field }) => (
-                  <FormItem className="flex items-start space-x-2 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={!termsRead || !privacyRead}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Horários de Funcionamento</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {diasSemana.map((dia) => (
+                    <div key={dia} className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="horarios"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{dia}</FormLabel>
+                            <div className="grid grid-cols-2 gap-2">
+                              <FormControl>
+                                <Input
+                                  type="time"
+                                  placeholder="Abertura"
+                                  onChange={(e) => {
+                                    const horarios = field.value || [];
+                                    const index = horarios.findIndex(h => h.diaSemana === dia);
+                                    if (index >= 0) {
+                                      horarios[index].horarioAbertura = e.target.value;
+                                    } else {
+                                      horarios.push({
+                                        diaSemana: dia,
+                                        horarioAbertura: e.target.value,
+                                        horarioFechamento: ''
+                                      });
+                                    }
+                                    field.onChange(horarios);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormControl>
+                                <Input
+                                  type="time"
+                                  placeholder="Fechamento"
+                                  onChange={(e) => {
+                                    const horarios = field.value || [];
+                                    const index = horarios.findIndex(h => h.diaSemana === dia);
+                                    if (index >= 0) {
+                                      horarios[index].horarioFechamento = e.target.value;
+                                    } else {
+                                      horarios.push({
+                                        diaSemana: dia,
+                                        horarioAbertura: '',
+                                        horarioFechamento: e.target.value
+                                      });
+                                    }
+                                    field.onChange(horarios);
+                                  }}
+                                />
+                              </FormControl>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="text-sm">
-                        Eu concordo com os{" "}
-                        <button
-                          type="button"
-                          onClick={handleTermsClick}
-                          className="text-barber-900 hover:underline"
-                        >
-                          Termos de Serviço
-                        </button>
-                        {" e "}
-                        <button
-                          type="button"
-                          onClick={handlePrivacyClick}
-                          className="text-barber-900 hover:underline"
-                        >
-                          Política de Privacidade
-                        </button>
-                      </FormLabel>
-                      {(!termsRead || !privacyRead) && (
-                        <p className="text-sm text-amber-600">
-                          Por favor, leia os termos de serviço e a política de privacidade antes de prosseguir
-                        </p>
-                      )}
-                      <FormMessage />
                     </div>
-                  </FormItem>
-                )}
-              />
-              
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Termos e Condições</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={termsRead}
+                      onCheckedChange={(checked) => setTermsRead(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Li e concordo com os{" "}
+                      <button
+                        type="button"
+                        onClick={handleTermsClick}
+                        className="text-barber-900 hover:underline"
+                      >
+                        Termos de Serviço
+                      </button>
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="privacy"
+                      checked={privacyRead}
+                      onCheckedChange={(checked) => setPrivacyRead(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="privacy"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Li e concordo com a{" "}
+                      <button
+                        type="button"
+                        onClick={handlePrivacyClick}
+                        className="text-barber-900 hover:underline"
+                      >
+                        Política de Privacidade
+                      </button>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex gap-4 pt-2">
                 <Button 
                   type="button" 
