@@ -41,5 +41,6 @@ public class AgendamentoDTO {
     private LocalDateTime dataHora;
 
     private StatusAgendamento statusAgendamento;
-
+    
+    private AvaliacaoDTO avaliacao;
 }

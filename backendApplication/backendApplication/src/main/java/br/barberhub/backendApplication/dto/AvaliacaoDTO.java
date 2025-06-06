@@ -1,7 +1,6 @@
 package br.barberhub.backendApplication.dto;
 
 import java.time.LocalDateTime;
-import br.barberhub.backendApplication.model.Agendamento;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -24,11 +23,13 @@ public class AvaliacaoDTO {
     private String comentario;
     
     @NotNull(message = "O agendamento é obrigatório")
-    private Agendamento agendamento;
+    private Long agendamentoId;
     
-    @NotNull(message = "O profissional é obrigatório")
-    private Long profissionalId;
+    @NotNull(message = "O estabelecimento é obrigatório")
+    private Long estabelecimentoId;
     
 	private LocalDateTime dateTime;
-
+    
+    private Long id;
+    private LocalDateTime dataAvaliacao;
 }

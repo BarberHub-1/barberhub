@@ -1,6 +1,5 @@
 package br.barberhub.backendApplication.model;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,10 +8,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -30,5 +31,13 @@ public class AgendamentoServico {
     @ManyToOne
     @JoinColumn(name = "servico_id", nullable = false)
     private Servico servico;
-    
+
+    @Override
+    public String toString() {
+        return "AgendamentoServico{" +
+                "id=" + id +
+                ", agendamento=" + (agendamento != null ? agendamento.getId() : null) +
+                ", servico=" + (servico != null ? servico.getId() : null) +
+                '}';
+    }
 } 

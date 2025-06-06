@@ -21,6 +21,7 @@ import br.barberhub.backendApplication.repository.AgendamentoServicoRepository;
 import br.barberhub.backendApplication.repository.ClienteRepository;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
+import br.barberhub.backendApplication.repository.AvaliacaoRepository;
 
 
 @Service
@@ -43,6 +44,9 @@ public class AgendamentoService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private AvaliacaoRepository avaliacaoRepository;
 
     public AgendamentoDTO criarAgendamento(AgendamentoDTO agendamentoDTO) {
         Agendamento agendamento = new Agendamento();
@@ -87,9 +91,15 @@ public class AgendamentoService {
     }
 
     public List<AgendamentoDTO> listarAgendamentosPorCliente(Long clienteId) {
+        System.out.println("Buscando agendamentos do cliente: " + clienteId);
         List<Agendamento> agendamentos = agendamentoRepository.findByClienteIdWithDetails(clienteId);
+        System.out.println("Agendamentos encontrados: " + agendamentos.size());
+        
         return agendamentos.stream()
                 .map(agendamento -> {
+                    System.out.println("Processando agendamento: " + agendamento.getId());
+                    System.out.println("Avaliação do agendamento: " + agendamento.getAvaliacao());
+                    
                     AgendamentoDTO dto = new AgendamentoDTO();
                     dto.setId(agendamento.getId());
                     dto.setClienteId(agendamento.getCliente().getId());
@@ -103,6 +113,12 @@ public class AgendamentoService {
                     dto.setServicosNomes(agendamento.getServicos().stream()
                             .map(as -> as.getServico().getTipo().toString())
                             .collect(Collectors.toList()));
+                    
+                    if (agendamento.getAvaliacao() != null) {
+                        System.out.println("Adicionando avaliação ao DTO");
+                        dto.setAvaliacao(modelMapper.map(agendamento.getAvaliacao(), AvaliacaoDTO.class));
+                    }
+                    
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -156,7 +172,14 @@ public class AgendamentoService {
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
         
         agendamento.setStatus(status);
-        Agendamento agendamentoAtualizado = agendamentoRepository.save(agendamento);
+        agendamentoRepository.save(agendamento);
+        
+        // Buscar o agendamento atualizado com todos os relacionamentos
+        Agendamento agendamentoAtualizado = agendamentoRepository.findByClienteIdWithDetails(agendamento.getCliente().getId())
+                .stream()
+                .filter(a -> a.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado após atualização"));
         
         AgendamentoDTO dto = new AgendamentoDTO();
         dto.setId(agendamentoAtualizado.getId());
@@ -176,20 +199,75 @@ public class AgendamentoService {
     }
 
     public AgendamentoDTO avaliarAgendamento(Long id, AvaliacaoDTO avaliacaoDTO) {
-        Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
-        
-        if (agendamento.getStatus() != StatusAgendamento.CONCLUIDA) {
-            throw new RuntimeException("Apenas agendamentos concluídos podem ser avaliados");
+        try {
+            System.out.println("Iniciando avaliação do agendamento: " + id);
+            System.out.println("Payload recebido: " + avaliacaoDTO);
+            
+            Agendamento agendamento = agendamentoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Agendamento nao encontrado"));
+            
+            System.out.println("Agendamento encontrado: " + agendamento);
+            
+            // Buscar o agendamento com todos os relacionamentos
+            agendamento = agendamentoRepository.findByClienteIdWithDetails(agendamento.getCliente().getId())
+                    .stream()
+                    .filter(a -> a.getId().equals(id))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Agendamento nao encontrado"));
+            
+            System.out.println("Status do agendamento: " + agendamento.getStatus());
+            
+            if (agendamento.getStatus() != StatusAgendamento.CONCLUIDA) {
+                throw new RuntimeException("Apenas agendamentos concluidos podem ser avaliados");
+            }
+
+            if (agendamento.getAvaliacao() != null) {
+                throw new RuntimeException("Este agendamento ja foi avaliado");
+            }
+            
+            Avaliacao avaliacao = new Avaliacao();
+            avaliacao.setNota(avaliacaoDTO.getNota());
+            avaliacao.setComentario(avaliacaoDTO.getComentario());
+            avaliacao.setDataAvaliacao(avaliacaoDTO.getDateTime());
+            avaliacao.setAgendamento(agendamento);
+            avaliacao.setEstabelecimento(agendamento.getEstabelecimento());
+            
+            System.out.println("Salvando avaliação: " + avaliacao);
+            
+            try {
+                avaliacao = avaliacaoRepository.save(avaliacao);
+                System.out.println("Avaliação salva com sucesso: " + avaliacao);
+                
+                agendamento.setAvaliacao(avaliacao);
+                Agendamento agendamentoAtualizado = agendamentoRepository.save(agendamento);
+                System.out.println("Agendamento atualizado com sucesso: " + agendamentoAtualizado);
+                
+                // Mapeamento manual para evitar problemas com o ModelMapper
+                AgendamentoDTO dto = new AgendamentoDTO();
+                dto.setId(agendamentoAtualizado.getId());
+                dto.setClienteId(agendamentoAtualizado.getCliente().getId());
+                dto.setEstabelecimentoId(agendamentoAtualizado.getEstabelecimento().getId());
+                dto.setEstabelecimentoNome(agendamentoAtualizado.getEstabelecimento().getNomeEstabelecimento());
+                dto.setDataHora(agendamentoAtualizado.getDataHora());
+                dto.setStatusAgendamento(agendamentoAtualizado.getStatus());
+                dto.setServicos(agendamentoAtualizado.getServicos().stream()
+                        .map(as -> as.getServico().getId())
+                        .collect(Collectors.toList()));
+                dto.setServicosNomes(agendamentoAtualizado.getServicos().stream()
+                        .map(as -> as.getServico().getTipo().toString())
+                        .collect(Collectors.toList()));
+                
+                return dto;
+            } catch (Exception e) {
+                System.err.println("Erro ao salvar avaliação: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Erro ao salvar avaliação: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao processar avaliação: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao processar avaliação: " + e.getMessage());
         }
-        
-        Avaliacao avaliacao = modelMapper.map(avaliacaoDTO, Avaliacao.class);
-        avaliacao.setAgendamento(agendamento);
-        avaliacao.setEstabelecimento(agendamento.getEstabelecimento());
-        
-        agendamento.setAvaliacao(avaliacao);
-        Agendamento agendamentoAtualizado = agendamentoRepository.save(agendamento);
-        return modelMapper.map(agendamentoAtualizado, AgendamentoDTO.class);
     }
 
     public void excluirAgendamento(Long id) {

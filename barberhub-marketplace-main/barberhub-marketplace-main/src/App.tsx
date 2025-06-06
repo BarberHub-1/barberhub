@@ -25,8 +25,10 @@ import ClientLayout from "@/components/ClientLayout";
 import ClientProfile from "@/pages/ClientProfile";
 import ClientAppointments from "@/pages/ClientAppointments";
 import ClientHistory from "@/pages/ClientHistory";
+import ClientReviews from "@/pages/ClientReviews";
 import BarberShopDetails from './pages/BarberShopDetails';
 import Appointment from './pages/Appointment';
+import ClientSchedule from './pages/ClientSchedule';
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,8 @@ function App() {
                   <Route path="profile" element={<ClientProfile />} />
                   <Route path="appointments" element={<ClientAppointments />} />
                   <Route path="history" element={<ClientHistory />} />
+                  <Route path="schedule" element={<ClientSchedule />} />
+                  <Route path="reviews" element={<ClientReviews />} />
               </Route>
 
               <Route path="/barber/profile" element={<BarberProfile />} />

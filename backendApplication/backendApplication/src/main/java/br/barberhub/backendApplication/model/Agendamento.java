@@ -1,9 +1,7 @@
 package br.barberhub.backendApplication.model;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,10 +17,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -36,11 +36,9 @@ public class Agendamento {
     @Column(nullable = false)
     private LocalDateTime dataHora;
     
-    
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
-    
     
     @ManyToOne
     @JoinColumn(name = "estabelecimento_id", nullable = false)
@@ -56,4 +54,14 @@ public class Agendamento {
     @Column(nullable = false)
     private StatusAgendamento status;
 
+    @Override
+    public String toString() {
+        return "Agendamento{" +
+                "id=" + id +
+                ", dataHora=" + dataHora +
+                ", cliente=" + (cliente != null ? cliente.getId() : null) +
+                ", estabelecimento=" + (estabelecimento != null ? estabelecimento.getId() : null) +
+                ", status=" + status +
+                '}';
+    }
 } 

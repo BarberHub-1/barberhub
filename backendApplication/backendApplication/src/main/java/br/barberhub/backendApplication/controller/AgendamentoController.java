@@ -56,6 +56,11 @@ public class AgendamentoController {
         return ResponseEntity.ok(agendamentoService.atualizarStatus(id, StatusAgendamento.valueOf(status)));
     }
 
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<AgendamentoDTO> cancelarAgendamento(@PathVariable Long id) {
+        return ResponseEntity.ok(agendamentoService.atualizarStatus(id, StatusAgendamento.CANCELADA));
+    }
+
     @PutMapping("/{id}/avaliacao")
     public ResponseEntity<AgendamentoDTO> avaliarAgendamento(
             @PathVariable Long id,

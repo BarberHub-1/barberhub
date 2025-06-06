@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, LogOut, History } from "lucide-react";
+import { Calendar, User, LogOut, History, Star } from "lucide-react";
 import { Scissors } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -35,43 +35,60 @@ const ClientLayout = () => {
       </nav>
 
       {/* Sidebar */}
-      <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r">
-        <div className="p-4">
-          <nav className="space-y-2">
-            <Link to="/client/appointments">
-              <Button
-                variant={isActive("/client/appointments") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Agendamentos
-              </Button>
-            </Link>
-            <Link to="/client/history">
-              <Button
-                variant={isActive("/client/history") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <History className="w-4 h-4 mr-2" />
-                Histórico
-              </Button>
-            </Link>
-            <Link to="/client/profile">
-              <Button
-                variant={isActive("/client/profile") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <User className="w-4 h-4 mr-2" />
-                Perfil
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </div>
+      <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r">
+        <nav className="p-4 space-y-2">
+          <Link
+            to="/client/profile"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive("/client/profile")
+                ? "bg-barber-100 text-barber-900"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <User className="w-5 h-5" />
+            <span>Perfil</span>
+          </Link>
+          <Link
+            to="/client/appointments"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive("/client/appointments")
+                ? "bg-barber-100 text-barber-900"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <Calendar className="w-5 h-5" />
+            <span>Agendamentos</span>
+          </Link>
+          <Link
+            to="/client/history"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive("/client/history")
+                ? "bg-barber-100 text-barber-900"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <History className="w-5 h-5" />
+            <span>Histórico</span>
+          </Link>
+          <Link
+            to="/client/reviews"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              isActive("/client/reviews")
+                ? "bg-barber-100 text-barber-900"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <Star className="w-5 h-5" />
+            <span>Avaliações</span>
+          </Link>
+        </nav>
+      </aside>
 
       {/* Conteúdo principal */}
-      <main className="ml-64 pt-16">
-        <Outlet />
+      <main className="ml-64 pt-16 min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

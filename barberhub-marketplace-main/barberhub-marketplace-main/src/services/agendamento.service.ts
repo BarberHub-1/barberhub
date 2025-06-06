@@ -25,6 +25,12 @@ interface AgendamentoResponse {
   estabelecimentoNome: string;
   servicos: number[];
   servicosNomes: string[];
+  avaliacao?: {
+    id: number;
+    nota: number;
+    comentario: string;
+    dataAvaliacao: string;
+  };
 }
 
 // Interceptor para mapear o status do agendamento
@@ -33,7 +39,8 @@ api.interceptors.response.use((response) => {
     if (Array.isArray(response.data)) {
       response.data = response.data.map((agendamento: AgendamentoResponse) => ({
         ...agendamento,
-        status: agendamento.statusAgendamento || agendamento.status
+        status: agendamento.statusAgendamento || agendamento.status,
+        avaliacao: agendamento.avaliacao
       }));
     } else if ((response.data as AgendamentoResponse).statusAgendamento) {
       (response.data as AgendamentoResponse).status = (response.data as AgendamentoResponse).statusAgendamento;
@@ -53,6 +60,13 @@ export interface Agendamento {
   estabelecimentoNome: string;
   servicos: number[]; // Lista de IDs de serviço
   servicosNomes: string[]; // Lista de nomes dos serviços
+  profissionalId?: number;
+  avaliacao?: {
+    id: number;
+    nota: number;
+    comentario: string;
+    dataAvaliacao: string;
+  };
 }
 
 export interface AgendamentoPayload {
@@ -60,6 +74,27 @@ export interface AgendamentoPayload {
   estabelecimentoId: number;
   servicos: number[]; // Lista de IDs de serviço
   dataHora: string; // Formato ISO 8601
+}
+
+export interface Estabelecimento {
+  id: number;
+  nome: string;
+  endereco: string;
+  telefone: string;
+}
+
+export interface Servico {
+  id: number;
+  tipo: string;
+  preco: number;
+}
+
+export interface AvaliacaoPayload {
+  nota: number;
+  comentario: string;
+  agendamentoId: number;
+  estabelecimentoId: number;
+  dateTime: string;
 }
 
 export const agendamentoService = {
@@ -93,5 +128,25 @@ export const agendamentoService = {
   // Concluir agendamento
   concluirAgendamento: async (id: number): Promise<void> => {
     await api.put(`/api/agendamentos/${id}/status?status=CONCLUIDA`);
+  },
+
+  getEstabelecimentos: async (): Promise<Estabelecimento[]> => {
+    const response = await api.get<Estabelecimento[]>('/api/estabelecimentos');
+    return response.data;
+  },
+
+  getServicos: async (): Promise<Servico[]> => {
+    const response = await api.get<Servico[]>('/api/servicos');
+    return response.data;
+  },
+
+  avaliarAgendamento: async (id: number, avaliacao: AvaliacaoPayload): Promise<void> => {
+    await api.put(`/api/agendamentos/${id}/avaliacao`, {
+      nota: avaliacao.nota,
+      comentario: avaliacao.comentario,
+      agendamentoId: avaliacao.agendamentoId,
+      estabelecimentoId: avaliacao.estabelecimentoId,
+      dateTime: avaliacao.dateTime
+    });
   }
 }; 

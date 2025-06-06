@@ -115,22 +115,34 @@ const ClientAppointments = () => {
     );
   }
 
+  const agendamentosAtivos = agendamentos?.filter(
+    agendamento => agendamento.status === 'AGENDADA'
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Meus Agendamentos</h1>
-          <Button
-            onClick={() => navigate('/barbershops')}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Novo Agendamento
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              onClick={() => navigate('/client/history')}
+              className="bg-gray-600 hover:bg-gray-700"
+            >
+              Ver Histórico
+            </Button>
+            <Button
+              onClick={() => navigate('/client/schedule')}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Novo Agendamento
+            </Button>
+          </div>
         </div>
 
-        {agendamentos && agendamentos.length > 0 ? (
+        {agendamentosAtivos && agendamentosAtivos.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {agendamentos.map((agendamento) => (
+            {agendamentosAtivos.map((agendamento) => (
               <Card key={agendamento.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
@@ -138,14 +150,8 @@ const ClientAppointments = () => {
                       <FaCalendarAlt className="text-blue-600" />
                       {new Date(agendamento.dataHora).toLocaleDateString('pt-BR')}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-sm ${
-                      (agendamento.status === 'AGENDADA' || agendamento.statusAgendamento === 'AGENDADA') ? 'bg-green-100 text-green-800' :
-                      (agendamento.status === 'CONCLUIDA' || agendamento.statusAgendamento === 'CONCLUIDA') ? 'bg-blue-100 text-blue-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {(agendamento.status === 'AGENDADA' || agendamento.statusAgendamento === 'AGENDADA') ? 'Agendada' :
-                       (agendamento.status === 'CONCLUIDA' || agendamento.statusAgendamento === 'CONCLUIDA') ? 'Concluída' :
-                       'Cancelada'}
+                    <span className="px-2 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                      Agendado
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -165,28 +171,20 @@ const ClientAppointments = () => {
                       {new Date(agendamento.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </div>
 
-                    {agendamento.status === 'AGENDADA' && (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="destructive"
-                          className="flex-1"
-                          onClick={() => handleCancelar(agendamento.id)}
-                          disabled={cancelarAgendamento.isPending}
-                        >
-                          <FaTrash className="mr-2" />
-                          Cancelar
-                        </Button>
-                        <Button
-                          variant="default"
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                          onClick={() => handleConcluir(agendamento.id)}
-                          disabled={concluirAgendamento.isPending}
-                        >
-                          <FaCheck className="mr-2" />
-                          Concluir
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleCancelar(agendamento.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={() => handleConcluir(agendamento.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Concluir
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -194,13 +192,13 @@ const ClientAppointments = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <h2 className="text-xl font-medium text-gray-600">Você não possui agendamentos</h2>
-            <p className="mt-2 text-gray-500">Faça seu primeiro agendamento em uma de nossas barbearias parceiras!</p>
+            <h2 className="text-xl font-medium text-gray-600">Nenhum agendamento ativo</h2>
+            <p className="mt-2 text-gray-500">Você não tem agendamentos ativos no momento.</p>
             <Button
-              onClick={() => navigate('/barbershops')}
+              onClick={() => navigate('/client/schedule')}
               className="mt-4 bg-blue-600 hover:bg-blue-700"
             >
-              Ver Barbearias
+              Fazer um Agendamento
             </Button>
           </div>
         )}
