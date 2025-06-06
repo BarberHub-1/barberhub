@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '../components/Spinner';
 import { toast } from 'react-toastify';
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaTrash } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaTrash, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const ClientAppointments = () => {
@@ -33,12 +33,34 @@ const ClientAppointments = () => {
     }
   });
 
+  const concluirAgendamento = useMutation({
+    mutationFn: agendamentoService.concluirAgendamento,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agendamentos'] });
+      toast.success('Agendamento concluído com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao concluir agendamento:', error);
+      toast.error('Erro ao concluir agendamento. Por favor, tente novamente.');
+    }
+  });
+
   const handleCancelar = async (id: number) => {
     if (window.confirm('Tem certeza que deseja cancelar este agendamento?')) {
       try {
         await cancelarAgendamento.mutateAsync(id);
       } catch (error) {
         console.error('Erro ao cancelar agendamento:', error);
+      }
+    }
+  };
+
+  const handleConcluir = async (id: number) => {
+    if (window.confirm('Tem certeza que deseja concluir este agendamento?')) {
+      try {
+        await concluirAgendamento.mutateAsync(id);
+      } catch (error) {
+        console.error('Erro ao concluir agendamento:', error);
       }
     }
   };
@@ -114,50 +136,56 @@ const ClientAppointments = () => {
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <FaCalendarAlt className="text-blue-600" />
-                      {new Date(agendamento.data).toLocaleDateString('pt-BR')}
+                      {new Date(agendamento.dataHora).toLocaleDateString('pt-BR')}
                     </span>
                     <span className={`px-2 py-1 rounded-full text-sm ${
-                      agendamento.status === 'AGENDADO' ? 'bg-green-100 text-green-800' :
-                      agendamento.status === 'CONCLUIDO' ? 'bg-blue-100 text-blue-800' :
+                      (agendamento.status === 'AGENDADA' || agendamento.statusAgendamento === 'AGENDADA') ? 'bg-green-100 text-green-800' :
+                      (agendamento.status === 'CONCLUIDA' || agendamento.statusAgendamento === 'CONCLUIDA') ? 'bg-blue-100 text-blue-800' :
                       'bg-red-100 text-red-800'
                     }`}>
-                      {agendamento.status === 'AGENDADO' ? 'Agendado' :
-                       agendamento.status === 'CONCLUIDO' ? 'Concluído' :
-                       'Cancelado'}
+                      {(agendamento.status === 'AGENDADA' || agendamento.statusAgendamento === 'AGENDADA') ? 'Agendada' :
+                       (agendamento.status === 'CONCLUIDA' || agendamento.statusAgendamento === 'CONCLUIDA') ? 'Concluída' :
+                       'Cancelada'}
                     </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-medium text-gray-800">{agendamento.estabelecimento.nomeEstabelecimento}</h3>
-                      <div className="flex items-center text-gray-600 mt-1">
-                        <FaMapMarkerAlt className="mr-2" />
-                        <span>{agendamento.estabelecimento.endereco}, {agendamento.estabelecimento.cidade}</span>
-                      </div>
+                      <h3 className="font-medium text-gray-800">Estabelecimento: {agendamento.estabelecimentoNome}</h3>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-gray-800">Serviço</h4>
-                      <p className="text-gray-600">{agendamento.servico.descricao}</p>
-                      <p className="text-gray-600">R$ {agendamento.servico.preco.toFixed(2)}</p>
+                      <h4 className="font-medium text-gray-800">Serviços:</h4>
+                      <p className="text-gray-600">{agendamento.servicosNomes.join(', ')}</p>
                     </div>
 
                     <div className="flex items-center text-gray-600">
                       <FaClock className="mr-2" />
-                      <span>{agendamento.horario} ({agendamento.servico.duracaoMinutos} min)</span>
+                      {new Date(agendamento.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </div>
 
-                    {agendamento.status === 'AGENDADO' && (
-                      <Button
-                        variant="destructive"
-                        className="w-full"
-                        onClick={() => handleCancelar(agendamento.id)}
-                        disabled={cancelarAgendamento.isPending}
-                      >
-                        <FaTrash className="mr-2" />
-                        Cancelar Agendamento
-                      </Button>
+                    {agendamento.status === 'AGENDADA' && (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="destructive"
+                          className="flex-1"
+                          onClick={() => handleCancelar(agendamento.id)}
+                          disabled={cancelarAgendamento.isPending}
+                        >
+                          <FaTrash className="mr-2" />
+                          Cancelar
+                        </Button>
+                        <Button
+                          variant="default"
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          onClick={() => handleConcluir(agendamento.id)}
+                          disabled={concluirAgendamento.isPending}
+                        >
+                          <FaCheck className="mr-2" />
+                          Concluir
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>

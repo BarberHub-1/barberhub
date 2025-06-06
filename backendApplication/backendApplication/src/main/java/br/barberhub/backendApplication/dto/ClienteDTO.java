@@ -14,5 +14,5 @@ public class ClienteDTO extends UsuarioDTO {
     private String bairro;
     private String cidade;
     private String estado;
-    private String photo;
+    private String foto;
 }

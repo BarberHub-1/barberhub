@@ -21,6 +21,9 @@ SET time_zone = "+00:00";
 -- Banco de dados: `barberhub_db`
 --
 
+CREATE DATABASE IF NOT EXISTS `barberhub_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `barberhub_db`;
+
 -- --------------------------------------------------------
 
 --
@@ -101,8 +104,8 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id`, `bairro`, `cidade`, `cpf`, `email`, `estado`, `foto`, `nome`, `numero`, `rua`, `senha`, `telefone`) VALUES
-(1, 'string', 'string', 9007199254740991, 'string', 'string', 'string', 'string', 1073741824, 1073741824, 'string', 'string'),
-(6, 'Centro', 'São Paulo', 12345678900, 'cliente@example.com', 'SP', 'url-ou-base64-da-foto', 'João Silva', 123, 456, 'senhaSegura123', '(11) 98765-4321');
+(1, 'Centro', 'São Paulo', 9007199254740991, 'cliente@exemplo.com', 'SP', 'foto.jpg', 'João Silva', 123, 456, 'senha123', '(11) 98765-4321'),
+(6, 'Centro', 'São Paulo', 12345678900, 'cliente@exemplo.com', 'SP', 'url-ou-base64-da-foto', 'João Silva', 123, 456, 'senhaSegura123', '(11) 98765-4321');
 
 -- --------------------------------------------------------
 
@@ -437,11 +440,11 @@ COMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
 -- Inserir estabelecimentos de exemplo
-INSERT INTO estabelecimento (nome_proprietario, nome_estabelecimento, cnpj, endereco, cidade, cep, telefone, foto, status, horario, descricao)
+INSERT INTO estabelecimento (nome_proprietario, nome_estabelecimento, cnpj, endereco, cidade, cep, telefone, foto, status, email, senha)
 VALUES 
-('João Silva', 'Barbearia do João', '12345678901234', 'Rua das Flores, 123', 'São Paulo', '01234-567', '(11) 99999-9999', 'https://via.placeholder.com/300x200?text=Barbearia+do+Joao', 'APROVADO', '{"diaSemana": "SEGUNDA", "horarioAbertura": "09:00", "horarioFechamento": "18:00"}', 'Barbearia tradicional com mais de 10 anos de experiência'),
-('Maria Santos', 'Barbearia Moderna', '98765432109876', 'Av. Paulista, 1000', 'São Paulo', '01310-100', '(11) 98888-8888', 'https://via.placeholder.com/300x200?text=Barbearia+Moderna', 'APROVADO', '{"diaSemana": "SEGUNDA", "horarioAbertura": "10:00", "horarioFechamento": "19:00"}', 'Barbearia moderna com ambiente climatizado'),
-('Pedro Oliveira', 'Barbearia Clássica', '45678912345678', 'Rua Augusta, 500', 'São Paulo', '01304-000', '(11) 97777-7777', 'https://via.placeholder.com/300x200?text=Barbearia+Classica', 'APROVADO', '{"diaSemana": "SEGUNDA", "horarioAbertura": "08:00", "horarioFechamento": "17:00"}', 'Barbearia clássica com atendimento personalizado');
+('João Silva', 'Barbearia do João', '12345678901234', 'Rua das Flores, 123', 'São Paulo', '01234-567', '(11) 99999-9999', 'https://via.placeholder.com/300x200?text=Barbearia+do+Joao', 'APROVADO', 'barbearia.joao@exemplo.com', 'senha123'),
+('Maria Santos', 'Barbearia Moderna', '98765432109876', 'Av. Paulista, 1000', 'São Paulo', '01310-100', '(11) 98888-8888', 'https://via.placeholder.com/300x200?text=Barbearia+Moderna', 'APROVADO', 'barbearia.moderna@exemplo.com', 'senha123'),
+('Pedro Oliveira', 'Barbearia Clássica', '45678912345678', 'Rua Augusta, 500', 'São Paulo', '01304-000', '(11) 97777-7777', 'https://via.placeholder.com/300x200?text=Barbearia+Classica', 'APROVADO', 'barbearia.classica@exemplo.com', 'senha123');
 
 -- Inserir serviços para os estabelecimentos
 INSERT INTO servico (descricao, preco, duracao_minutos, tipo, estabelecimento_id)

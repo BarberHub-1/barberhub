@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.barberhub.backendApplication.model.Cliente;
-import br.barberhub.backendApplication.model.Estabelecimento;
-import br.barberhub.backendApplication.model.Profissional;
 import br.barberhub.backendApplication.model.StatusAgendamento;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
@@ -29,16 +26,15 @@ public class AgendamentoDTO {
     private double discount;
     
     @NotNull(message = "O cliente é obrigatório")
-    private Cliente cliente;
+    private Long clienteId;
     
     @NotNull(message = "O estabelecimento é obrigatório")
-    private Estabelecimento estabelecimento;
-
-    @NotNull(message = "O profissional é obrigatório")
-    private Profissional profissional;
+    private Long estabelecimentoId;
+    private String estabelecimentoNome;
 
     @NotEmpty(message = "A lista de serviços é obrigatória")
     private List<Long> servicos = new ArrayList<>();
+    private List<String> servicosNomes = new ArrayList<>();
 
     @NotNull(message = "A data e hora são obrigatórias")
     @Future(message = "A data e hora devem ser futuras")

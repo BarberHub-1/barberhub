@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ id, tipo }));
+      localStorage.setItem('userId', id.toString());
       
       setToken(token);
       setUser({ id, tipo });
@@ -60,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
     setToken(null);
     setUser(null);
   };

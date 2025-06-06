@@ -9,6 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '../components/Spinner';
 import { toast } from 'react-toastify';
 import { FaCalendarAlt, FaClock, FaUser, FaMapMarkerAlt } from 'react-icons/fa';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from "date-fns";
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { agendamentoService } from '../services/agendamento.service';
 
 interface Servico {
   id: number;
@@ -31,7 +37,7 @@ const Appointment = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedService, setSelectedService] = useState<Servico | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>('');
 
   // Verificar se o usuário está logado
@@ -115,7 +121,7 @@ const Appointment = () => {
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]);
+      dates.push(date);
     }
     return dates;
   }, []);
@@ -129,10 +135,26 @@ const Appointment = () => {
     }
 
     try {
-      // Aqui você implementaria a chamada para a API de agendamento
+      // Criar uma nova data com o horário selecionado
+      const dataHora = new Date(selectedDate);
+      const [hours, minutes] = selectedTime.split(':');
+      dataHora.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const agendamentoData = {
+        clienteId: user?.id,
+        estabelecimentoId: Number(id),
+        servicos: selectedService ? [selectedService.id] : [],
+        dataHora: dataHora.toISOString(),
+      };
+      
+      console.log('Dados do agendamento a serem enviados:', agendamentoData);
+
+      await agendamentoService.criarAgendamento(agendamentoData);
+
       toast.success('Agendamento realizado com sucesso!');
       navigate('/client/appointments');
     } catch (error) {
+      console.error('Erro ao realizar agendamento:', error);
       toast.error('Erro ao realizar agendamento');
     }
   };
@@ -228,24 +250,39 @@ const Appointment = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Data
                   </label>
-                  <select
-                    className="w-full p-2 border rounded-lg"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    required
-                  >
-                    <option value="">Selecione uma data</option>
-                    {availableDates.map((date) => (
-                      <option key={date} value={date}>
-                        {new Date(date).toLocaleDateString('pt-BR', {
-                          weekday: 'long',
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })}
-                      </option>
-                    ))}
-                  </select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                      >
+                        <FaCalendarAlt className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : <span className="text-gray-500">Selecione uma data</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        initialFocus
+                        disabled={(date) => {
+                          return !availableDates.some(availableDate => 
+                            availableDate.getFullYear() === date.getFullYear() &&
+                            availableDate.getMonth() === date.getMonth() &&
+                            availableDate.getDate() === date.getDate()
+                          );
+                        }}
+                        locale={ptBR}
+                        formatters={{
+                          formatWeekdayName: (date, options) => format(date, 'EEEEEE', options),
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Seleção de Horário */}
@@ -253,19 +290,18 @@ const Appointment = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Horário
                   </label>
-                  <select
-                    className="w-full p-2 border rounded-lg"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    required
-                  >
-                    <option value="">Selecione um horário</option>
+                  <div className="grid grid-cols-4 gap-2">
                     {availableTimes.map((time) => (
-                      <option key={time} value={time}>
+                      <button
+                        key={time}
+                        type="button"
+                        onClick={() => setSelectedTime(time)}
+                        className={`px-3 py-2 border rounded-lg text-sm ${selectedTime === time ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+                      >
                         {time}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
                 {/* Resumo do Agendamento */}
@@ -278,7 +314,7 @@ const Appointment = () => {
                       </p>
                       <p className="text-gray-600">
                         <span className="font-medium">Data:</span>{' '}
-                        {new Date(selectedDate).toLocaleDateString('pt-BR')}
+                        {format(selectedDate, "PPP", { locale: ptBR })}
                       </p>
                       <p className="text-gray-600">
                         <span className="font-medium">Horário:</span> {selectedTime}
