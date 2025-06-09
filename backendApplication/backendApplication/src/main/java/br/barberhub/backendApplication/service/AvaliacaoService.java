@@ -36,12 +36,12 @@ public class AvaliacaoService {
     public AvaliacaoDTO cadastrarAvaliacao(AvaliacaoDTO avaliacaoDTO) {
         Avaliacao avaliacao = modelMapper.map(avaliacaoDTO, Avaliacao.class);
         
-        Agendamento agendamento = agendamentoRepository.findById(avaliacaoDTO.getAgendamento().getId())
+        Agendamento agendamento = agendamentoRepository.findById(avaliacaoDTO.getAgendamentoId())
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
         avaliacao.setAgendamento(agendamento);
 
 
-        Estabelecimento estabelecimento = estabelecimentoRepository.findById(avaliacaoDTO.getAgendamento().getId())
+        Estabelecimento estabelecimento = estabelecimentoRepository.findById(avaliacaoDTO.getAgendamentoId())
                 .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
         avaliacao.setEstabelecimento(estabelecimento);
 

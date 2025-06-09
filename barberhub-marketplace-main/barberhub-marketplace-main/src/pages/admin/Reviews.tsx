@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const AdminUsers = () => {
+const AdminReviews = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -23,7 +23,7 @@ const AdminUsers = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Gerenciamento de Usuários</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Gerenciamento de Avaliações</h1>
           <button 
             onClick={() => navigate('/admin')}
             className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
@@ -38,61 +38,62 @@ const AdminUsers = () => {
               <div className="flex gap-4">
                 <input
                   type="text"
-                  placeholder="Buscar usuário..."
+                  placeholder="Buscar avaliação..."
                   className="border rounded px-4 py-2 w-64"
                 />
                 <select className="border rounded px-4 py-2">
-                  <option value="">Todos os tipos</option>
-                  <option value="ADMIN">Administrador</option>
-                  <option value="CLIENTE">Cliente</option>
-                  <option value="BARBEIRO">Barbeiro</option>
+                  <option value="">Todas as notas</option>
+                  <option value="5">5 estrelas</option>
+                  <option value="4">4 estrelas</option>
+                  <option value="3">3 estrelas</option>
+                  <option value="2">2 estrelas</option>
+                  <option value="1">1 estrela</option>
                 </select>
               </div>
-              <button className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
-                Novo Usuário
-              </button>
             </div>
 
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4">Nome</th>
-                  <th className="text-left py-3 px-4">Email</th>
-                  <th className="text-left py-3 px-4">Tipo</th>
-                  <th className="text-left py-3 px-4">Status</th>
+                  <th className="text-left py-3 px-4">Estabelecimento</th>
+                  <th className="text-left py-3 px-4">Cliente</th>
+                  <th className="text-left py-3 px-4">Nota</th>
+                  <th className="text-left py-3 px-4">Data</th>
                   <th className="text-left py-3 px-4">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="py-3 px-4">João Silva</td>
-                  <td className="py-3 px-4">joao@email.com</td>
-                  <td className="py-3 px-4">Cliente</td>
+                  <td className="py-3 px-4">Barbearia do João</td>
+                  <td className="py-3 px-4">Maria Silva</td>
                   <td className="py-3 px-4">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                      Ativo
-                    </span>
+                    <div className="flex items-center">
+                      <span className="text-yellow-400">★★★★★</span>
+                      <span className="ml-2">5.0</span>
+                    </div>
                   </td>
+                  <td className="py-3 px-4">01/03/2024</td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2">
-                      <button className="text-blue-600 hover:text-blue-800">Editar</button>
-                      <button className="text-red-600 hover:text-red-800">Desativar</button>
+                      <button className="text-blue-600 hover:text-blue-800">Ver Detalhes</button>
+                      <button className="text-red-600 hover:text-red-800">Remover</button>
                     </div>
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Maria Santos</td>
-                  <td className="py-3 px-4">maria@email.com</td>
-                  <td className="py-3 px-4">Barbeiro</td>
+                  <td className="py-3 px-4">Salão da Maria</td>
+                  <td className="py-3 px-4">João Santos</td>
                   <td className="py-3 px-4">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                      Ativo
-                    </span>
+                    <div className="flex items-center">
+                      <span className="text-yellow-400">★★★★</span>
+                      <span className="ml-2">4.0</span>
+                    </div>
                   </td>
+                  <td className="py-3 px-4">28/02/2024</td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2">
-                      <button className="text-blue-600 hover:text-blue-800">Editar</button>
-                      <button className="text-red-600 hover:text-red-800">Desativar</button>
+                      <button className="text-blue-600 hover:text-blue-800">Ver Detalhes</button>
+                      <button className="text-red-600 hover:text-red-800">Remover</button>
                     </div>
                   </td>
                 </tr>
@@ -119,4 +120,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers; 
+export default AdminReviews; 

@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const AdminUsers = () => {
+const AdminServices = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -23,7 +23,7 @@ const AdminUsers = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Gerenciamento de Usuários</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Gerenciamento de Serviços</h1>
           <button 
             onClick={() => navigate('/admin')}
             className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
@@ -38,18 +38,18 @@ const AdminUsers = () => {
               <div className="flex gap-4">
                 <input
                   type="text"
-                  placeholder="Buscar usuário..."
+                  placeholder="Buscar serviço..."
                   className="border rounded px-4 py-2 w-64"
                 />
                 <select className="border rounded px-4 py-2">
-                  <option value="">Todos os tipos</option>
-                  <option value="ADMIN">Administrador</option>
-                  <option value="CLIENTE">Cliente</option>
-                  <option value="BARBEIRO">Barbeiro</option>
+                  <option value="">Todas as categorias</option>
+                  <option value="CABELO">Cabelo</option>
+                  <option value="BARBA">Barba</option>
+                  <option value="ESTETICA">Estética</option>
                 </select>
               </div>
               <button className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
-                Novo Usuário
+                Novo Serviço
               </button>
             </div>
 
@@ -57,17 +57,17 @@ const AdminUsers = () => {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4">Nome</th>
-                  <th className="text-left py-3 px-4">Email</th>
-                  <th className="text-left py-3 px-4">Tipo</th>
+                  <th className="text-left py-3 px-4">Categoria</th>
+                  <th className="text-left py-3 px-4">Duração (min)</th>
                   <th className="text-left py-3 px-4">Status</th>
                   <th className="text-left py-3 px-4">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="py-3 px-4">João Silva</td>
-                  <td className="py-3 px-4">joao@email.com</td>
-                  <td className="py-3 px-4">Cliente</td>
+                  <td className="py-3 px-4">Corte de Cabelo</td>
+                  <td className="py-3 px-4">Cabelo</td>
+                  <td className="py-3 px-4">30</td>
                   <td className="py-3 px-4">
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
                       Ativo
@@ -81,9 +81,9 @@ const AdminUsers = () => {
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Maria Santos</td>
-                  <td className="py-3 px-4">maria@email.com</td>
-                  <td className="py-3 px-4">Barbeiro</td>
+                  <td className="py-3 px-4">Barba</td>
+                  <td className="py-3 px-4">Barba</td>
+                  <td className="py-3 px-4">20</td>
                   <td className="py-3 px-4">
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
                       Ativo
@@ -119,4 +119,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers; 
+export default AdminServices; 

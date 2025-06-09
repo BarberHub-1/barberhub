@@ -365,7 +365,7 @@ const Appointment = () => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg"
                 >
                   Confirmar Agendamento
                 </Button>

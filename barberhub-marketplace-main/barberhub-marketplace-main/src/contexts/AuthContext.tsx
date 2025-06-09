@@ -10,6 +10,7 @@ interface LoginResponse {
 interface User {
   id: number;
   tipo: string;
+  role: string;
 }
 
 interface AuthContextType {
@@ -47,11 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { token, tipo, id } = response.data;
       
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ id, tipo }));
+      localStorage.setItem('user', JSON.stringify({ id, tipo, role: tipo }));
       localStorage.setItem('userId', id.toString());
       
       setToken(token);
-      setUser({ id, tipo });
+      setUser({ id, tipo, role: tipo });
     } catch (error) {
       console.error('Erro detalhado:', error);
       throw error;

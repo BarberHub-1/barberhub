@@ -81,7 +81,20 @@ const ClientAppointments = () => {
       'LIMPEZA': 'Limpeza de Pele',
       'MAQUIAGEM': 'Maquiagem',
       'DEPILACAO': 'Depilação',
-      'TRATAMENTO': 'Tratamento Capilar'
+      'TRATAMENTO': 'Tratamento Capilar',
+      'CORTE_DE_CABELO': 'Corte de Cabelo',
+      'CORTE_DE_BARBA': 'Corte de Barba',
+      'HIDRATACAO_CAPILAR': 'Hidratação Capilar',
+      'COLORACAO_CAPILAR': 'Coloração Capilar',
+      'PINTURA_CAPILAR': 'Pintura Capilar',
+      'ALISAMENTO_CAPILAR': 'Alisamento Capilar',
+      'PENTEADO_FESTA': 'Penteado para Festa',
+      'MANICURE_PEDICURE': 'Manicure e Pedicure',
+      'MASSAGEM_FACIAL': 'Massagem Facial',
+      'LIMPEZA_PELE': 'Limpeza de Pele',
+      'MAQUIAGEM_FESTA': 'Maquiagem para Festa',
+      'DEPILACAO_FACIAL': 'Depilação Facial',
+      'TRATAMENTO_CAPILAR': 'Tratamento Capilar'
     };
     return formatacoes[servico] || servico;
   };
