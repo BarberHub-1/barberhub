@@ -225,7 +225,7 @@ const ClientHistory = () => {
                       {!agendamento.avaliacao && (
                         <Button
                           onClick={() => handleAvaliar(agendamento)}
-                          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                          className="w-full bg-gray-600 hover:bg-gray-700 text-white"
                         >
                           <FaStar className="mr-2" />
                           Avaliar Estabelecimento

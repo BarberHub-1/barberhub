@@ -174,7 +174,7 @@ const ClientAppointments = () => {
                       </Button>
                       <Button
                         onClick={() => handleConcluir(agendamento.id)}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-gray-600 hover:bg-gray-700"
                       >
                         Concluir
                       </Button>
