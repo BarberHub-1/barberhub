@@ -11,6 +11,39 @@ import { Star } from 'lucide-react';
 const ClientReviews: React.FC = () => {
   const { user } = useAuth();
 
+  const formatarServico = (servico: string) => {
+    const formatacoes: { [key: string]: string } = {
+      'HIDRATACAO': 'Hidratação',
+      'LUZES': 'Luzes',
+      'CORTE': 'Corte',
+      'BARBA': 'Barba',
+      'COLORACAO': 'Coloração',
+      'PINTURA': 'Pintura',
+      'ALISAMENTO': 'Alisamento',
+      'PENTEADO': 'Penteado',
+      'MANICURE': 'Manicure',
+      'PEDICURE': 'Pedicure',
+      'MASSAGEM': 'Massagem',
+      'LIMPEZA': 'Limpeza de Pele',
+      'MAQUIAGEM': 'Maquiagem',
+      'DEPILACAO': 'Depilação',
+      'TRATAMENTO': 'Tratamento Capilar',
+      'CORTE_DE_CABELO': 'Corte de Cabelo',
+      'CORTE_DE_BARBA': 'Corte de Barba',
+      'CORTE_DE_CABELO_E_BARBA': 'Corte de Cabelo e Barba',
+      'HIDRATACAO_CAPILAR': 'Hidratação Capilar',
+      'COLORACAO_CAPILAR': 'Coloração Capilar',
+      'ALISAMENTO_CAPILAR': 'Alisamento Capilar',
+      'PINTURA_DE_CABELO': 'Pintura de Cabelo',
+      'PENTEADO_FESTA': 'Penteado para Festa',
+      'TRATAMENTO_CAPILAR': 'Tratamento Capilar',
+      'LIMPEZA_DE_PELE': 'Limpeza de Pele',
+      'DEPILACAO_FACIAL': 'Depilação Facial',
+      'DEPILACAO_CORPORAL': 'Depilação Corporal'
+    };
+    return formatacoes[servico] || servico;
+  };
+
   const { data: agendamentos, isLoading } = useQuery({
     queryKey: ['agendamentos'],
     queryFn: agendamentoService.getAgendamentosCliente,
@@ -93,7 +126,7 @@ const ClientReviews: React.FC = () => {
                     <p className="font-medium">Serviços realizados:</p>
                     <ul className="list-disc list-inside text-gray-600">
                       {agendamento.servicosNomes.map((servico, index) => (
-                        <li key={index}>{servico}</li>
+                        <li key={index}>{formatarServico(servico)}</li>
                       ))}
                     </ul>
                   </div>

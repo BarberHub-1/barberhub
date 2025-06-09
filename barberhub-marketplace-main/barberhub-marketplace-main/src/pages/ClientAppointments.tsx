@@ -65,6 +65,27 @@ const ClientAppointments = () => {
     }
   };
 
+  const formatarServico = (servico: string) => {
+    const formatacoes: { [key: string]: string } = {
+      'HIDRATACAO': 'Hidratação',
+      'LUZES': 'Luzes',
+      'CORTE': 'Corte',
+      'BARBA': 'Barba',
+      'COLORACAO': 'Coloração',
+      'PINTURA': 'Pintura',
+      'ALISAMENTO': 'Alisamento',
+      'PENTEADO': 'Penteado',
+      'MANICURE': 'Manicure',
+      'PEDICURE': 'Pedicure',
+      'MASSAGEM': 'Massagem',
+      'LIMPEZA': 'Limpeza de Pele',
+      'MAQUIAGEM': 'Maquiagem',
+      'DEPILACAO': 'Depilação',
+      'TRATAMENTO': 'Tratamento Capilar'
+    };
+    return formatacoes[servico] || servico;
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -157,7 +178,9 @@ const ClientAppointments = () => {
 
                     <div>
                       <h4 className="font-medium text-gray-800">Serviços:</h4>
-                      <p className="text-gray-600">{agendamento.servicosNomes.join(', ')}</p>
+                      <p className="text-gray-600">
+                        {agendamento.servicosNomes.map(formatarServico).join(', ')}
+                      </p>
                     </div>
 
                     <div className="flex items-center text-gray-600">
@@ -188,12 +211,6 @@ const ClientAppointments = () => {
           <div className="text-center py-12">
             <h2 className="text-xl font-medium text-gray-600">Nenhum agendamento ativo</h2>
             <p className="mt-2 text-gray-500">Você não tem agendamentos ativos no momento.</p>
-            <Button
-              onClick={() => navigate('/client/schedule')}
-              className="mt-4 bg-gray-600 hover:bg-gray-700"
-            >
-              Fazer um Agendamento
-            </Button>
           </div>
         )}
       </div>
