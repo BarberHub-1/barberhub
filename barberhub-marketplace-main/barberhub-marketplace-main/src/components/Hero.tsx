@@ -73,38 +73,6 @@ const Hero = () => {
             Descubra as melhores barbearias perto de você, agende horários com facilidade e mostre seu novo visual.
           </p>
         </FadeIn>
-        
-        <FadeIn delay={300} direction="up" className="w-full max-w-2xl">
-          <div className="bg-white/95 backdrop-blur-md p-2 rounded-lg flex items-center shadow-lg">
-            <div className="flex-1 border-r">
-              <SearchAutocomplete
-                type="search"
-                value={searchTerm}
-                onChange={setSearchTerm}
-                onSelect={setSearchTerm}
-                placeholder="Procure pelas barbearias ou serviços que mais combinam com você!"
-                suggestions={availableBarbershops}
-              />
-            </div>
-            <div className="flex-1 px-4">
-              <SearchAutocomplete
-                type="location"
-                value={location}
-                onChange={setLocation}
-                onSelect={setLocation}
-                placeholder="Localização"
-                suggestions={availableLocations}
-              />
-            </div>
-            <Button 
-              size="lg" 
-              className="bg-barber-900 hover:bg-barber-800 text-white"
-              onClick={handleSearch}
-            >
-              Encontrar Barbearias
-            </Button>
-          </div>
-        </FadeIn>
       </div>
     </section>
   );

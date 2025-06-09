@@ -23,39 +23,36 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, senha: string) => {
     try {
-      console.log('Tentando login com:', { email, senha: password });
-      const response = await api.post<LoginResponse>('/auth/login', { 
-        email, 
-        senha: password 
-      });
-      console.log('Resposta do servidor:', response.data);
+      const response = await api.post<LoginResponse>('/auth/login', { email, senha });
       const { token, tipo, id } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ id, tipo, role: tipo }));
-      localStorage.setItem('userId', id.toString());
+      // Mapear o tipo ADMINISTRADOR para ADMIN
+      const role = tipo === 'ADMINISTRADOR' ? 'ADMIN' : tipo;
       
+      const userData = { id, tipo, role };
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
       setToken(token);
-      setUser({ id, tipo, role: tipo });
+      setUser(userData);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } catch (error) {
-      console.error('Erro detalhado:', error);
-      throw error;
+      throw new Error('Falha na autenticação');
     }
   };
 

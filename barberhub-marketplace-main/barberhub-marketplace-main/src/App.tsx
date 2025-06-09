@@ -29,6 +29,14 @@ import ClientReviews from "@/pages/ClientReviews";
 import BarberShopDetails from './pages/BarberShopDetails';
 import Appointment from './pages/Appointment';
 import ClientSchedule from './pages/ClientSchedule';
+import AdminLayout from './components/AdminLayout';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminUsers from './pages/admin/Users';
+import AdminBarbershops from './pages/admin/Barbershops';
+import AdminServices from './pages/admin/Services';
+import AdminReviews from './pages/admin/Reviews';
+import AdminReports from './pages/admin/Reports';
+import AdminSettings from './pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
@@ -71,6 +79,18 @@ function App() {
                   <Route path="reviews" element={<ClientReviews />} />
               </Route>
 
+              {/* Rotas do Administrador */}
+              <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminLayout /></PrivateRoute>}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="barbershops" element={<AdminBarbershops />} />
+                <Route path="services" element={<AdminServices />} />
+                <Route path="reviews" element={<AdminReviews />} />
+                <Route path="reports" element={<AdminReports />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+
+              {/* Rotas do Barbeiro */}
               <Route path="/barber/profile" element={<BarberProfile />} />
               <Route path="/barber/edit-profile" element={<BarberEditProfile />} />
               <Route path="/barber/employees" element={<BarberEmployees />} />

@@ -36,12 +36,9 @@ const Navigation = () => {
         <nav className="hidden md:flex items-center gap-8">
           {!isAboutPage && (
             <>
-              <a href="#featured" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">
-                Descobrir
-              </a>
-              <a href="#categories" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">
-                Serviços
-              </a>
+              <Link to="/" className="text-barber-600 hover:text-barber-900 transition-colors">
+                Barbearias
+              </Link>
             </>
           )}
           <Link to="/barbers" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">

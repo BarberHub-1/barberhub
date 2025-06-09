@@ -221,10 +221,7 @@ const ClientProfile = () => {
             
             <nav className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-6">
               <Link to="/" className="text-barber-600 hover:text-barber-900 transition-colors">
-                Descobrir
-              </Link>
-              <Link to="/services" className="text-barber-600 hover:text-barber-900 transition-colors">
-                Serviços
+                Barbearias
               </Link>
               <Link to="/about" className="text-barber-600 hover:text-barber-900 transition-colors">
                 Sobre

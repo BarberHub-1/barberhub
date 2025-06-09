@@ -52,7 +52,7 @@ const Login = () => {
           redirectTo = '/barber/profile';
           break;
         case 'ADMINISTRADOR':
-          redirectTo = '/'; // Redireciona para a página inicial temporariamente - ajuste conforme necessário
+          redirectTo = '/admin/dashboard';
           break;
         default:
           redirectTo = '/';

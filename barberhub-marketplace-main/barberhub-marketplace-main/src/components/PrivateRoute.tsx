@@ -14,7 +14,11 @@ export default function PrivateRoute({ children, role }: PrivateRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user?.tipo !== role) {
+  // Verifica se o usuário tem a role necessária
+  const hasRequiredRole = user?.role === role || 
+    (role === 'ADMIN' && user?.tipo === 'ADMINISTRADOR');
+
+  if (!hasRequiredRole) {
     return <Navigate to="/" replace />;
   }
 
