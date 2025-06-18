@@ -21,4 +21,6 @@ public class EstabelecimentoDTO extends UsuarioDTO {
     private List<HorarioFuncionamentoDTO> horario;
     private String descricao;
     private List<String> servicos;
+    private Double notaMedia;
+    private Integer quantidadeAvaliacoes;
 }

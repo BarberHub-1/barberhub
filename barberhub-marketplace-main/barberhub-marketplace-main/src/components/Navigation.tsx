@@ -36,7 +36,11 @@ const Navigation = () => {
         <nav className="hidden md:flex items-center gap-8">
           {!isAboutPage && (
             <>
+<<<<<<< HEAD
               <Link to="/" className="text-barber-600 hover:text-barber-900 transition-colors">
+=======
+              <Link to="/barbershops" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">
+>>>>>>> 657d6f7 (add avaliações cards)
                 Barbearias
               </Link>
             </>

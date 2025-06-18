@@ -21,6 +21,7 @@ import br.barberhub.backendApplication.model.StatusCadastro;
 import br.barberhub.backendApplication.model.TipoServico;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
+import br.barberhub.backendApplication.repository.AvaliacaoRepository;
 import jakarta.validation.Valid;
 
 @Service
@@ -32,6 +33,9 @@ public class EstabelecimentoService {
 
     @Autowired
     private ServicoRepository servicoRepository;
+
+    @Autowired
+    private AvaliacaoRepository avaliacaoRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -125,18 +129,39 @@ public class EstabelecimentoService {
     public List<EstabelecimentoDTO> listarEstabelecimentos() {
         List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findAll();
         return estabelecimentos.stream()
-                .map(estabelecimento -> modelMapper.map(estabelecimento, EstabelecimentoDTO.class))
+                .map(estabelecimento -> {
+                    EstabelecimentoDTO dto = modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
+                    // Buscar avaliações
+                    List<br.barberhub.backendApplication.model.Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoId(estabelecimento.getId());
+                    if (!avaliacoes.isEmpty()) {
+                        double media = avaliacoes.stream().mapToInt(a -> a.getNota()).average().orElse(0.0);
+                        dto.setNotaMedia(media);
+                        dto.setQuantidadeAvaliacoes(avaliacoes.size());
+                    } else {
+                        dto.setNotaMedia(null);
+                        dto.setQuantidadeAvaliacoes(0);
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
     public EstabelecimentoDTO buscarEstabelecimentoPorId(Long id) {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
-        
         // Força o carregamento dos horários
         estabelecimento.getHorario().size();
-        
-        return modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
+        EstabelecimentoDTO dto = modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
+        List<br.barberhub.backendApplication.model.Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoId(estabelecimento.getId());
+        if (!avaliacoes.isEmpty()) {
+            double media = avaliacoes.stream().mapToInt(a -> a.getNota()).average().orElse(0.0);
+            dto.setNotaMedia(media);
+            dto.setQuantidadeAvaliacoes(avaliacoes.size());
+        } else {
+            dto.setNotaMedia(null);
+            dto.setQuantidadeAvaliacoes(0);
+        }
+        return dto;
     }
 
     @Transactional

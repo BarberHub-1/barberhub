@@ -41,6 +41,8 @@ export interface Estabelecimento {
         duracaoMinutos: number;
         tipo: string;
     }[];
+    notaMedia?: number;
+    quantidadeAvaliacoes?: number;
 }
 
 export interface HorarioFuncionamento {

@@ -15,7 +15,38 @@ interface FeaturedShop {
 }
 
 const FeaturedShops = () => {
-  const [featuredShops, setFeaturedShops] = useState<FeaturedShop[]>([]);
+  const [featuredShops] = useState<FeaturedShop[]>([
+    {
+      id: '1',
+      name: 'Barbearia Elite',
+      rating: 4.8,
+      reviews: 120,
+      location: 'Centro, São Paulo',
+      services: ['CORTE_DE_CABELO', 'BARBA', 'SOBRANCELHA'],
+      priceRange: [30, 80],
+      image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      id: '2',
+      name: 'Vintage Barber',
+      rating: 4.7,
+      reviews: 98,
+      location: 'Jardins, São Paulo',
+      services: ['CORTE_DE_CABELO', 'LUZES', 'HIDRATACAO'],
+      priceRange: [40, 100],
+      image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      id: '3',
+      name: 'Modern Barber',
+      rating: 4.9,
+      reviews: 150,
+      location: 'Moema, São Paulo',
+      services: ['CORTE_DE_CABELO', 'BARBA', 'LUZES', 'HIDRATACAO'],
+      priceRange: [35, 90],
+      image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80',
+    },
+  ]);
 
   return (
     <section className="py-16 bg-gray-50">

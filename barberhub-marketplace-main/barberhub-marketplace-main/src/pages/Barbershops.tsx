@@ -7,6 +7,7 @@ import { FaSearch, FaMapMarkerAlt, FaStar, FaFilter } from 'react-icons/fa';
 import { Spinner } from '../components/Spinner';
 import { toast } from 'react-toastify';
 import Navigation from '../components/Navigation';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 interface Servico {
   id: number;
@@ -34,6 +35,8 @@ interface BarberShop {
     horarioFechamento: string;
   }[];
   servicos: Servico[];
+  notaMedia?: number;
+  quantidadeAvaliacoes?: number;
 }
 
 export default function Barbershops() {
@@ -137,7 +140,9 @@ export default function Barbershops() {
     
     const matchesLocation = !selectedLocation || shop.cidade === selectedLocation;
     
-    const matchesRating = !selectedRating || shop.status === 'APROVADO';
+    const matchesRating = !selectedRating || (
+      shop.notaMedia !== undefined && shop.notaMedia !== null && shop.notaMedia >= parseInt(selectedRating)
+    );
 
     // Retorna true se todos os filtros ativos corresponderem
     return matchesSearch && matchesCity && matchesService && matchesLocation && matchesRating;
@@ -192,16 +197,40 @@ export default function Barbershops() {
               ))}
             </select>
 
-            <select
-              className="p-2 border rounded-lg"
-              value={selectedRating}
-              onChange={(e) => setSelectedRating(e.target.value)}
-            >
-              <option value="">Todas as Avaliações</option>
-              <option value="4">4+ Estrelas</option>
-              <option value="3">3+ Estrelas</option>
-              <option value="2">2+ Estrelas</option>
-            </select>
+            {/* Filtro de Estrelas em Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="p-2 w-full border rounded-lg flex items-center justify-between bg-white text-yellow-500 border-gray-300 hover:bg-yellow-50 transition-colors"
+                >
+                  <span className="flex items-center">
+                    <FaStar className="mr-2 text-yellow-400" />
+                    {selectedRating ? `${selectedRating}+` : 'Todas as Avaliações'}
+                  </span>
+                  <svg className="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setSelectedRating('')} className={!selectedRating ? 'bg-yellow-100 font-semibold' : ''}>
+                  Todas as Avaliações
+                </DropdownMenuItem>
+                {[4, 3, 2, 1].map((star) => (
+                  <DropdownMenuItem
+                    key={star}
+                    onClick={() => setSelectedRating(String(star))}
+                    className={selectedRating === String(star) ? 'bg-yellow-100 font-semibold' : ''}
+                  >
+                    <span className="flex items-center">
+                      {[...Array(star)].map((_, i) => (
+                        <FaStar key={i} className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                      ))}
+                      <span className="ml-2">{star}+</span>
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <div className="flex items-center space-x-2">
               <span>Preço:</span>
@@ -251,7 +280,11 @@ export default function Barbershops() {
 
                 <div className="flex items-center text-gray-600 mb-4">
                   <FaStar className="mr-2 text-yellow-400" />
-                  <span>4.5 (120 avaliações)</span>
+                  {shop.notaMedia !== undefined && shop.notaMedia !== null ? (
+                    <span>{shop.notaMedia.toFixed(1)} ({shop.quantidadeAvaliacoes} avaliação{shop.quantidadeAvaliacoes === 1 ? '' : 's'})</span>
+                  ) : (
+                    <span>Sem avaliações</span>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
