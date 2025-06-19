@@ -22,6 +22,7 @@ export interface Estabelecimento {
     nomeEstabelecimento: string;
     nomeProprietario: string;
     endereco: string;
+    bairro?: string;
     cidade: string;
     cep: string;
     telefone: string;
@@ -34,13 +35,13 @@ export interface Estabelecimento {
         horarioAbertura: string;
         horarioFechamento: string;
     }[];
-    servicos: {
+    servicos: (string | {
         id: number;
         descricao: string;
         preco: number;
         duracaoMinutos: number;
         tipo: string;
-    }[];
+    })[];
     notaMedia?: number;
     quantidadeAvaliacoes?: number;
 }

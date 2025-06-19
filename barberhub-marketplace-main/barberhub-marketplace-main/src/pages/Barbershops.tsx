@@ -61,6 +61,11 @@ export default function Barbershops() {
         const barbershopsProcessados = response.map(shop => ({
           ...shop,
           servicos: shop.servicos.map(servicoStr => {
+            // Se já for um objeto, retorna como está
+            if (typeof servicoStr === 'object' && servicoStr !== null) {
+              return servicoStr;
+            }
+            
             // Garantir que estamos lidando com uma string
             const servicoString = typeof servicoStr === 'string' ? servicoStr : JSON.stringify(servicoStr);
             
@@ -81,13 +86,15 @@ export default function Barbershops() {
         console.error('Erro ao buscar barbearias:', error);
         throw error;
       }
-    }
+    },
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Extrair cidades únicas das barbearias
   const uniqueCities = React.useMemo(() => {
     if (!barbershops) return [];
-    return Array.from(new Set(barbershops.map(shop => shop.cidade))).sort();
+    return Array.from(new Set(barbershops.map(shop => shop.cidade).filter(Boolean))).sort();
   }, [barbershops]);
 
   useEffect(() => {
@@ -132,22 +139,35 @@ export default function Barbershops() {
     // Verifica cada filtro apenas se estiver ativo
     const matchesSearch = !searchTerm || 
       (shop.nomeEstabelecimento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       shop.endereco?.toLowerCase().includes(searchTerm.toLowerCase()));
+       shop.endereco?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       shop.bairro?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       shop.cidade?.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesCity = !selectedCity || shop.cidade === selectedCity;
     
     const matchesService = !selectedService || 
-      (shop.servicos && shop.servicos.some(service => service.tipo === selectedService));
+      (shop.servicos && shop.servicos.some(service => {
+        if (typeof service === 'object' && service !== null) {
+          return service.tipo === selectedService;
+        }
+        // Se for string, tenta extrair o tipo
+        const servicoString = typeof service === 'string' ? service : JSON.stringify(service);
+        const tipo = servicoString.match(/tipo=([^,]+)/)?.[1];
+        return tipo === selectedService;
+      }));
     
     const matchesLocation = !selectedLocation || shop.cidade === selectedLocation;
     
     const matchesRating = !selectedRating || (
-      shop.notaMedia !== undefined && shop.notaMedia !== null && shop.notaMedia >= parseInt(selectedRating)
+      shop.notaMedia !== undefined && shop.notaMedia !== null && Number(shop.notaMedia) >= parseInt(selectedRating)
     );
 
     // Novo filtro: serviço mais caro
     const maxServicePrice = shop.servicos && shop.servicos.length > 0
-      ? Math.max(...shop.servicos.map(s => s.preco))
+      ? Math.max(...shop.servicos.map(s => {
+          const preco = typeof s.preco === 'number' ? s.preco : parseFloat(String(s.preco)) || 0;
+          return isNaN(preco) ? 0 : preco;
+        }))
       : 0;
     const matchesPrice = maxServicePrice <= priceRange[1];
 
@@ -282,13 +302,13 @@ export default function Barbershops() {
                 
                 <div className="flex items-center text-gray-600 mb-2">
                   <FaMapMarkerAlt className="mr-2" />
-                  <span>{[shop.endereco, shop.bairro ? `Bairro: ${shop.bairro}` : '', shop.cidade].filter(Boolean).join(', ')}</span>
+                  <span>{[shop.endereco, shop.bairro, shop.cidade].filter(Boolean).join(', ')}</span>
                 </div>
 
                 <div className="flex items-center text-gray-600 mb-4">
                   <FaStar className="mr-2 text-yellow-400" />
                   {shop.notaMedia !== undefined && shop.notaMedia !== null ? (
-                    <span>{shop.notaMedia.toFixed(1)} ({shop.quantidadeAvaliacoes} avaliação{shop.quantidadeAvaliacoes === 1 ? '' : 's'})</span>
+                    <span>{Number(shop.notaMedia).toFixed(1)} ({shop.quantidadeAvaliacoes || 0} avaliação{(shop.quantidadeAvaliacoes || 0) === 1 ? '' : 's'})</span>
                   ) : (
                     <span>Sem avaliações</span>
                   )}
@@ -297,14 +317,18 @@ export default function Barbershops() {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {shop.servicos && shop.servicos.length > 0 ? (
                     <>
-                      {shop.servicos.slice(0, 3).map((service) => (
-                        <span
-                          key={`${shop.id}-service-${service.id}`}
-                          className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
-                        >
-                          {service.descricao} - R$ {service.preco.toFixed(2)}
-                        </span>
-                      ))}
+                      {shop.servicos.slice(0, 3).map((service, idx) => {
+                        const descricao = service.descricao || service.tipo || 'Serviço';
+                        const preco = typeof service.preco === 'number' ? service.preco : (parseFloat(String(service.preco)) || 0);
+                        return (
+                          <span
+                            key={`${shop.id}-service-${service.id}-${idx}`}
+                            className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
+                          >
+                            {descricao} - R$ {preco.toFixed(2)}
+                          </span>
+                        );
+                      })}
                       {shop.servicos.length > 3 && (
                         <span 
                           key={`${shop.id}-more-services-${shop.servicos.length}`}
@@ -322,7 +346,7 @@ export default function Barbershops() {
                 <div className="flex justify-between items-center mb-4">
                   <div className="text-sm text-gray-600">
                     <span className="font-medium">Horário:</span>{' '}
-                    {shop.horario?.[0]?.horarioAbertura ? (
+                    {shop.horario && shop.horario.length > 0 && shop.horario[0]?.horarioAbertura ? (
                       `${shop.horario[0].horarioAbertura} - ${shop.horario[0].horarioFechamento}`
                     ) : (
                       'Horário não definido'
