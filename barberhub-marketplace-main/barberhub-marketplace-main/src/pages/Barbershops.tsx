@@ -37,6 +37,7 @@ interface BarberShop {
   servicos: Servico[];
   notaMedia?: number;
   quantidadeAvaliacoes?: number;
+  bairro?: string;
 }
 
 export default function Barbershops() {
@@ -281,7 +282,7 @@ export default function Barbershops() {
                 
                 <div className="flex items-center text-gray-600 mb-2">
                   <FaMapMarkerAlt className="mr-2" />
-                  <span>{shop.endereco}, {shop.cidade}</span>
+                  <span>{[shop.endereco, shop.bairro ? `Bairro: ${shop.bairro}` : '', shop.cidade].filter(Boolean).join(', ')}</span>
                 </div>
 
                 <div className="flex items-center text-gray-600 mb-4">
