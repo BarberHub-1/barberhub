@@ -84,30 +84,14 @@ const ClientAppointments = () => {
       'TRATAMENTO': 'Tratamento Capilar',
       'CORTE_DE_CABELO': 'Corte de Cabelo',
       'CORTE_DE_BARBA': 'Corte de Barba',
-<<<<<<< HEAD
       'HIDRATACAO_CAPILAR': 'Hidratação Capilar',
       'COLORACAO_CAPILAR': 'Coloração Capilar',
       'PINTURA_CAPILAR': 'Pintura Capilar',
-      'ALISAMENTO_CAPILAR': 'Alisamento Capilar',
-      'PENTEADO_FESTA': 'Penteado para Festa',
-      'MANICURE_PEDICURE': 'Manicure e Pedicure',
-      'MASSAGEM_FACIAL': 'Massagem Facial',
-      'LIMPEZA_PELE': 'Limpeza de Pele',
       'MAQUIAGEM_FESTA': 'Maquiagem para Festa',
       'DEPILACAO_FACIAL': 'Depilação Facial',
-      'TRATAMENTO_CAPILAR': 'Tratamento Capilar'
-=======
-      'CORTE_DE_CABELO_E_BARBA': 'Corte de Cabelo e Barba',
-      'HIDRATACAO_CAPILAR': 'Hidratação Capilar',
-      'COLORACAO_CAPILAR': 'Coloração Capilar',
-      'ALISAMENTO_CAPILAR': 'Alisamento Capilar',
-      'PINTURA_DE_CABELO': 'Pintura de Cabelo',
-      'PENTEADO_FESTA': 'Penteado para Festa',
       'TRATAMENTO_CAPILAR': 'Tratamento Capilar',
-      'LIMPEZA_DE_PELE': 'Limpeza de Pele',
-      'DEPILACAO_FACIAL': 'Depilação Facial',
-      'DEPILACAO_CORPORAL': 'Depilação Corporal'
->>>>>>> 657d6f7 (add avaliações cards)
+      'CORTE_DE_CABELO_E_BARBA': 'Corte de Cabelo e Barba',
+      'ALISAMENTO_CAPILAR': 'Alisamento Capilar',
     };
     return formatacoes[servico] || servico;
   };

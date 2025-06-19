@@ -365,11 +365,7 @@ const Appointment = () => {
 
                 <Button
                   type="submit"
-<<<<<<< HEAD
                   className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg"
-=======
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-6 text-lg"
->>>>>>> 657d6f7 (add avaliações cards)
                 >
                   Confirmar Agendamento
                 </Button>

@@ -124,7 +124,7 @@ export default function Barbershops() {
     if (!shop) return false;
 
     // Se não houver filtros ativos, retorna true
-    if (!searchTerm && !selectedCity && !selectedService && !selectedLocation && !selectedRating) {
+    if (!searchTerm && !selectedCity && !selectedService && !selectedLocation && !selectedRating && priceRange[1] === 200) {
       return true;
     }
 
@@ -144,8 +144,14 @@ export default function Barbershops() {
       shop.notaMedia !== undefined && shop.notaMedia !== null && shop.notaMedia >= parseInt(selectedRating)
     );
 
+    // Novo filtro: serviço mais caro
+    const maxServicePrice = shop.servicos && shop.servicos.length > 0
+      ? Math.max(...shop.servicos.map(s => s.preco))
+      : 0;
+    const matchesPrice = maxServicePrice <= priceRange[1];
+
     // Retorna true se todos os filtros ativos corresponderem
-    return matchesSearch && matchesCity && matchesService && matchesLocation && matchesRating;
+    return matchesSearch && matchesCity && matchesService && matchesLocation && matchesRating && matchesPrice;
   });
 
   console.log('Barbearias filtradas:', filteredBarbershops);
@@ -319,14 +325,6 @@ export default function Barbershops() {
                       `${shop.horario[0].horarioAbertura} - ${shop.horario[0].horarioFechamento}`
                     ) : (
                       'Horário não definido'
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Duração:</span>{' '}
-                    {shop.servicos?.[0]?.duracaoMinutos ? (
-                      `${shop.servicos[0].duracaoMinutos}min`
-                    ) : (
-                      'Não definida'
                     )}
                   </div>
                 </div>
