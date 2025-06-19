@@ -61,7 +61,7 @@ const About = () => {
     <div className="min-h-screen bg-white">
       <Navigation />
       
-      <section className="pt-32 pb-16 px-6 bg-barber-50">
+      <section className="pt-24 pb-16 px-6 bg-barber-50">
         <div className="container mx-auto max-w-7xl">
           <FadeIn>
             <h1 className="text-4xl md:text-5xl font-bold text-barber-900 text-center mb-6">

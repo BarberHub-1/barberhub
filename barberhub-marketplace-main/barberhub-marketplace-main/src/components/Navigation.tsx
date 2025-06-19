@@ -37,11 +37,9 @@ const Navigation = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-8">
-          {!isAboutPage && (
-            <Link to="/barbershops" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">
-              Barbearias
-            </Link>
-          )}
+          <Link to="/barbershops" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">
+            Barbearias
+          </Link>
           {!isAuthenticated && (
             <Link to="/barbers" className="text-barber-700 hover:text-barber-900 transition-colors text-sm font-medium">
               Para Barbeiros
