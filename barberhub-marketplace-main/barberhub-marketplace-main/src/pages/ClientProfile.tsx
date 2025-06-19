@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import Navigation from '@/components/Navigation';
 
 interface Cliente {
   id: number;
@@ -211,40 +212,7 @@ const ClientProfile = () => {
 
   return (
     <div className="min-h-screen bg-barber-50">
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Scissors size={28} className="text-barber-900" />
-              <span className="text-xl font-semibold tracking-tight text-barber-900">BarberHub</span>
-            </div>
-            
-            <nav className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-6">
-              <Link to="/" className="text-barber-600 hover:text-barber-900 transition-colors">
-                Descobrir
-              </Link>
-              <Link to="/services" className="text-barber-600 hover:text-barber-900 transition-colors">
-                Serviços
-              </Link>
-              <Link to="/about" className="text-barber-600 hover:text-barber-900 transition-colors">
-                Sobre
-              </Link>
-            </nav>
-
-            <Button 
-              variant="ghost" 
-              className="text-barber-600 hover:text-barber-900 hover:bg-barber-50"
-              onClick={() => {
-                logout();
-                navigate('/');
-              }}
-            >
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      <Navigation />
       <div className="pt-24 pb-12">
         <div className="container mx-auto max-w-3xl px-4">
           <div className="bg-white rounded-xl shadow-lg p-8">
