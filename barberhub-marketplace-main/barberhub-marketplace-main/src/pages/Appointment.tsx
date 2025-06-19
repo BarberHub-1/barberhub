@@ -273,7 +273,7 @@ const Appointment = () => {
                     <option value="">Selecione um serviço</option>
                     {barbershop.servicos.map((servico) => (
                       <option key={servico.id} value={servico.id}>
-                        {servico.descricao} - R$ {typeof servico.preco === 'number' ? servico.preco.toFixed(2) : '0.00'} ({servico.duracaoMinutos || 0} min)
+                        {servico.descricao} - R$ {typeof servico.preco === 'number' ? servico.preco.toFixed(2) : 'N/A'} ({servico.duracaoMinutos || 0} min)
                       </option>
                     ))}
                   </select>
@@ -357,7 +357,7 @@ const Appointment = () => {
                         <span className="font-medium">Duração:</span> {selectedService.duracaoMinutos} minutos
                       </p>
                       <p className="text-gray-600">
-                        <span className="font-medium">Valor:</span> R$ {selectedService.preco.toFixed(2)}
+                        <span className="font-medium">Valor:</span> R$ {typeof selectedService.preco === 'number' ? selectedService.preco.toFixed(2) : 'N/A'}
                       </p>
                     </div>
                   </div>
