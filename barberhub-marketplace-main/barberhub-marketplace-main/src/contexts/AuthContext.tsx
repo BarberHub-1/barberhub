@@ -39,8 +39,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, senha: string) => {
     try {
+      console.log('AuthContext - iniciando login');
       const response = await api.post<LoginResponse>('/auth/login', { email, senha });
       const { token, tipo, id } = response.data;
+      
+      console.log('AuthContext - resposta do login:', { token: !!token, tipo, id });
       
       // Mapear o tipo ADMINISTRADOR para ADMIN
       const role = tipo === 'ADMINISTRADOR' ? 'ADMIN' : tipo;
@@ -51,7 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(token);
       setUser(userData);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      console.log('AuthContext - login concluído, userData:', userData);
     } catch (error) {
+      console.error('AuthContext - erro no login:', error);
       throw new Error('Falha na autenticação');
     }
   };

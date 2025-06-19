@@ -7,7 +7,7 @@ import Navigation from '../components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '../components/Spinner';
-import { toast } from 'react-toastify';
+import { useToast } from '@/hooks/use-toast';
 import { FaCalendarAlt, FaClock, FaUser, FaMapMarkerAlt } from 'react-icons/fa';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -36,6 +36,7 @@ const Appointment = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedService, setSelectedService] = useState<Servico | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>('');
@@ -43,10 +44,20 @@ const Appointment = () => {
   // Verificar se o usuário está logado
   React.useEffect(() => {
     if (!user) {
-      toast.error('Você precisa estar logado para fazer um agendamento');
-      navigate('/login');
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para fazer um agendamento.",
+        variant: "destructive",
+      });
+      navigate('/login', { 
+        state: { 
+          from: {
+            pathname: `/agendamento/${id}`
+          }
+        } 
+      });
     }
-  }, [user, navigate]);
+  }, [user, navigate, toast, id]);
 
   const { data: barbershop, isLoading, error } = useQuery<BarberShop>({
     queryKey: ['barbershop', id],
@@ -130,22 +141,38 @@ const Appointment = () => {
     e.preventDefault();
     
     if (!user?.id) {
-      toast.error('Usuário não autenticado');
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!selectedService || !selectedService.id) {
-      toast.error('Por favor, selecione um serviço');
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um serviço",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!selectedDate) {
-      toast.error('Por favor, selecione uma data');
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione uma data",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!selectedTime) {
-      toast.error('Por favor, selecione um horário');
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um horário",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -160,7 +187,11 @@ const Appointment = () => {
 
       // Verificar se a data é futura
       if (dataHoraLocal <= new Date()) {
-        toast.error('A data e hora devem ser futuras');
+        toast({
+          title: "Erro",
+          description: "A data e hora devem ser futuras",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -184,12 +215,20 @@ const Appointment = () => {
       const response = await agendamentoService.criarAgendamento(agendamentoData);
       console.log('Resposta do servidor:', response);
 
-      toast.success('Agendamento realizado com sucesso!');
+      toast({
+        title: "Sucesso",
+        description: "Agendamento realizado com sucesso!",
+        variant: "default",
+      });
       navigate('/client/appointments');
     } catch (error: any) {
       console.error('Erro ao realizar agendamento:', error);
       console.error('Detalhes do erro:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Erro ao realizar agendamento');
+      toast({
+        title: "Erro",
+        description: error.response?.data?.message || 'Erro ao realizar agendamento',
+        variant: "destructive",
+      });
     }
   };
 

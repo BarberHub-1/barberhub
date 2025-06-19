@@ -7,6 +7,8 @@ import Navigation from '../components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '../components/Spinner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface Servico {
   id: number;
@@ -39,6 +41,8 @@ interface BarberShop {
 const BarberShopDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
 
   const { data: barbershop, isLoading, error } = useQuery<BarberShop>({
     queryKey: ['barbershop', id],
@@ -107,6 +111,44 @@ const BarberShopDetails = () => {
       console.log('Serviços da barbearia:', barbershop.servicos);
     }
   }, [barbershop]);
+
+  const handleAgendamentoClick = () => {
+    console.log('BarberShopDetails - handleAgendamentoClick chamado');
+    console.log('BarberShopDetails - isAuthenticated:', isAuthenticated);
+    console.log('BarberShopDetails - user tipo:', user?.tipo);
+    console.log('BarberShopDetails - id:', id);
+    
+    if (!isAuthenticated) {
+      console.log('BarberShopDetails - usuário não autenticado, redirecionando para login');
+      toast({
+        title: "Login necessário",
+        description: "Por favor, faça login para agendar um horário.",
+        variant: "destructive",
+      });
+      navigate("/login", { 
+        state: { 
+          from: {
+            pathname: `/barbershops/${id}`
+          }
+        } 
+      });
+      return;
+    }
+
+    if (user?.tipo !== "CLIENTE") {
+      console.log('BarberShopDetails - usuário não é cliente');
+      toast({
+        title: "Acesso restrito",
+        description: "Apenas clientes podem realizar agendamentos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Se passou pelas verificações, permite a navegação
+    console.log('BarberShopDetails - navegando para agendamento');
+    navigate(`/agendamento/${id}`);
+  };
 
   if (isLoading) {
     return (
@@ -249,7 +291,7 @@ const BarberShopDetails = () => {
             {/* Botão de Agendamento */}
             <Button 
               className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg"
-              onClick={() => navigate(`/agendamento/${barbershop.id}`)}
+              onClick={handleAgendamentoClick}
             >
               <FaCalendarAlt className="mr-2" />
               Agendar Horário

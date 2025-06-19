@@ -41,25 +41,60 @@ const Login = () => {
   // UseEffect para lidar com o redirecionamento após o login bem-sucedido
   useEffect(() => {
     if (user) {
-      const from = location.state?.from?.pathname;
-      let redirectTo = from || '/';
+      // Tentar obter o from de diferentes formas
+      const fromPathname = location.state?.from?.pathname;
+      const fromString = location.state?.from;
+      const from = fromPathname || (typeof fromString === 'string' ? fromString : null);
+      
+      console.log('Login - location.state:', location.state);
+      console.log('Login - fromPathname:', fromPathname);
+      console.log('Login - fromString:', fromString);
+      console.log('Login - from final:', from);
+      console.log('Login - user tipo:', user.tipo);
+      
+      let redirectTo = '/';
 
-      switch (user.tipo) {
-        case 'CLIENTE':
+      // Se há from específico, usa ele (com validações)
+      if (from) {
+        console.log('Login - há from, redirecionando para:', from);
+        
+        // Verificar se o usuário tem permissão para acessar a rota
+        if (from.startsWith('/agendamento/') && user.tipo !== 'CLIENTE') {
+          toast({
+            title: "Acesso restrito",
+            description: "Apenas clientes podem realizar agendamentos.",
+            variant: "destructive",
+          });
           redirectTo = '/client/profile';
-          break;
-        case 'ESTABELECIMENTO':
-          redirectTo = '/barber/profile';
-          break;
-        case 'ADMINISTRADOR':
-          redirectTo = '/admin/dashboard';
-          break;
-        default:
-          redirectTo = '/';
+        } else if (from.startsWith('/barbershops/')) {
+          // Para páginas de barbearia, qualquer usuário pode acessar
+          redirectTo = from;
+        } else {
+          // Para outras rotas, usar o from
+          redirectTo = from;
+        }
+      } else {
+        // Se não há from, usa a lógica padrão por tipo de usuário
+        console.log('Login - não há from, usando redirecionamento padrão');
+        switch (user.tipo) {
+          case 'CLIENTE':
+            redirectTo = '/client/profile';
+            break;
+          case 'ESTABELECIMENTO':
+            redirectTo = '/barber/profile';
+            break;
+          case 'ADMINISTRADOR':
+            redirectTo = '/admin/dashboard';
+            break;
+          default:
+            redirectTo = '/';
+        }
       }
+      
+      console.log('Login - redirecionamento final para:', redirectTo);
       navigate(redirectTo, { replace: true });
     }
-  }, [user, navigate, location.state]); // Dependências: user, navigate, location.state
+  }, [user, navigate, location.state, toast]); // Dependências: user, navigate, location.state, toast
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
