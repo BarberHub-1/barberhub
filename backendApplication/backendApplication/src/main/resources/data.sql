@@ -1,12 +1,17 @@
 -- Inserir usuários
-INSERT INTO usuario (id, email, senha, tipo, nome, cpf, telefone, status, nome_proprietario, nome_estabelecimento, cnpj, endereco, cidade, cep) VALUES
-(1, 'admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Administrador', '123.456.789-00', '11999999999', 'APROVADO', NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 'cliente@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'CLIENTE', 'João Silva', '987.654.321-00', '11988888888', 'APROVADO', NULL, NULL, NULL, 'Centro', 'São Paulo', '01234-567'),
-(3, 'estabelecimento@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11977777777', 'APROVADO', 'Carlos Oliveira', 'Barbearia Estilo', '12.345.678/0001-95', 'Rua das Flores, 123', 'São Paulo', '01234-567'),
-(4, 'novo.admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Maria Santos', '999.999.999-99', '11944444444', 'APROVADO', NULL, NULL, NULL, NULL, NULL, NULL),
-(5, 'elite@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11922223333', 'APROVADO', 'Eduardo Lima', 'Barbearia Elite', '23.456.789/0001-10', 'Av. Paulista, 1000', 'São Paulo', '01310-100'),
-(6, 'vintage@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11933334444', 'APROVADO', 'Roberto Souza', 'Vintage Barber', '34.567.890/0001-20', 'Rua Augusta, 500', 'São Paulo', '01305-000'),
-(7, 'modern@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11944445555', 'APROVADO', 'Lucas Martins', 'Modern Barber', '45.678.901/0001-30', 'Rua Oscar Freire, 250', 'São Paulo', '01426-001');
+INSERT INTO usuario (id, email, senha, tipo, nome, cpf, telefone, status, nome_proprietario, nome_estabelecimento, cnpj, rua, numero, bairro, cidade, estado, cep) VALUES
+(1, 'admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Administrador', '123.456.789-00', '11999999999', 'APROVADO', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 'cliente@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'CLIENTE', 'João Silva', '987.654.321-00', '11988888888', 'APROVADO', NULL, NULL, NULL, 'Rua das Palmeiras', 101, 'Centro', 'São Paulo', NULL, '01234-567'),
+(3, 'estabelecimento@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11977777777', 'APROVADO', 'Carlos Oliveira', 'Barbearia Estilo', '12.345.678/0001-95', 'Rua das Flores', 123, 'Centro', 'São Paulo', NULL, '01234-567'),
+(4, 'novo.admin@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMINISTRADOR', 'Maria Santos', '999.999.999-99', '11944444444', 'APROVADO', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 'elite@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11922223333', 'APROVADO', 'Eduardo Lima', 'Barbearia Elite', '23.456.789/0001-10', 'Av. Paulista', 1000, 'Bela Vista', 'São Paulo', NULL, '01310-100'),
+(6, 'vintage@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11933334444', 'APROVADO', 'Roberto Souza', 'Vintage Barber', '34.567.890/0001-20', 'Rua Augusta', 500, 'Consolação', 'São Paulo', NULL, '01305-000'),
+(7, 'modern@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11944445555', 'APROVADO', 'Lucas Martins', 'Modern Barber', '45.678.901/0001-30', 'Rua Oscar Freire', 250, 'Jardins', 'São Paulo', NULL, '01426-001'),
+(8, 'cliente2@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'CLIENTE', 'Ana Paula', '888.777.666-55', '11911112222', 'APROVADO', NULL, NULL, NULL, 'Rua Bela Vista', 45, 'Bela Vista', 'São Paulo', NULL, '01311-200'),
+(9, 'barbeariax@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '11955556666', 'APROVADO', 'Marcos Vinicius', 'Barbearia X', '56.789.012/0001-40', 'Rua do Carmo', 45, 'Sé', 'São Paulo', NULL, '01019-020'),
+(10, 'portoalegre@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '51999998888', 'APROVADO', 'Rafael Souza', 'Barbearia Gaúcha', '67.890.123/0001-55', 'Av. Borges de Medeiros', 250, 'Centro', 'Porto Alegre', 'RS', '90020-021'),
+(11, 'curitiba@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '41988887777', 'APROVADO', 'Bruno Lima', 'Barbearia Curitiba', '78.901.234/0001-66', 'Rua XV de Novembro', 100, 'Centro', 'Curitiba', 'PR', '80020-310'),
+(12, 'bh@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ESTABELECIMENTO', NULL, NULL, '31977776666', 'APROVADO', 'Carlos Mendes', 'Barbearia Mineira', '89.012.345/0001-77', 'Av. Afonso Pena', 1500, 'Centro', 'Belo Horizonte', 'MG', '30130-003');
 
 -- Inserir serviços
 INSERT INTO servico (id, descricao, preco, duracao_minutos, tipo, estabelecimento_id) VALUES
@@ -23,7 +28,17 @@ INSERT INTO servico (id, descricao, preco, duracao_minutos, tipo, estabeleciment
 (11, 'Luzes', 160.00, 110, 'LUZES', 6),
 (12, 'Corte Moderno', 70.00, 45, 'CORTE_DE_CABELO', 7),
 (13, 'Barba Express', 28.00, 15, 'BARBA', 7),
-(14, 'Sobrancelha', 22.00, 10, 'SOBRANCELHA', 7);
+(14, 'Sobrancelha', 22.00, 10, 'SOBRANCELHA', 7),
+(15, 'Corte Infantil', 40.00, 25, 'CORTE_DE_CABELO', 9),
+(16, 'Barba Rápida', 20.00, 10, 'BARBA', 9),
+(17, 'Pezinho', 15.00, 10, 'CORTE_DE_CABELO', 9),
+(18, 'Hidratação Simples', 50.00, 30, 'HIDRATACAO', 9),
+(19, 'Corte Masculino', 45.00, 30, 'CORTE_DE_CABELO', 10),
+(20, 'Barba Tradicional', 25.00, 20, 'BARBA', 10),
+(21, 'Corte Moderno', 50.00, 35, 'CORTE_DE_CABELO', 11),
+(22, 'Barba Express', 22.00, 15, 'BARBA', 11),
+(23, 'Corte Clássico', 48.00, 30, 'CORTE_DE_CABELO', 12),
+(24, 'Barba Mineira', 28.00, 20, 'BARBA', 12);
 
 -- Inserir profissionais
 INSERT INTO profissional (id, nome, email, telefone, estabelecimento_id) VALUES
@@ -32,7 +47,12 @@ INSERT INTO profissional (id, nome, email, telefone, estabelecimento_id) VALUES
 (3, 'Pedro Oliveira', 'pedro@email.com', '11933333333', 3),
 (4, 'Felipe Ramos', 'felipe@email.com', '11955556666', 5),
 (5, 'André Silva', 'andre@email.com', '11966667777', 6),
-(6, 'Bruno Costa', 'bruno@email.com', '11977778888', 7);
+(6, 'Bruno Costa', 'bruno@email.com', '11977778888', 7),
+(7, 'Carlos Mendes', 'carlos@email.com', '11988889999', 9),
+(8, 'Fernanda Lima', 'fernanda@email.com', '11977778888', 9),
+(9, 'João Porto', 'joaoporto@email.com', '51988887777', 10),
+(10, 'Lucas Paraná', 'lucaspr@email.com', '41977776666', 11),
+(11, 'Pedro Belo', 'pedrobh@email.com', '31966665555', 12);
 
 -- Inserir horários de funcionamento
 INSERT INTO horarios_funcionamento (id, dia_semana, horario_abertura, horario_fechamento, estabelecimento_id) VALUES
@@ -59,21 +79,71 @@ INSERT INTO horarios_funcionamento (id, dia_semana, horario_abertura, horario_fe
 (21, 'QUARTA', '11:00', '20:00', 7),
 (22, 'QUINTA', '11:00', '20:00', 7),
 (23, 'SEXTA', '11:00', '20:00', 7),
-(24, 'SABADO', '10:00', '16:00', 7);
+(24, 'SABADO', '10:00', '16:00', 7),
+(25, 'SEGUNDA', '08:00', '17:00', 9),
+(26, 'TERCA', '08:00', '17:00', 9),
+(27, 'QUARTA', '08:00', '17:00', 9),
+(28, 'QUINTA', '08:00', '17:00', 9),
+(29, 'SEXTA', '08:00', '17:00', 9),
+(30, 'SABADO', '09:00', '13:00', 9),
+(31, 'SEGUNDA', '09:00', '18:00', 10),
+(32, 'TERCA', '09:00', '18:00', 10),
+(33, 'QUARTA', '09:00', '18:00', 10),
+(34, 'QUINTA', '09:00', '18:00', 10),
+(35, 'SEXTA', '09:00', '18:00', 10),
+(36, 'SABADO', '09:00', '14:00', 10),
+(37, 'SEGUNDA', '10:00', '19:00', 11),
+(38, 'TERCA', '10:00', '19:00', 11),
+(39, 'QUARTA', '10:00', '19:00', 11),
+(40, 'QUINTA', '10:00', '19:00', 11),
+(41, 'SEXTA', '10:00', '19:00', 11),
+(42, 'SABADO', '09:00', '15:00', 11),
+(43, 'SEGUNDA', '09:00', '18:00', 12),
+(44, 'TERCA', '09:00', '18:00', 12),
+(45, 'QUARTA', '09:00', '18:00', 12),
+(46, 'QUINTA', '09:00', '18:00', 12),
+(47, 'SEXTA', '09:00', '18:00', 12),
+(48, 'SABADO', '09:00', '14:00', 12);
 
 -- Inserir agendamentos
 INSERT INTO agendamento (id, data_hora, status, cliente_id, estabelecimento_id) VALUES
 (1, '2024-05-27 10:00:00', 'AGENDADA', 2, 3),
-(2, '2024-05-28 14:00:00', 'AGENDADA', 2, 3);
+(2, '2024-05-28 14:00:00', 'AGENDADA', 2, 3),
+(3, '2024-05-29 09:30:00', 'AGENDADA', 8, 9),
+(4, '2024-05-29 11:00:00', 'AGENDADA', 2, 9),
+(5, '2024-05-30 15:00:00', 'AGENDADA', 8, 3),
+(6, '2024-05-31 10:30:00', 'AGENDADA', 2, 5),
+(7, '2024-06-01 13:00:00', 'AGENDADA', 8, 6),
+(8, '2024-06-02 09:00:00', 'AGENDADA', 2, 7),
+(9, '2024-06-03 16:00:00', 'AGENDADA', 8, 9),
+(10, '2024-06-04 11:00:00', 'AGENDADA', 2, 9);
 
 -- Inserir serviços dos agendamentos
 INSERT INTO agendamento_servico (agendamento_id, servico_id) VALUES
 (1, 1),
 (1, 2),
 (2, 3),
-(2, 4);
+(2, 4),
+(3, 15),
+(3, 16),
+(4, 17),
+(5, 1),
+(5, 2),
+(6, 6),
+(7, 9),
+(8, 13),
+(9, 15),
+(10, 18);
 
 -- Inserir avaliações
 INSERT INTO avaliacao (id, nota, comentario, data_avaliacao, agendamento_id, estabelecimento_id) VALUES
 (1, 5, 'Excelente atendimento! Profissionais muito atenciosos.', '2024-05-27 11:00:00', 1, 3),
-(2, 4, 'Muito bom atendimento, ambiente agradável!', '2024-05-28 15:00:00', 2, 3); 
+(2, 4, 'Muito bom atendimento, ambiente agradável!', '2024-05-28 15:00:00', 2, 3),
+(3, 5, 'Atendimento excelente, corte perfeito!', '2024-05-29 10:00:00', 3, 9),
+(4, 3, 'Achei o serviço rápido, mas poderia ser mais caprichado.', '2024-05-29 12:00:00', 4, 9),
+(5, 4, 'Gostei do corte, ambiente limpo e organizado.', '2024-05-30 16:00:00', 5, 3),
+(6, 5, 'Profissional muito atencioso, recomendo!', '2024-05-31 11:30:00', 6, 5),
+(7, 2, 'Não gostei do resultado, esperava mais.', '2024-06-01 14:00:00', 7, 6),
+(8, 5, 'Atendimento rápido e eficiente!', '2024-06-02 10:00:00', 8, 7),
+(9, 4, 'Corte infantil ficou ótimo, minha filha adorou.', '2024-06-03 17:00:00', 9, 9),
+(10, 3, 'Hidratação simples, mas esperava um pouco mais.', '2024-06-04 12:00:00', 10, 9); 

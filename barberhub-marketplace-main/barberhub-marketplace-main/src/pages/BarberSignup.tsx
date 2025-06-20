@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,8 +22,11 @@ interface EstabelecimentoResponse {
   cnpj: string;
   email: string;
   telefone: string;
-  endereco: string;
+  rua: string;
+  numero: number;
+  bairro: string;
   cidade: string;
+  estado: string;
   cep: string;
   descricao: string;
   foto: string;
@@ -44,6 +48,7 @@ const barberShopSchema = z.object({
   number: z.string().min(1, { message: "Número inválido" }),
   neighborhood: z.string().min(2, { message: "Bairro inválido" }),
   city: z.string().min(2, { message: "Cidade inválida" }),
+  state: z.string().min(2, { message: "Estado inválido" }),
   zipCode: z.string().min(8, { message: "CEP inválido" }).max(9, { message: "CEP inválido" }),
   description: z.string().min(20, { message: "A descrição deve ter pelo menos 20 caracteres" }),
   services: z.array(z.string()).min(1, { message: "Selecione pelo menos um serviço" }),
@@ -57,6 +62,36 @@ const barberShopSchema = z.object({
 type BarberShopFormValues = z.infer<typeof barberShopSchema>;
 
 const diasSemana = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'] as const;
+
+const estadosBrasileiros = [
+  { sigla: 'AC', nome: 'Acre' },
+  { sigla: 'AL', nome: 'Alagoas' },
+  { sigla: 'AP', nome: 'Amapá' },
+  { sigla: 'AM', nome: 'Amazonas' },
+  { sigla: 'BA', nome: 'Bahia' },
+  { sigla: 'CE', nome: 'Ceará' },
+  { sigla: 'DF', nome: 'Distrito Federal' },
+  { sigla: 'ES', nome: 'Espírito Santo' },
+  { sigla: 'GO', nome: 'Goiás' },
+  { sigla: 'MA', nome: 'Maranhão' },
+  { sigla: 'MT', nome: 'Mato Grosso' },
+  { sigla: 'MS', nome: 'Mato Grosso do Sul' },
+  { sigla: 'MG', nome: 'Minas Gerais' },
+  { sigla: 'PA', nome: 'Pará' },
+  { sigla: 'PB', nome: 'Paraíba' },
+  { sigla: 'PR', nome: 'Paraná' },
+  { sigla: 'PE', nome: 'Pernambuco' },
+  { sigla: 'PI', nome: 'Piauí' },
+  { sigla: 'RJ', nome: 'Rio de Janeiro' },
+  { sigla: 'RN', nome: 'Rio Grande do Norte' },
+  { sigla: 'RS', nome: 'Rio Grande do Sul' },
+  { sigla: 'RO', nome: 'Rondônia' },
+  { sigla: 'RR', nome: 'Roraima' },
+  { sigla: 'SC', nome: 'Santa Catarina' },
+  { sigla: 'SP', nome: 'São Paulo' },
+  { sigla: 'SE', nome: 'Sergipe' },
+  { sigla: 'TO', nome: 'Tocantins' }
+] as const;
 
 const BarberSignup = () => {
   const { toast } = useToast();
@@ -78,6 +113,7 @@ const BarberSignup = () => {
       number: "",
       neighborhood: "",
       city: "",
+      state: "",
       zipCode: "",
       description: "",
       services: [],
@@ -151,11 +187,15 @@ const BarberSignup = () => {
         cnpj: cnpjComFormato,
         email: data.email,
         telefone: telefoneComFormato,
-        endereco: `${data.street}, ${data.number} - ${data.neighborhood}`,
+        rua: data.street,
+        numero: parseInt(data.number),
+        bairro: data.neighborhood,
         cidade: data.city,
+        estado: data.state,
         cep: data.zipCode,
         descricao: data.description,
         foto: base64Image,
+        servicos: data.services,
         horario: data.horarios.map(horario => ({
           diaSemana: horario.diaSemana,
           horarioAbertura: horario.horarioAbertura,
@@ -164,23 +204,6 @@ const BarberSignup = () => {
       };
 
       const response = await api.post<EstabelecimentoResponse>('/api/estabelecimentos', estabelecimentoData);
-      
-      // Após criar o estabelecimento, criar os serviços selecionados
-      if (response.data && response.data.id) {
-        const servicosPromises = data.services.map(async (serviceId) => {
-          const servicoData = {
-            tipo: serviceId,
-            descricao: AVAILABLE_SERVICES.find(s => s.id === serviceId)?.label || '',
-            preco: 0, // Preço padrão inicial
-            duracaoMinutos: 30, // Duração padrão inicial
-            estabelecimentoId: response.data.id
-          };
-          
-          return api.post('/api/servicos', servicoData);
-        });
-        
-        await Promise.all(servicosPromises);
-      }
       
       toast({
         title: "Inscrição Enviada",
@@ -429,6 +452,34 @@ const BarberSignup = () => {
                             />
                           </FormControl>
                         </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={(value) => field.onChange(value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {estadosBrasileiros.map((estado) => (
+                                <SelectItem key={estado.sigla} value={estado.sigla}>
+                                  {estado.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

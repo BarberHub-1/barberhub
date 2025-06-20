@@ -22,9 +22,12 @@ interface BarberShop {
   id: number;
   nomeEstabelecimento: string;
   nomeProprietario: string;
-  endereco: string;
-  cidade: string;
-  cep: string;
+  rua?: string;
+  numero?: string | number;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep?: string;
   telefone: string;
   foto?: string;
   status: string;
@@ -217,7 +220,14 @@ const BarberShopDetails = () => {
                 <div className="space-y-4">
                   <div className="flex items-center text-gray-600">
                     <FaMapMarkerAlt className="mr-2" />
-                    <span>{barbershop.endereco}, {barbershop.cidade}</span>
+                    <span>{[
+                      barbershop.rua,
+                      barbershop.numero,
+                      barbershop.bairro,
+                      barbershop.cidade,
+                      barbershop.estado,
+                      barbershop.cep
+                    ].filter(Boolean).join(', ')}</span>
                   </div>
                   
                   <div className="flex items-center text-gray-600">

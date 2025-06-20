@@ -30,16 +30,11 @@ public class Estabelecimento extends Usuario {
     @Column(unique = true, columnDefinition = "VARCHAR(18)")
     private String cnpj;
 
-    @NotBlank
-    @Size(min = 5, max = 200)
-    private String endereco;
-
-    @NotBlank
-    @Size(min = 2, max = 100)
+    private Integer numero;
+    private String rua;
+    private String bairro;
     private String cidade;
-
-    @NotBlank
-    @Size(min = 5, max = 10)
+    private String estado;
     private String cep;
     
     @Column(columnDefinition = "LONGTEXT")

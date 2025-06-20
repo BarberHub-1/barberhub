@@ -9,9 +9,14 @@ const api = axios.create({
 
 // Interceptor para adicionar token de autenticação
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    // Não adiciona token para rotas de cadastro e autenticação
+    if (!config.url?.includes('/auth/') && 
+        !(config.url?.includes('/api/clientes') && config.method === 'post') && 
+        !(config.url?.includes('/api/estabelecimentos') && config.method === 'post')) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
     return config;
 });

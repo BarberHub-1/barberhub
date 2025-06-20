@@ -15,9 +15,12 @@ public class Cliente extends Usuario {
     private String cpf;
     private String telefone;
     private Integer numero;
-    private Integer rua;
+    private String rua;
     private String bairro;
     private String cidade;
     private String estado;
+    private String cep;
+    
+    @Column(columnDefinition = "LONGTEXT")
     private String foto;
 }

@@ -22,6 +22,7 @@ import br.barberhub.backendApplication.model.TipoServico;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
 import br.barberhub.backendApplication.repository.AvaliacaoRepository;
+import br.barberhub.backendApplication.repository.HorarioFuncionamentoRepository;
 import jakarta.validation.Valid;
 
 @Service
@@ -38,6 +39,9 @@ public class EstabelecimentoService {
     private AvaliacaoRepository avaliacaoRepository;
 
     @Autowired
+    private HorarioFuncionamentoRepository horarioFuncionamentoRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -45,6 +49,8 @@ public class EstabelecimentoService {
 
     @Transactional
     public EstabelecimentoDTO cadastrarEstabelecimento(@Valid EstabelecimentoDTO estabelecimentoDTO) {
+        System.out.println("Iniciando cadastro de estabelecimento: " + estabelecimentoDTO.getNomeEstabelecimento());
+        
         Estabelecimento estabelecimento = modelMapper.map(estabelecimentoDTO, Estabelecimento.class);
         
         // Configura o status inicial como PENDENTE
@@ -54,11 +60,38 @@ public class EstabelecimentoService {
         String senhaTemporaria = UUID.randomUUID().toString().substring(0, 8);
         estabelecimento.setSenha(passwordEncoder.encode(senhaTemporaria));
         
-        // Salva o estabelecimento primeiro para ter o ID
+        // Processa os horários de funcionamento antes de salvar
+        if (estabelecimentoDTO.getHorario() != null) {
+            System.out.println("Processando " + estabelecimentoDTO.getHorario().size() + " horários");
+            estabelecimentoDTO.getHorario().forEach(horarioDTO -> {
+                try {
+                    System.out.println("Processando horário: " + horarioDTO.getDiaSemana() + " - " + horarioDTO.getHorarioAbertura() + " até " + horarioDTO.getHorarioFechamento());
+                    
+                    // Cria o horário manualmente para evitar problemas de mapeamento
+                    HorarioFuncionamento horario = new HorarioFuncionamento();
+                    horario.setDiaSemana(horarioDTO.getDiaSemana());
+                    horario.setHorarioAbertura(horarioDTO.getHorarioAbertura());
+                    horario.setHorarioFechamento(horarioDTO.getHorarioFechamento());
+                    
+                    // Adiciona o horário ao estabelecimento usando o método addHorario
+                    estabelecimento.addHorario(horario);
+                    System.out.println("Horário adicionado ao estabelecimento");
+                } catch (Exception e) {
+                    System.err.println("Erro ao processar horário: " + e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException("Erro ao processar horário de funcionamento", e);
+                }
+            });
+        }
+        
+        System.out.println("Salvando estabelecimento com horários...");
+        // Salva o estabelecimento com os horários (cascade irá salvar os horários automaticamente)
         Estabelecimento estabelecimentoSalvo = estabelecimentoRepository.save(estabelecimento);
+        System.out.println("Estabelecimento salvo com ID: " + estabelecimentoSalvo.getId());
         
         // Processa os serviços
         if (estabelecimentoDTO.getServicos() != null) {
+            System.out.println("Processando " + estabelecimentoDTO.getServicos().size() + " serviços");
             estabelecimentoDTO.getServicos().forEach(tipoServico -> {
                 Servico servico = new Servico();
                 servico.setTipo(TipoServico.valueOf(tipoServico));
@@ -173,8 +206,11 @@ public class EstabelecimentoService {
         estabelecimento.setNomeProprietario(estabelecimentoDTO.getNomeProprietario());
         estabelecimento.setNomeEstabelecimento(estabelecimentoDTO.getNomeEstabelecimento());
         estabelecimento.setCnpj(estabelecimentoDTO.getCnpj());
-        estabelecimento.setEndereco(estabelecimentoDTO.getEndereco());
+        estabelecimento.setRua(estabelecimentoDTO.getRua());
+        estabelecimento.setNumero(estabelecimentoDTO.getNumero());
+        estabelecimento.setBairro(estabelecimentoDTO.getBairro());
         estabelecimento.setCidade(estabelecimentoDTO.getCidade());
+        estabelecimento.setEstado(estabelecimentoDTO.getEstado());
         estabelecimento.setCep(estabelecimentoDTO.getCep());
         estabelecimento.setTelefone(estabelecimentoDTO.getTelefone());
         estabelecimento.setDescricao(estabelecimentoDTO.getDescricao());

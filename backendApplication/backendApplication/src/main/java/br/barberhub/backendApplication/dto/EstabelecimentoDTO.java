@@ -12,8 +12,11 @@ public class EstabelecimentoDTO extends UsuarioDTO {
     private String nomeProprietario;
     private String nomeEstabelecimento;
     private String cnpj;
-    private String endereco;
+    private Integer numero;
+    private String rua;
+    private String bairro;
     private String cidade;
+    private String estado;
     private String cep;
     private String telefone;
     private String foto;

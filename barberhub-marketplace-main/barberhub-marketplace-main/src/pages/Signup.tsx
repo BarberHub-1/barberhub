@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +11,7 @@ import * as z from "zod";
 import { Mail, Lock, User, Eye, EyeOff, MapPin, CreditCard, Home, Hash, Map, Building2, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Scissors } from "lucide-react";
+import api from "@/lib/api";
 
 const signupSchema = z.object({
   name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
@@ -20,6 +22,7 @@ const signupSchema = z.object({
   number: z.string().min(1, { message: "Número inválido" }),
   neighborhood: z.string().min(2, { message: "Bairro inválido" }),
   city: z.string().min(2, { message: "Cidade inválida" }),
+  state: z.string().min(2, { message: "Estado inválido" }),
   zipCode: z.string().min(8, { message: "CEP inválido" }).max(9, { message: "CEP inválido" }),
   password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
   termsAndConditions: z.literal(true, {
@@ -28,6 +31,36 @@ const signupSchema = z.object({
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
+
+const estadosBrasileiros = [
+  { sigla: 'AC', nome: 'Acre' },
+  { sigla: 'AL', nome: 'Alagoas' },
+  { sigla: 'AP', nome: 'Amapá' },
+  { sigla: 'AM', nome: 'Amazonas' },
+  { sigla: 'BA', nome: 'Bahia' },
+  { sigla: 'CE', nome: 'Ceará' },
+  { sigla: 'DF', nome: 'Distrito Federal' },
+  { sigla: 'ES', nome: 'Espírito Santo' },
+  { sigla: 'GO', nome: 'Goiás' },
+  { sigla: 'MA', nome: 'Maranhão' },
+  { sigla: 'MT', nome: 'Mato Grosso' },
+  { sigla: 'MS', nome: 'Mato Grosso do Sul' },
+  { sigla: 'MG', nome: 'Minas Gerais' },
+  { sigla: 'PA', nome: 'Pará' },
+  { sigla: 'PB', nome: 'Paraíba' },
+  { sigla: 'PR', nome: 'Paraná' },
+  { sigla: 'PE', nome: 'Pernambuco' },
+  { sigla: 'PI', nome: 'Piauí' },
+  { sigla: 'RJ', nome: 'Rio de Janeiro' },
+  { sigla: 'RN', nome: 'Rio Grande do Norte' },
+  { sigla: 'RS', nome: 'Rio Grande do Sul' },
+  { sigla: 'RO', nome: 'Rondônia' },
+  { sigla: 'RR', nome: 'Roraima' },
+  { sigla: 'SC', nome: 'Santa Catarina' },
+  { sigla: 'SP', nome: 'São Paulo' },
+  { sigla: 'SE', nome: 'Sergipe' },
+  { sigla: 'TO', nome: 'Tocantins' }
+] as const;
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,19 +80,70 @@ const Signup = () => {
       number: "",
       neighborhood: "",
       city: "",
+      state: "",
       zipCode: "",
       password: "",
       termsAndConditions: undefined,
     },
   });
 
-  function onSubmit(data: SignupFormValues) {
-    console.log(data);
-    toast({
-      title: "Conta Criada",
-      description: `Bem-vindo, ${data.name}! Sua conta foi criada.`,
-    });
-    navigate("/login");
+  async function onSubmit(data: SignupFormValues) {
+    try {
+      // Formata o telefone (remove caracteres não numéricos e garante formato correto)
+      const telefoneFormatado = data.phone.replace(/\D/g, '');
+      if (telefoneFormatado.length !== 11) {
+        toast({
+          title: "Erro",
+          description: "O telefone deve conter 11 dígitos (DDD + número)",
+          variant: "destructive",
+        });
+        return;
+      }
+      const telefoneComFormato = `(${telefoneFormatado.substring(0, 2)}) ${telefoneFormatado.substring(2, 7)}-${telefoneFormatado.substring(7)}`;
+      
+      // Formata o CPF (remove caracteres não numéricos e garante formato correto)
+      const cpfFormatado = data.cpf.replace(/\D/g, '');
+      if (cpfFormatado.length !== 11) {
+        toast({
+          title: "Erro",
+          description: "O CPF deve conter 11 dígitos",
+          variant: "destructive",
+        });
+        return;
+      }
+      const cpfComFormato = `${cpfFormatado.substring(0, 3)}.${cpfFormatado.substring(3, 6)}.${cpfFormatado.substring(6, 9)}-${cpfFormatado.substring(9)}`;
+      
+      // Prepara os dados do cliente
+      const clienteData = {
+        nome: data.name,
+        email: data.email,
+        senha: data.password,
+        cpf: cpfComFormato,
+        telefone: telefoneComFormato,
+        rua: data.street,
+        numero: parseInt(data.number),
+        bairro: data.neighborhood,
+        cidade: data.city,
+        estado: data.state,
+        cep: data.zipCode
+      };
+
+      const response = await api.post('/api/clientes', clienteData);
+      
+      toast({
+        title: "Conta Criada",
+        description: `Bem-vindo, ${data.name}! Sua conta foi criada com sucesso.`,
+      });
+      
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error: any) {
+      console.error('Erro ao cadastrar:', error);
+      toast({
+        title: "Erro",
+        description: error.response?.data?.message || "Não foi possível criar a conta. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   }
 
   const handleTermsClick = () => {
@@ -288,6 +372,34 @@ const Signup = () => {
                             {...field}
                           />
                         </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <div className="relative">
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {estadosBrasileiros.map((estado) => (
+                              <SelectItem key={estado.sigla} value={estado.sigla}>
+                                {estado.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <FormMessage />
                     </FormItem>
