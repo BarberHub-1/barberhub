@@ -160,7 +160,7 @@ const BarberEmployees = () => {
         ...editingEmployee,
         telefone: telefoneFormatado,
         estabelecimentoId: user?.id,
-        servicosIds: [] // Lista vazia de serviços por enquanto
+        servicosIds: editingEmployee.servicosIds || []
       };
 
       console.log('Atualizando profissional:', profissionalData);
