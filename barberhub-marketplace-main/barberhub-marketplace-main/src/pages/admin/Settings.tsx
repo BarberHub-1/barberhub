@@ -26,7 +26,7 @@ const AdminSettings = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Configurações</h1>
           <button 
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/dashboard')}
             className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
           >
             Voltar ao Dashboard

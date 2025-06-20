@@ -93,7 +93,7 @@ const AdminReviews = () => {
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">Gerenciamento de Avaliações</h1>
-                    <button onClick={() => navigate('/admin')} className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
+                    <button onClick={() => navigate('/admin/dashboard')} className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
                         Voltar ao Dashboard
                     </button>
                 </div>
