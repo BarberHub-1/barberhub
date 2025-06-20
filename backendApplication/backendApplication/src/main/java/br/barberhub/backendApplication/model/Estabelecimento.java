@@ -41,7 +41,7 @@ public class Estabelecimento extends Usuario {
     private String foto;
 
     @NotBlank
-    @Pattern(regexp = "\\(\\d{2}\\) \\d{5}-\\d{4}", message = "Telefone inválido")
+    @Pattern(regexp = "(\\(\\d{2}\\) \\d{5}-\\d{4}|\\d{11})", message = "Telefone inválido")
     private String telefone;
 
     @Column(columnDefinition = "TEXT")

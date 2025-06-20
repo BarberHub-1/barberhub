@@ -30,5 +30,26 @@ export const estabelecimentoService = {
 
     async delete(id: number) {
         await api.delete(`/api/estabelecimentos/${id}`);
+    },
+
+    async aprovar(id: number) {
+        console.log('Chamando API para aprovar estabelecimento ID:', id);
+        const response = await api.patch<Estabelecimento>(`/api/estabelecimentos/${id}/status`, { status: 'APROVADO' });
+        console.log('Resposta da API:', response.data);
+        return response.data;
+    },
+
+    async rejeitar(id: number) {
+        console.log('Chamando API para rejeitar estabelecimento ID:', id);
+        const response = await api.patch<Estabelecimento>(`/api/estabelecimentos/${id}/status`, { status: 'REJEITADO' });
+        console.log('Resposta da API:', response.data);
+        return response.data;
+    },
+
+    async desativar(id: number) {
+        console.log('Chamando API para desativar estabelecimento ID:', id);
+        const response = await api.patch<Estabelecimento>(`/api/estabelecimentos/${id}/status`, { status: 'REJEITADO' });
+        console.log('Resposta da API:', response.data);
+        return response.data;
     }
 }; 

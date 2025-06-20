@@ -280,9 +280,42 @@ public class EstabelecimentoService {
     }
 
     public void excluirEstabelecimento(Long id) {
-        Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
-        estabelecimentoRepository.delete(estabelecimento);
+        estabelecimentoRepository.deleteById(id);
+    }
+
+    @Transactional
+    public EstabelecimentoDTO alterarStatusEstabelecimento(Long id, String novoStatus) {
+        try {
+            System.out.println("Iniciando alteração de status para estabelecimento ID: " + id);
+            System.out.println("Status atual: " + novoStatus);
+            
+            Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
+            
+            System.out.println("Estabelecimento encontrado: " + estabelecimento.getNomeEstabelecimento());
+            System.out.println("Status atual no banco: " + estabelecimento.getStatus());
+            
+            StatusCadastro status = StatusCadastro.valueOf(novoStatus);
+            System.out.println("Status convertido com sucesso: " + status);
+            
+            estabelecimento.setStatus(status);
+            System.out.println("Status definido no objeto: " + estabelecimento.getStatus());
+            
+            Estabelecimento estabelecimentoSalvo = estabelecimentoRepository.save(estabelecimento);
+            System.out.println("Estabelecimento salvo com sucesso. Novo status: " + estabelecimentoSalvo.getStatus());
+            
+            EstabelecimentoDTO dto = modelMapper.map(estabelecimentoSalvo, EstabelecimentoDTO.class);
+            System.out.println("DTO criado com status: " + dto.getStatus());
+            
+            return dto;
+        } catch (IllegalArgumentException e) {
+            System.err.println("Erro ao converter status '" + novoStatus + "': " + e.getMessage());
+            throw new RuntimeException("Status inválido: " + novoStatus, e);
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao alterar status: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao alterar status do estabelecimento", e);
+        }
     }
 
     public EstabelecimentoDTO toDTO(Estabelecimento estabelecimento) {

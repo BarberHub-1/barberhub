@@ -21,14 +21,18 @@ export interface Estabelecimento {
     id: number;
     nomeEstabelecimento: string;
     nomeProprietario: string;
-    endereco: string;
-    bairro?: string;
-    cidade: string;
-    cep: string;
+    cnpj: string;
+    email: string;
     telefone: string;
+    rua: string;
+    numero: number;
+    bairro: string;
+    cidade: string;
+    estado: string;
+    cep: string;
+    descricao?: string;
     foto?: string;
     status: string;
-    descricao?: string;
     horario: {
         id: number;
         diaSemana: string;

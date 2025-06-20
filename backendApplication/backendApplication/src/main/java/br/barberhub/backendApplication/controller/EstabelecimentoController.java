@@ -19,6 +19,7 @@ import br.barberhub.backendApplication.model.Servico;
 import br.barberhub.backendApplication.repository.ServicoRepository;
 import br.barberhub.backendApplication.model.HorarioFuncionamento;
 import br.barberhub.backendApplication.repository.HorarioFuncionamentoRepository;
+import lombok.Data;
 
 @RestController
 @RequestMapping("/api/estabelecimentos")
@@ -35,6 +36,11 @@ public class EstabelecimentoController {
 
     @Autowired
     private HorarioFuncionamentoRepository horarioFuncionamentoRepository;
+
+    @Data
+    public static class StatusUpdateRequest {
+        private String status;
+    }
 
     @PostMapping
     public ResponseEntity<EstabelecimentoDTO> cadastrarEstabelecimento(@Valid @RequestBody EstabelecimentoDTO estabelecimentoDTO) {
@@ -65,6 +71,40 @@ public class EstabelecimentoController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<EstabelecimentoDTO> alterarStatusEstabelecimento(
+            @PathVariable Long id,
+            @RequestBody StatusUpdateRequest request) {
+        System.out.println("Recebida requisição PATCH para alterar status do estabelecimento ID: " + id);
+        System.out.println("Novo status: " + request.getStatus());
+        try {
+            EstabelecimentoDTO resultado = estabelecimentoService.alterarStatusEstabelecimento(id, request.getStatus());
+            System.out.println("Status alterado com sucesso para: " + resultado.getStatus());
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            System.err.println("Erro ao alterar status: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<EstabelecimentoDTO> alterarStatusEstabelecimentoPut(
+            @PathVariable Long id,
+            @RequestBody StatusUpdateRequest request) {
+        System.out.println("Recebida requisição PUT para alterar status do estabelecimento ID: " + id);
+        System.out.println("Novo status: " + request.getStatus());
+        try {
+            EstabelecimentoDTO resultado = estabelecimentoService.alterarStatusEstabelecimento(id, request.getStatus());
+            System.out.println("Status alterado com sucesso para: " + resultado.getStatus());
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            System.err.println("Erro ao alterar status: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
     @PostMapping("/teste")
     public ResponseEntity<String> testeCadastro() {
         try {
@@ -80,6 +120,20 @@ public class EstabelecimentoController {
             Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
             
             return ResponseEntity.ok("Estabelecimento salvo com ID: " + salvo.getId());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/teste-status/{id}")
+    public ResponseEntity<String> testeStatus(@PathVariable Long id) {
+        try {
+            Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
+            
+            return ResponseEntity.ok("Estabelecimento ID: " + id + 
+                                   ", Nome: " + estabelecimento.getNomeEstabelecimento() + 
+                                   ", Status atual: " + estabelecimento.getStatus());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro: " + e.getMessage());
         }
