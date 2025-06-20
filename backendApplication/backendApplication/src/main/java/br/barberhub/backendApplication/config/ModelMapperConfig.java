@@ -44,9 +44,28 @@ public class ModelMapperConfig {
                 mapper.map(Estabelecimento::getServicos, EstabelecimentoDTO::setServicos);
             });
         
+        // Configuração específica para EstabelecimentoDTO -> Estabelecimento (ignora ID)
+        modelMapper.createTypeMap(EstabelecimentoDTO.class, Estabelecimento.class)
+            .addMappings(mapper -> {
+                mapper.skip(Estabelecimento::setId); // Ignora o ID durante o mapeamento
+                mapper.map(EstabelecimentoDTO::getNomeEstabelecimento, Estabelecimento::setNomeEstabelecimento);
+                mapper.map(EstabelecimentoDTO::getNomeProprietario, Estabelecimento::setNomeProprietario);
+                mapper.map(EstabelecimentoDTO::getCnpj, Estabelecimento::setCnpj);
+                mapper.map(EstabelecimentoDTO::getRua, Estabelecimento::setRua);
+                mapper.map(EstabelecimentoDTO::getNumero, Estabelecimento::setNumero);
+                mapper.map(EstabelecimentoDTO::getBairro, Estabelecimento::setBairro);
+                mapper.map(EstabelecimentoDTO::getCidade, Estabelecimento::setCidade);
+                mapper.map(EstabelecimentoDTO::getEstado, Estabelecimento::setEstado);
+                mapper.map(EstabelecimentoDTO::getCep, Estabelecimento::setCep);
+                mapper.map(EstabelecimentoDTO::getTelefone, Estabelecimento::setTelefone);
+                mapper.map(EstabelecimentoDTO::getFoto, Estabelecimento::setFoto);
+                mapper.map(EstabelecimentoDTO::getDescricao, Estabelecimento::setDescricao);
+            });
+        
         // Configuração específica para HorarioFuncionamento
         modelMapper.createTypeMap(HorarioFuncionamentoDTO.class, HorarioFuncionamento.class)
             .addMappings(mapper -> {
+                mapper.skip(HorarioFuncionamento::setId); // Ignora o ID durante o mapeamento
                 mapper.map(HorarioFuncionamentoDTO::getDiaSemana, HorarioFuncionamento::setDiaSemana);
                 mapper.map(HorarioFuncionamentoDTO::getHorarioAbertura, HorarioFuncionamento::setHorarioAbertura);
                 mapper.map(HorarioFuncionamentoDTO::getHorarioFechamento, HorarioFuncionamento::setHorarioFechamento);
@@ -55,6 +74,7 @@ public class ModelMapperConfig {
         // Configuração específica para Cliente
         modelMapper.createTypeMap(ClienteDTO.class, Cliente.class)
             .addMappings(mapper -> {
+                mapper.skip(Cliente::setId); // Ignora o ID durante o mapeamento
                 mapper.map(ClienteDTO::getNome, Cliente::setNome);
                 mapper.map(ClienteDTO::getCpf, Cliente::setCpf);
                 mapper.map(ClienteDTO::getTelefone, Cliente::setTelefone);

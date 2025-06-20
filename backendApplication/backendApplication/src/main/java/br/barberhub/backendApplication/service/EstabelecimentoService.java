@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.UUID;
+import java.util.ArrayList;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.barberhub.backendApplication.dto.EstabelecimentoDTO;
+import br.barberhub.backendApplication.dto.HorarioFuncionamentoDTO;
 import br.barberhub.backendApplication.model.Estabelecimento;
 import br.barberhub.backendApplication.model.HorarioFuncionamento;
 import br.barberhub.backendApplication.model.Servico;
@@ -53,6 +55,10 @@ public class EstabelecimentoService {
         
         Estabelecimento estabelecimento = modelMapper.map(estabelecimentoDTO, Estabelecimento.class);
         
+        // Limpa as listas para evitar cascade de objetos vazios
+        estabelecimento.setHorario(new ArrayList<>());
+        estabelecimento.setServicos(new ArrayList<>());
+        
         // Configura o status inicial como PENDENTE
         estabelecimento.setStatus(StatusCadastro.PENDENTE);
         
@@ -60,22 +66,28 @@ public class EstabelecimentoService {
         String senhaTemporaria = UUID.randomUUID().toString().substring(0, 8);
         estabelecimento.setSenha(passwordEncoder.encode(senhaTemporaria));
         
-        // Processa os horários de funcionamento antes de salvar
+        // Salva o estabelecimento primeiro para obter o ID
+        System.out.println("Salvando estabelecimento...");
+        Estabelecimento estabelecimentoSalvo = estabelecimentoRepository.save(estabelecimento);
+        System.out.println("Estabelecimento salvo com ID: " + estabelecimentoSalvo.getId());
+        
+        // Processa os horários de funcionamento após salvar o estabelecimento
         if (estabelecimentoDTO.getHorario() != null) {
             System.out.println("Processando " + estabelecimentoDTO.getHorario().size() + " horários");
             estabelecimentoDTO.getHorario().forEach(horarioDTO -> {
                 try {
                     System.out.println("Processando horário: " + horarioDTO.getDiaSemana() + " - " + horarioDTO.getHorarioAbertura() + " até " + horarioDTO.getHorarioFechamento());
                     
-                    // Cria o horário manualmente para evitar problemas de mapeamento
+                    // Cria o horário manualmente
                     HorarioFuncionamento horario = new HorarioFuncionamento();
                     horario.setDiaSemana(horarioDTO.getDiaSemana());
                     horario.setHorarioAbertura(horarioDTO.getHorarioAbertura());
                     horario.setHorarioFechamento(horarioDTO.getHorarioFechamento());
+                    horario.setEstabelecimento(estabelecimentoSalvo);
                     
-                    // Adiciona o horário ao estabelecimento usando o método addHorario
-                    estabelecimento.addHorario(horario);
-                    System.out.println("Horário adicionado ao estabelecimento");
+                    // Salva o horário
+                    HorarioFuncionamento horarioSalvo = horarioFuncionamentoRepository.save(horario);
+                    System.out.println("Horário salvo com ID: " + horarioSalvo.getId());
                 } catch (Exception e) {
                     System.err.println("Erro ao processar horário: " + e.getMessage());
                     e.printStackTrace();
@@ -84,26 +96,47 @@ public class EstabelecimentoService {
             });
         }
         
-        System.out.println("Salvando estabelecimento com horários...");
-        // Salva o estabelecimento com os horários (cascade irá salvar os horários automaticamente)
-        Estabelecimento estabelecimentoSalvo = estabelecimentoRepository.save(estabelecimento);
-        System.out.println("Estabelecimento salvo com ID: " + estabelecimentoSalvo.getId());
-        
         // Processa os serviços
         if (estabelecimentoDTO.getServicos() != null) {
             System.out.println("Processando " + estabelecimentoDTO.getServicos().size() + " serviços");
             estabelecimentoDTO.getServicos().forEach(tipoServico -> {
-                Servico servico = new Servico();
-                servico.setTipo(TipoServico.valueOf(tipoServico));
-                servico.setDescricao(getDescricaoServico(TipoServico.valueOf(tipoServico)));
-                servico.setPreco(getPrecoPadraoServico(TipoServico.valueOf(tipoServico)));
-                servico.setDuracaoMinutos(getDuracaoPadraoServico(TipoServico.valueOf(tipoServico)));
-                servico.setEstabelecimento(estabelecimentoSalvo);
-                servicoRepository.save(servico);
+                try {
+                    System.out.println("Processando serviço: " + tipoServico);
+                    TipoServico tipo = TipoServico.valueOf(tipoServico);
+                    System.out.println("Tipo convertido: " + tipo);
+                    
+                    Servico servico = new Servico();
+                    servico.setTipo(tipo);
+                    
+                    String descricao = getDescricaoServico(tipo);
+                    System.out.println("Descrição: " + descricao);
+                    servico.setDescricao(descricao);
+                    
+                    double preco = getPrecoPadraoServico(tipo);
+                    System.out.println("Preço: " + preco);
+                    servico.setPreco(preco);
+                    
+                    int duracao = getDuracaoPadraoServico(tipo);
+                    System.out.println("Duração: " + duracao);
+                    servico.setDuracaoMinutos(duracao);
+                    
+                    servico.setEstabelecimento(estabelecimentoSalvo);
+                    
+                    Servico servicoSalvo = servicoRepository.save(servico);
+                    System.out.println("Serviço salvo com ID: " + servicoSalvo.getId());
+                } catch (Exception e) {
+                    System.err.println("Erro ao processar serviço: " + e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException("Erro ao processar serviço", e);
+                }
             });
         }
         
-        EstabelecimentoDTO response = modelMapper.map(estabelecimentoSalvo, EstabelecimentoDTO.class);
+        // Busca o estabelecimento atualizado com os horários
+        Estabelecimento estabelecimentoCompleto = estabelecimentoRepository.findById(estabelecimentoSalvo.getId())
+                .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado após salvar"));
+        
+        EstabelecimentoDTO response = modelMapper.map(estabelecimentoCompleto, EstabelecimentoDTO.class);
         response.setSenha(senhaTemporaria); // Inclui a senha temporária na resposta
         return response;
     }
