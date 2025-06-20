@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Scissors, MapPin, User, Mail, Phone, Store, Clock, Image, Calendar, Upload, Building2, Hash, Home, Map } from "lucide-react";
+import { Scissors, MapPin, User, Mail, Phone, Store, Clock, Image, Calendar, Upload, Building2, Hash, Home, Map, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AVAILABLE_SERVICES } from "@/constants/services";
 import { estabelecimentoService } from "@/services/estabelecimento.service";
@@ -43,6 +43,7 @@ const barberShopSchema = z.object({
   ownerName: z.string().min(2, { message: "O nome do proprietário deve ter pelo menos 2 caracteres" }),
   cnpj: z.string().min(14, { message: "CNPJ inválido" }).max(18, { message: "CNPJ inválido" }),
   email: z.string().email({ message: "Por favor, insira um endereço de e-mail válido" }),
+  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
   phone: z.string().min(10, { message: "Por favor, insira um número de telefone válido" }),
   street: z.string().min(3, { message: "Rua inválida" }),
   number: z.string().min(1, { message: "Número inválido" }),
@@ -98,6 +99,7 @@ const BarberSignup = () => {
   const navigate = useNavigate();
   const [termsRead, setTermsRead] = useState(false);
   const [privacyRead, setPrivacyRead] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [shopImage, setShopImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   
@@ -108,6 +110,7 @@ const BarberSignup = () => {
       ownerName: "",
       cnpj: "",
       email: "",
+      password: "",
       phone: "",
       street: "",
       number: "",
@@ -186,6 +189,7 @@ const BarberSignup = () => {
         nomeProprietario: data.ownerName,
         cnpj: cnpjComFormato,
         email: data.email,
+        senha: data.password,
         telefone: telefoneComFormato,
         rua: data.street,
         numero: parseInt(data.number),
@@ -210,7 +214,7 @@ const BarberSignup = () => {
         description: "Obrigado por se inscrever! Analisaremos suas informações e entraremos em contato em breve.",
       });
       
-      setTimeout(() => navigate("/barbers"), 2000);
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error: any) {
       console.error('Erro ao cadastrar:', error);
       toast({
@@ -351,6 +355,39 @@ const BarberSignup = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Senha</FormLabel>
+                      <div className="relative">
+                        <Hash className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <FormControl>
+                          <Input 
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Sua senha" 
+                            className="pl-10 pr-10" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <button
+                          type="button"
+                          className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="phone"

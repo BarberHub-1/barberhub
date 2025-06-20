@@ -62,9 +62,14 @@ public class EstabelecimentoService {
         // Configura o status inicial como PENDENTE
         estabelecimento.setStatus(StatusCadastro.PENDENTE);
         
-        // Gera uma senha temporária
-        String senhaTemporaria = UUID.randomUUID().toString().substring(0, 8);
-        estabelecimento.setSenha(passwordEncoder.encode(senhaTemporaria));
+        // Criptografa a senha fornecida pelo usuário
+        if (estabelecimentoDTO.getSenha() != null && !estabelecimentoDTO.getSenha().trim().isEmpty()) {
+            estabelecimento.setSenha(passwordEncoder.encode(estabelecimentoDTO.getSenha()));
+        } else {
+            // Gera uma senha temporária apenas se não foi fornecida
+            String senhaTemporaria = UUID.randomUUID().toString().substring(0, 8);
+            estabelecimento.setSenha(passwordEncoder.encode(senhaTemporaria));
+        }
         
         // Salva o estabelecimento primeiro para obter o ID
         System.out.println("Salvando estabelecimento...");
@@ -137,7 +142,7 @@ public class EstabelecimentoService {
                 .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado após salvar"));
         
         EstabelecimentoDTO response = modelMapper.map(estabelecimentoCompleto, EstabelecimentoDTO.class);
-        response.setSenha(senhaTemporaria); // Inclui a senha temporária na resposta
+        response.setSenha(estabelecimentoDTO.getSenha()); // Inclui a senha fornecida pelo usuário na resposta
         return response;
     }
 
