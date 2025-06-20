@@ -200,20 +200,14 @@ public class EstabelecimentoService {
     public List<EstabelecimentoDTO> listarEstabelecimentos() {
         List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findByStatus(StatusCadastro.APROVADO);
         return estabelecimentos.stream()
-                .map(estabelecimento -> {
-                    EstabelecimentoDTO dto = modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
-                    // Buscar avaliações
-                    List<br.barberhub.backendApplication.model.Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoId(estabelecimento.getId());
-                    if (!avaliacoes.isEmpty()) {
-                        double media = avaliacoes.stream().mapToInt(a -> a.getNota()).average().orElse(0.0);
-                        dto.setNotaMedia(media);
-                        dto.setQuantidadeAvaliacoes(avaliacoes.size());
-                    } else {
-                        dto.setNotaMedia(null);
-                        dto.setQuantidadeAvaliacoes(0);
-                    }
-                    return dto;
-                })
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<EstabelecimentoDTO> listarTodosEstabelecimentos() {
+        List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findAll();
+        return estabelecimentos.stream()
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -279,47 +273,46 @@ public class EstabelecimentoService {
         return modelMapper.map(estabelecimentoAtualizado, EstabelecimentoDTO.class);
     }
 
+    @Transactional
     public void excluirEstabelecimento(Long id) {
         estabelecimentoRepository.deleteById(id);
     }
 
     @Transactional
     public EstabelecimentoDTO alterarStatusEstabelecimento(Long id, String novoStatus) {
+        System.out.println("Buscando estabelecimento com ID: " + id);
+        Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
+            .orElseThrow(() -> {
+                System.out.println("Estabelecimento não encontrado com ID: " + id);
+                return new RuntimeException("Estabelecimento não encontrado");
+            });
+
+        System.out.println("Estabelecimento encontrado: " + estabelecimento.getNomeEstabelecimento());
+        System.out.println("Alterando status para: " + novoStatus);
+
         try {
-            System.out.println("Iniciando alteração de status para estabelecimento ID: " + id);
-            System.out.println("Status atual: " + novoStatus);
-            
-            Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
-            
-            System.out.println("Estabelecimento encontrado: " + estabelecimento.getNomeEstabelecimento());
-            System.out.println("Status atual no banco: " + estabelecimento.getStatus());
-            
-            StatusCadastro status = StatusCadastro.valueOf(novoStatus);
-            System.out.println("Status convertido com sucesso: " + status);
-            
+            StatusCadastro status = StatusCadastro.valueOf(novoStatus.toUpperCase());
             estabelecimento.setStatus(status);
-            System.out.println("Status definido no objeto: " + estabelecimento.getStatus());
-            
-            Estabelecimento estabelecimentoSalvo = estabelecimentoRepository.save(estabelecimento);
-            System.out.println("Estabelecimento salvo com sucesso. Novo status: " + estabelecimentoSalvo.getStatus());
-            
-            EstabelecimentoDTO dto = modelMapper.map(estabelecimentoSalvo, EstabelecimentoDTO.class);
-            System.out.println("DTO criado com status: " + dto.getStatus());
-            
-            return dto;
+            estabelecimentoRepository.save(estabelecimento);
+            System.out.println("Status salvo com sucesso.");
+            return toDTO(estabelecimento);
         } catch (IllegalArgumentException e) {
-            System.err.println("Erro ao converter status '" + novoStatus + "': " + e.getMessage());
-            throw new RuntimeException("Status inválido: " + novoStatus, e);
-        } catch (Exception e) {
-            System.err.println("Erro inesperado ao alterar status: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Erro ao alterar status do estabelecimento", e);
+            System.err.println("Status inválido: " + novoStatus);
+            throw new IllegalArgumentException("Status inválido: " + novoStatus);
         }
     }
 
     public EstabelecimentoDTO toDTO(Estabelecimento estabelecimento) {
         EstabelecimentoDTO dto = modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
+        List<br.barberhub.backendApplication.model.Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoId(estabelecimento.getId());
+        if (!avaliacoes.isEmpty()) {
+            double media = avaliacoes.stream().mapToInt(a -> a.getNota()).average().orElse(0.0);
+            dto.setNotaMedia(media);
+            dto.setQuantidadeAvaliacoes(avaliacoes.size());
+        } else {
+            dto.setNotaMedia(null);
+            dto.setQuantidadeAvaliacoes(0);
+        }
         return dto;
     }
 

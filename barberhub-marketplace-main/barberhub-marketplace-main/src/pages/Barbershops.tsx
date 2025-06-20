@@ -8,37 +8,21 @@ import { Spinner } from '../components/Spinner';
 import { toast } from 'react-toastify';
 import Navigation from '../components/Navigation';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Estabelecimento } from '../types';
 
-interface Servico {
-  id: number;
-  tipo: string;
-  descricao: string;
-  preco: number;
-  duracaoMinutos: number;
-}
-
-interface BarberShop {
-  id: number;
-  nomeEstabelecimento: string;
-  nomeProprietario: string;
-  endereco: string;
-  cidade: string;
-  cep: string;
-  telefone: string;
-  foto?: string;
-  status: string;
-  descricao?: string;
-  horario: {
-    id: number;
-    diaSemana: string;
-    horarioAbertura: string;
-    horarioFechamento: string;
-  }[];
-  servicos: Servico[];
-  notaMedia?: number;
-  quantidadeAvaliacoes?: number;
-  bairro?: string;
-}
+// Mapeamento para nomes amigáveis dos tipos de serviço
+const labelServico: Record<string, string> = {
+  CORTE_DE_CABELO: 'Corte de Cabelo',
+  BARBA: 'Barba',
+  HIDRATACAO: 'Hidratação',
+  LUZES: 'Luzes',
+  SOBRANCELHA: 'Sobrancelha',
+  PIGMENTACAO: 'Pigmentação',
+  TRATAMENTO_CAPILAR: 'Tratamento Capilar',
+  COLORACAO: 'Coloração',
+  SELAGEM: 'Selagem',
+  ESCOVA: 'Escova',
+};
 
 export default function Barbershops() {
   const navigate = useNavigate();
@@ -50,11 +34,11 @@ export default function Barbershops() {
   const [selectedRating, setSelectedRating] = useState('');
   const [priceRange, setPriceRange] = useState([0, 200]);
 
-  const { data: barbershops, isLoading, error } = useQuery({
+  const { data: barbershops, isLoading, error } = useQuery<Estabelecimento[]>({
     queryKey: ['barbershops'],
     queryFn: async () => {
       try {
-        const response = await estabelecimentoService.getAll();
+        const response = await estabelecimentoService.getAprovados();
         console.log('Dados recebidos do backend:', response);
         
         // Converter os serviços de string para objeto
@@ -81,7 +65,7 @@ export default function Barbershops() {
         }));
         
         console.log('Barbearias processadas:', barbershopsProcessados);
-        return barbershopsProcessados as BarberShop[];
+        return barbershopsProcessados;
       } catch (error) {
         console.error('Erro ao buscar barbearias:', error);
         throw error;
@@ -139,7 +123,7 @@ export default function Barbershops() {
     // Verifica cada filtro apenas se estiver ativo
     const matchesSearch = !searchTerm || 
       (shop.nomeEstabelecimento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       shop.endereco?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       `${shop.rua}, ${shop.numero}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
        shop.bairro?.toLowerCase().includes(searchTerm.toLowerCase()) ||
        shop.cidade?.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -165,7 +149,7 @@ export default function Barbershops() {
     // Novo filtro: serviço mais caro
     const maxServicePrice = shop.servicos && shop.servicos.length > 0
       ? Math.max(...shop.servicos.map(s => {
-          const preco = typeof s.preco === 'number' ? s.preco : parseFloat(String(s.preco)) || 0;
+          const preco = (s as any).preco || 0;
           return isNaN(preco) ? 0 : preco;
         }))
       : 0;
@@ -248,126 +232,143 @@ export default function Barbershops() {
                     onClick={() => setSelectedRating(String(star))}
                     className={selectedRating === String(star) ? 'bg-yellow-100 font-semibold' : ''}
                   >
-                    <span className="flex items-center">
+                    <div className="flex items-center">
                       {[...Array(star)].map((_, i) => (
-                        <FaStar key={i} className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                        <FaStar key={i} className="text-yellow-400" />
                       ))}
-                      <span className="ml-2">{star}+</span>
-                    </span>
+                      {[...Array(5 - star)].map((_, i) => (
+                        <FaStar key={i} className="text-gray-300" />
+                      ))}
+                      <span className="ml-2 text-sm">{star} Estrela{star > 1 ? 's' : ''} ou mais</span>
+                    </div>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <div className="flex items-center space-x-2">
-              <span>Preço:</span>
+            
+            {/* Filtro de Preço */}
+            <div className="p-2 border rounded-lg bg-white">
+              <label htmlFor="priceRange" className="block text-sm font-medium text-gray-700">
+                Preço máximo: R$ {priceRange[1]}
+              </label>
               <input
+                id="priceRange"
                 type="range"
                 min="0"
                 max="200"
+                step="10"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                className="w-full"
+                onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(priceRange[1] / 200) * 100}%, #e5e7eb ${(priceRange[1] / 200) * 100}%, #e5e7eb 100%)`
+                }}
               />
-              <span>R$ {priceRange[1]}</span>
             </div>
           </div>
         </div>
-
-        {/* Lista de Barbearias */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBarbershops?.map((shop) => (
-            <div
-              key={shop.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="relative h-48">
-                <img
-                  src={shop.foto || 'https://placehold.co/300x200/e2e8f0/1e293b?text=Barbearia'}
-                  alt={shop.nomeEstabelecimento}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://placehold.co/300x200/e2e8f0/1e293b?text=Barbearia';
-                  }}
-                />
-                {shop.status === 'APROVADO' && (
-                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-sm">
-                    Verificado
+        
+        {isLoading && <p>Carregando barbearias...</p>}
+        {error && <p>Erro ao carregar barbearias.</p>}
+        {!isLoading && !error && filteredBarbershops && filteredBarbershops.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredBarbershops.map((shop) => (
+              <div 
+                key={shop.id}
+                className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"
+              >
+                <div className="relative">
+                  <img 
+                    src={shop.foto || 'https://via.placeholder.com/400x250'} 
+                    alt={shop.nomeEstabelecimento}
+                    className="w-full h-48 object-cover" 
+                  />
+                  {/* Selo de verificação com nota */}
+                  <div className="absolute top-4 right-4 bg-white/90 px-3 py-1 rounded-full flex items-center gap-1">
+                    <FaStar className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm font-medium">
+                      {shop.notaMedia ? Number(shop.notaMedia).toFixed(1) : '0.0'}
+                    </span>
                   </div>
-                )}
-              </div>
-
-              <div className="p-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">{shop.nomeEstabelecimento}</h2>
-                
-                <div className="flex items-center text-gray-600 mb-2">
-                  <FaMapMarkerAlt className="mr-2" />
-                  <span>{[shop.endereco, shop.bairro, shop.cidade].filter(Boolean).join(', ')}</span>
                 </div>
-
-                <div className="flex items-center text-gray-600 mb-4">
-                  <FaStar className="mr-2 text-yellow-400" />
-                  {shop.notaMedia !== undefined && shop.notaMedia !== null ? (
-                    <span>{Number(shop.notaMedia).toFixed(1)} ({shop.quantidadeAvaliacoes || 0} avaliação{(shop.quantidadeAvaliacoes || 0) === 1 ? '' : 's'})</span>
-                  ) : (
-                    <span>Sem avaliações</span>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {shop.servicos && shop.servicos.length > 0 ? (
-                    <>
-                      {shop.servicos.slice(0, 3).map((service, idx) => {
-                        const descricao = service.descricao || service.tipo || 'Serviço';
-                        const preco = typeof service.preco === 'number' ? service.preco : (parseFloat(String(service.preco)) || 0);
-                        return (
-                          <span
-                            key={`${shop.id}-service-${service.id}-${idx}`}
-                            className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
-                          >
-                            {descricao} - R$ {preco.toFixed(2)}
-                          </span>
-                        );
-                      })}
-                      {shop.servicos.length > 3 && (
-                        <span 
-                          key={`${shop.id}-more-services-${shop.servicos.length}`}
-                          className="bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded"
-                        >
-                          +{shop.servicos.length - 3} serviços
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">{shop.nomeEstabelecimento}</h2>
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <FaMapMarkerAlt className="mr-2" />
+                    <p>{shop.rua}, {shop.numero} - {shop.bairro}</p>
+                  </div>
+                  <div className="flex items-center text-yellow-500 mb-4">
+                    {shop.notaMedia ? (
+                      <>
+                        {[...Array(Math.floor(shop.notaMedia))].map((_, i) => (
+                          <FaStar key={i} />
+                        ))}
+                        {[...Array(5 - Math.floor(shop.notaMedia))].map((_, i) => (
+                          <FaStar key={i} className="text-gray-300" />
+                        ))}
+                        <span className="text-gray-600 ml-2 text-sm">
+                          {shop.notaMedia.toFixed(1)} ({shop.quantidadeAvaliacoes} avaliação{shop.quantidadeAvaliacoes === 1 ? '' : 'es'})
                         </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-gray-500 text-sm">Nenhum serviço cadastrado</span>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center mb-4">
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Horário:</span>{' '}
-                    {shop.horario && shop.horario.length > 0 && shop.horario[0]?.horarioAbertura ? (
-                      `${shop.horario[0].horarioAbertura} - ${shop.horario[0].horarioFechamento}`
+                      </>
                     ) : (
-                      'Horário não definido'
+                      <span className="text-gray-500 text-sm">Sem avaliações</span>
                     )}
                   </div>
+                  
+                  {/* Seção de Serviços */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {shop.servicos && shop.servicos.length > 0 ? (
+                      <>
+                        {shop.servicos.slice(0, 3).map((service, idx) => {
+                          let nomeServico = '';
+                          if (typeof service === 'string') {
+                            // Se for string e parece um objeto serializado, tenta extrair o tipo
+                            const tipoMatch = service.match(/tipo=([A-Z_]+)/);
+                            const tipo = tipoMatch ? tipoMatch[1] : service;
+                            nomeServico = labelServico[tipo] || tipo;
+                          } else if (typeof service === 'object' && service !== null) {
+                            nomeServico = labelServico[service.tipo] || service.descricao || service.tipo || '';
+                          }
+                          return nomeServico ? (
+                            <span
+                              key={`${shop.id}-service-${idx}-${nomeServico}`}
+                              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                            >
+                              {nomeServico}
+                            </span>
+                          ) : null;
+                        })}
+                        {shop.servicos.length > 3 && (
+                          <span
+                            key={`${shop.id}-more-services-${shop.servicos.length}`}
+                            className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full"
+                          >
+                            +{shop.servicos.length - 3} serviços
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-gray-500 text-xs">Nenhum serviço cadastrado</span>
+                    )}
+                  </div>
+                  
+                  {/* Botão Ver Detalhes */}
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => navigate(`/barbershops/${shop.id}`)}
+                      className="inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                    >
+                      Ver Detalhes
+                    </button>
+                  </div>
                 </div>
-
-                <button
-                  onClick={() => navigate(`/barbershops/${shop.id}`)}
-                  className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
-                >
-                  Ver Detalhes
-                </button>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredBarbershops?.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500 text-lg">Nenhuma barbearia encontrada com os filtros selecionados.</p>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <h2 className="text-2xl font-semibold text-gray-700">Nenhuma barbearia encontrada</h2>
+            <p className="mt-2 text-gray-500">Tente ajustar seus filtros para encontrar o que procura.</p>
           </div>
         )}
       </div>

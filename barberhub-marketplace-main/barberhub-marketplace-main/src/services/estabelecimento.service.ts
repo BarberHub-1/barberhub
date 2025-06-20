@@ -2,15 +2,25 @@ import api from '../lib/axios';
 import { Estabelecimento } from '../types';
 
 export const estabelecimentoService = {
-    async getAll() {
+    // Para páginas públicas
+    getAprovados: async (): Promise<Estabelecimento[]> => {
         const response = await api.get<Estabelecimento[]>('/api/estabelecimentos');
-        return response.data.map(estabelecimento => ({
-            ...estabelecimento,
-            foto: estabelecimento.foto ? `data:image/jpeg;base64,${estabelecimento.foto}` : undefined
+        return response.data.map(est => ({
+            ...est,
+            foto: est.foto ? `data:image/jpeg;base64,${est.foto}` : undefined
         }));
     },
 
-    async getById(id: number) {
+    // Para o painel de admin
+    getAll: async (): Promise<Estabelecimento[]> => {
+        const response = await api.get<Estabelecimento[]>('/api/estabelecimentos/all');
+        return response.data.map(est => ({
+            ...est,
+            foto: est.foto ? `data:image/jpeg;base64,${est.foto}` : undefined
+        }));
+    },
+
+    getById: async (id: number): Promise<Estabelecimento> => {
         const response = await api.get<Estabelecimento>(`/api/estabelecimentos/${id}`);
         return {
             ...response.data,
@@ -18,38 +28,32 @@ export const estabelecimentoService = {
         };
     },
 
-    async create(estabelecimento: Partial<Estabelecimento>) {
-        const response = await api.post<Estabelecimento>('/api/estabelecimentos', estabelecimento);
+    create: async (data: any): Promise<Estabelecimento> => {
+        const response = await api.post<Estabelecimento>('/api/estabelecimentos', data);
         return response.data;
     },
 
-    async update(id: number, estabelecimento: Partial<Estabelecimento>) {
-        const response = await api.put<Estabelecimento>(`/api/estabelecimentos/${id}`, estabelecimento);
+    update: async (id: number, data: any): Promise<Estabelecimento> => {
+        const response = await api.put<Estabelecimento>(`/api/estabelecimentos/${id}`, data);
         return response.data;
     },
 
-    async delete(id: number) {
+    delete: async (id: number): Promise<void> => {
         await api.delete(`/api/estabelecimentos/${id}`);
     },
 
-    async aprovar(id: number) {
-        console.log('Chamando API para aprovar estabelecimento ID:', id);
+    aprovar: async (id: number): Promise<Estabelecimento> => {
         const response = await api.patch<Estabelecimento>(`/api/estabelecimentos/${id}/status`, { status: 'APROVADO' });
-        console.log('Resposta da API:', response.data);
         return response.data;
     },
 
-    async rejeitar(id: number) {
-        console.log('Chamando API para rejeitar estabelecimento ID:', id);
+    rejeitar: async (id: number): Promise<Estabelecimento> => {
         const response = await api.patch<Estabelecimento>(`/api/estabelecimentos/${id}/status`, { status: 'REJEITADO' });
-        console.log('Resposta da API:', response.data);
         return response.data;
     },
 
-    async desativar(id: number) {
-        console.log('Chamando API para desativar estabelecimento ID:', id);
+    desativar: async (id: number): Promise<Estabelecimento> => {
         const response = await api.patch<Estabelecimento>(`/api/estabelecimentos/${id}/status`, { status: 'REJEITADO' });
-        console.log('Resposta da API:', response.data);
         return response.data;
     }
 }; 

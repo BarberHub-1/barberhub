@@ -52,6 +52,11 @@ public class EstabelecimentoController {
         return ResponseEntity.ok(estabelecimentoService.listarEstabelecimentos());
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<EstabelecimentoDTO>> listarTodosEstabelecimentos() {
+        return ResponseEntity.ok(estabelecimentoService.listarTodosEstabelecimentos());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EstabelecimentoDTO> buscarEstabelecimentoPorId(@PathVariable Long id) {
         return ResponseEntity.ok(estabelecimentoService.buscarEstabelecimentoPorId(id));
