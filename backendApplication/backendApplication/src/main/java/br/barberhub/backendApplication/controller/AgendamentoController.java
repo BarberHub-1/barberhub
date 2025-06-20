@@ -1,6 +1,8 @@
 package br.barberhub.backendApplication.controller;
 
 import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +41,16 @@ public class AgendamentoController {
     }
 
     @GetMapping("/estabelecimento/{estabelecimentoId}")
-    public ResponseEntity<List<AgendamentoDTO>> listarAgendamentosPorEstabelecimento(@PathVariable Long estabelecimentoId) {
-        return ResponseEntity.ok(agendamentoService.listarAgendamentosPorEstabelecimento(estabelecimentoId));
+    public ResponseEntity<List<AgendamentoDTO>> listarAgendamentosPorEstabelecimento(
+            @PathVariable Long estabelecimentoId,
+            @RequestParam(required = false) String status) {
+        List<StatusAgendamento> statusList = null;
+        if (status != null && !status.isEmpty()) {
+            statusList = Arrays.stream(status.split(","))
+                               .map(StatusAgendamento::valueOf)
+                               .collect(Collectors.toList());
+        }
+        return ResponseEntity.ok(agendamentoService.listarAgendamentosPorEstabelecimento(estabelecimentoId, statusList));
     }
 
 

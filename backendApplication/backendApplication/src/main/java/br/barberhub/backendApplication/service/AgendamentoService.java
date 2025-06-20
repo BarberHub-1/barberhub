@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.barberhub.backendApplication.dto.AgendamentoDTO;
 import br.barberhub.backendApplication.dto.AvaliacaoDTO;
@@ -23,6 +24,7 @@ import br.barberhub.backendApplication.repository.ClienteRepository;
 import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
 import br.barberhub.backendApplication.repository.AvaliacaoRepository;
+import jakarta.persistence.EntityManager;
 
 
 @Service
@@ -49,6 +51,10 @@ public class AgendamentoService {
     @Autowired
     private AvaliacaoRepository avaliacaoRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
+    @Transactional
     public AgendamentoDTO criarAgendamento(AgendamentoDTO agendamentoDTO) {
         System.out.println("Iniciando criação de agendamento com dados: " + agendamentoDTO);
         System.out.println("Data e hora recebidas: " + agendamentoDTO.getDataHora());
@@ -97,6 +103,7 @@ public class AgendamentoService {
         AgendamentoDTO response = new AgendamentoDTO();
         response.setId(agendamentoCompleto.getId());
         response.setClienteId(agendamentoCompleto.getCliente().getId());
+        response.setClienteNome(agendamentoCompleto.getCliente().getNome());
         response.setEstabelecimentoId(agendamentoCompleto.getEstabelecimento().getId());
         response.setEstabelecimentoNome(agendamentoCompleto.getEstabelecimento().getNomeEstabelecimento());
         response.setDataHora(agendamentoCompleto.getDataHora());
@@ -106,13 +113,14 @@ public class AgendamentoService {
         // Buscar os serviços salvos para obter os nomes
         List<AgendamentoServico> servicosSalvos = agendamentoServicoRepository.findByAgendamentoId(agendamentoCompleto.getId());
         response.setServicosNomes(servicosSalvos.stream()
-                .map(as -> as.getServico().getTipo().toString())
+                .map(as -> as.getServico().getTipo().getDisplayName())
                 .collect(Collectors.toList()));
         
         System.out.println("Agendamento criado com sucesso: " + response);
         return response;
     }
 
+    @Transactional(readOnly = true)
     public List<AgendamentoDTO> listarAgendamentosPorCliente(Long clienteId) {
         System.out.println("Buscando agendamentos do cliente: " + clienteId);
         List<Agendamento> agendamentos = agendamentoRepository.findByClienteIdWithDetails(clienteId);
@@ -126,6 +134,7 @@ public class AgendamentoService {
                     AgendamentoDTO dto = new AgendamentoDTO();
                     dto.setId(agendamento.getId());
                     dto.setClienteId(agendamento.getCliente().getId());
+                    dto.setClienteNome(agendamento.getCliente().getNome());
                     dto.setEstabelecimentoId(agendamento.getEstabelecimento().getId());
                     dto.setEstabelecimentoNome(agendamento.getEstabelecimento().getNomeEstabelecimento());
                     dto.setDataHora(agendamento.getDataHora());
@@ -134,7 +143,7 @@ public class AgendamentoService {
                             .map(as -> as.getServico().getId())
                             .collect(Collectors.toList()));
                     dto.setServicosNomes(agendamento.getServicos().stream()
-                            .map(as -> as.getServico().getTipo().toString())
+                            .map(as -> as.getServico().getTipo().getDisplayName())
                             .collect(Collectors.toList()));
                     
                     if (agendamento.getAvaliacao() != null) {
@@ -147,13 +156,20 @@ public class AgendamentoService {
                 .collect(Collectors.toList());
     }
 
-    public List<AgendamentoDTO> listarAgendamentosPorEstabelecimento(Long estabelecimentoId) {
-        List<Agendamento> agendamentos = agendamentoRepository.findByEstabelecimentoId(estabelecimentoId);
+    @Transactional(readOnly = true)
+    public List<AgendamentoDTO> listarAgendamentosPorEstabelecimento(Long estabelecimentoId, List<StatusAgendamento> status) {
+        List<Agendamento> agendamentos;
+        if (status == null || status.isEmpty()) {
+            agendamentos = agendamentoRepository.findByEstabelecimentoId(estabelecimentoId);
+        } else {
+            agendamentos = agendamentoRepository.findByEstabelecimentoIdAndStatusIn(estabelecimentoId, status);
+        }
         return agendamentos.stream()
                 .map(agendamento -> {
                     AgendamentoDTO dto = new AgendamentoDTO();
                     dto.setId(agendamento.getId());
                     dto.setClienteId(agendamento.getCliente().getId());
+                    dto.setClienteNome(agendamento.getCliente().getNome());
                     dto.setEstabelecimentoId(agendamento.getEstabelecimento().getId());
                     dto.setEstabelecimentoNome(agendamento.getEstabelecimento().getNomeEstabelecimento());
                     dto.setDataHora(agendamento.getDataHora());
@@ -162,13 +178,14 @@ public class AgendamentoService {
                             .map(as -> as.getServico().getId())
                             .collect(Collectors.toList()));
                     dto.setServicosNomes(agendamento.getServicos().stream()
-                            .map(as -> as.getServico().getTipo().toString())
+                            .map(as -> as.getServico().getTipo().getDisplayName())
                             .collect(Collectors.toList()));
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public AgendamentoDTO buscarAgendamentoPorId(Long id) {
         Agendamento agendamento = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
@@ -176,6 +193,7 @@ public class AgendamentoService {
         AgendamentoDTO dto = new AgendamentoDTO();
         dto.setId(agendamento.getId());
         dto.setClienteId(agendamento.getCliente().getId());
+        dto.setClienteNome(agendamento.getCliente().getNome());
         dto.setEstabelecimentoId(agendamento.getEstabelecimento().getId());
         dto.setEstabelecimentoNome(agendamento.getEstabelecimento().getNomeEstabelecimento());
         dto.setDataHora(agendamento.getDataHora());
@@ -184,29 +202,30 @@ public class AgendamentoService {
                 .map(as -> as.getServico().getId())
                 .collect(Collectors.toList()));
         dto.setServicosNomes(agendamento.getServicos().stream()
-                .map(as -> as.getServico().getTipo().toString())
+                .map(as -> as.getServico().getTipo().getDisplayName())
                 .collect(Collectors.toList()));
         
         return dto;
     }
 
+    @Transactional
     public AgendamentoDTO atualizarStatus(Long id, StatusAgendamento status) {
         Agendamento agendamento = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
         
         agendamento.setStatus(status);
-        agendamentoRepository.save(agendamento);
+        agendamentoRepository.saveAndFlush(agendamento);
+        entityManager.flush();
+        entityManager.clear();
         
         // Buscar o agendamento atualizado com todos os relacionamentos
-        Agendamento agendamentoAtualizado = agendamentoRepository.findByClienteIdWithDetails(agendamento.getCliente().getId())
-                .stream()
-                .filter(a -> a.getId().equals(id))
-                .findFirst()
+        Agendamento agendamentoAtualizado = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado após atualização"));
         
         AgendamentoDTO dto = new AgendamentoDTO();
         dto.setId(agendamentoAtualizado.getId());
         dto.setClienteId(agendamentoAtualizado.getCliente().getId());
+        dto.setClienteNome(agendamentoAtualizado.getCliente().getNome());
         dto.setEstabelecimentoId(agendamentoAtualizado.getEstabelecimento().getId());
         dto.setEstabelecimentoNome(agendamentoAtualizado.getEstabelecimento().getNomeEstabelecimento());
         dto.setDataHora(agendamentoAtualizado.getDataHora());
@@ -215,12 +234,13 @@ public class AgendamentoService {
                 .map(as -> as.getServico().getId())
                 .collect(Collectors.toList()));
         dto.setServicosNomes(agendamentoAtualizado.getServicos().stream()
-                .map(as -> as.getServico().getTipo().toString())
+                .map(as -> as.getServico().getTipo().getDisplayName())
                 .collect(Collectors.toList()));
         
         return dto;
     }
 
+    @Transactional
     public AgendamentoDTO avaliarAgendamento(Long id, AvaliacaoDTO avaliacaoDTO) {
         try {
             System.out.println("Iniciando avaliação do agendamento: " + id);
@@ -269,6 +289,7 @@ public class AgendamentoService {
                 AgendamentoDTO dto = new AgendamentoDTO();
                 dto.setId(agendamentoAtualizado.getId());
                 dto.setClienteId(agendamentoAtualizado.getCliente().getId());
+                dto.setClienteNome(agendamentoAtualizado.getCliente().getNome());
                 dto.setEstabelecimentoId(agendamentoAtualizado.getEstabelecimento().getId());
                 dto.setEstabelecimentoNome(agendamentoAtualizado.getEstabelecimento().getNomeEstabelecimento());
                 dto.setDataHora(agendamentoAtualizado.getDataHora());
@@ -277,7 +298,7 @@ public class AgendamentoService {
                         .map(as -> as.getServico().getId())
                         .collect(Collectors.toList()));
                 dto.setServicosNomes(agendamentoAtualizado.getServicos().stream()
-                        .map(as -> as.getServico().getTipo().toString())
+                        .map(as -> as.getServico().getTipo().getDisplayName())
                         .collect(Collectors.toList()));
                 
                 return dto;
@@ -293,9 +314,8 @@ public class AgendamentoService {
         }
     }
 
+    @Transactional
     public void excluirAgendamento(Long id) {
-        Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
-        agendamentoRepository.delete(agendamento);
+        agendamentoRepository.deleteById(id);
     }
 } 

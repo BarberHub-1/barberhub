@@ -27,6 +27,7 @@ public class AgendamentoDTO {
     
     @NotNull(message = "O cliente é obrigatório")
     private Long clienteId;
+    private String clienteNome;
     
     @NotNull(message = "O estabelecimento é obrigatório")
     private Long estabelecimentoId;

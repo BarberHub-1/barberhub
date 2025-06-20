@@ -18,9 +18,10 @@ api.interceptors.request.use((config) => {
 interface AgendamentoResponse {
   id: number;
   dataHora: string;
-  statusAgendamento?: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
-  status?: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
+  statusAgendamento?: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
+  status?: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
   clienteId: number;
+  clienteNome: string;
   estabelecimentoId: number;
   estabelecimentoNome: string;
   servicos: number[];
@@ -53,9 +54,10 @@ export interface Agendamento {
   id: number;
   // Data e hora do agendamento no formato ISO 8601
   dataHora: string;
-  status: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
-  statusAgendamento?: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
+  status: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
+  statusAgendamento?: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
   clienteId: number;
+  clienteNome: string;
   estabelecimentoId: number;
   estabelecimentoNome: string;
   servicos: number[]; // Lista de IDs de serviço
@@ -100,14 +102,24 @@ export interface AvaliacaoPayload {
 export const agendamentoService = {
   // Buscar todos os agendamentos do cliente logado
   getAgendamentosCliente: async (): Promise<Agendamento[]> => {
-    const clienteId = localStorage.getItem('userId');
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      throw new Error('Usuário não encontrado');
+    }
+    const user = JSON.parse(userStr);
+    const clienteId = user.id;
+
     if (!clienteId) {
       throw new Error('ID do cliente não encontrado');
     }
-    const response = await api.get<AgendamentoResponse[]>(`/api/agendamentos/cliente/${clienteId}`);
+    const response = await api.get<AgendamentoResponse[]>(`/api/agendamentos/cliente/${clienteId}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
     return response.data.map((agendamento) => ({
       ...agendamento,
-      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'
+      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA'
     }));
   },
 
@@ -116,7 +128,36 @@ export const agendamentoService = {
     const response = await api.get<AgendamentoResponse[]>(`/api/agendamentos/cliente/${clienteId}`);
     return response.data.map((agendamento) => ({
       ...agendamento,
-      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'
+      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA'
+    }));
+  },
+
+  // Buscar todos os agendamentos do estabelecimento logado
+  getAgendamentosEstabelecimento: async (status?: string[]): Promise<Agendamento[]> => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      throw new Error('Usuário não encontrado');
+    }
+    const user = JSON.parse(userStr);
+    const estabelecimentoId = user.id;
+    if (!estabelecimentoId) {
+      throw new Error('ID do estabelecimento não encontrado');
+    }
+
+    const params = new URLSearchParams();
+    if (status && status.length > 0) {
+      params.append('status', status.join(','));
+    }
+
+    const response = await api.get<AgendamentoResponse[]>(`/api/agendamentos/estabelecimento/${estabelecimentoId}`, {
+      params,
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
+    return response.data.map((agendamento) => ({
+      ...agendamento,
+      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA'
     }));
   },
 
@@ -144,7 +185,7 @@ export const agendamentoService = {
       
       return {
         ...response.data,
-        status: (response.data.statusAgendamento || response.data.status) as 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'
+        status: (response.data.statusAgendamento || response.data.status) as 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA'
       };
     } catch (error: any) {
       console.error('Erro na requisição:', error.response?.data);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import BarberCalendar from "@/components/BarberCalendar";
+import { agendamentoService, Agendamento } from "@/services/agendamento.service";
+import { Spinner } from "@/components/Spinner";
 
 interface Appointment {
   id: string;
@@ -24,83 +26,116 @@ interface Appointment {
   services: string[];
   date: string;
   time: string;
-  status: "current" | "upcoming" | "completed" | "cancelled";
+  status: "upcoming" | "completed" | "cancelled";
   employee?: string;
 }
 
 const BarberAppointments = () => {
   const { toast } = useToast();
-  const [appointments, setAppointments] = useState<Appointment[]>([
-    {
-      id: "1",
-      clientName: "João Silva",
-      services: ["Corte de Cabelo", "Barba"],
-      date: "2024-03-20",
-      time: "14:00",
-      status: "current",
-      employee: "Carlos"
-    },
-    {
-      id: "2",
-      clientName: "Maria Santos",
-      services: ["Corte de Cabelo", "Luzes"],
-      date: "2024-03-20",
-      time: "15:30",
-      status: "upcoming",
-      employee: "Ana"
-    },
-    {
-      id: "3",
-      clientName: "Pedro Oliveira",
-      services: ["Barba"],
-      date: "2024-03-19",
-      time: "10:00",
-      status: "completed",
-      employee: "Carlos"
-    }
-  ]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"upcoming" | "completed" | "cancelled">("upcoming");
 
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  const fetchAppointments = useCallback(async (tab: "upcoming" | "completed" | "cancelled") => {
+    try {
+      setLoading(true);
+      let statusToFetch: string[] = [];
+      if (tab === "upcoming") {
+        statusToFetch = ["AGENDADA"];
+      } else if (tab === "completed") {
+        statusToFetch = ["CONCLUIDA"];
+      } else if (tab === "cancelled") {
+        statusToFetch = ["CANCELADA"];
+      }
+
+      const data = await agendamentoService.getAgendamentosEstabelecimento(statusToFetch);
+
+      const mappedAppointments = data.map((ag: Agendamento) => {
+        const appointmentDate = new Date(ag.dataHora);
+
+        let status: Appointment['status'] = 'upcoming';
+        if (ag.status === 'CONCLUIDA') {
+          status = 'completed';
+        } else if (ag.status === 'CANCELADA') {
+          status = 'cancelled';
+        }
+
+        return {
+          id: ag.id.toString(),
+          clientName: ag.clienteNome || 'Nome não informado',
+          services: ag.servicosNomes,
+          date: appointmentDate.toISOString().split('T')[0],
+          time: appointmentDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          status: status,
+          employee: ag.profissionalId?.toString(),
+        };
+      });
+
+      setAppointments(mappedAppointments);
+    } catch (err) {
+      setError("Não foi possível carregar os agendamentos.");
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os agendamentos. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchAppointments(activeTab);
+  }, [fetchAppointments, activeTab]);
 
   const handleCancelAppointment = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowCancelDialog(true);
   };
 
-  const confirmCancelAppointment = () => {
+  const confirmCancelAppointment = async () => {
     if (selectedAppointment) {
-      setAppointments(appointments.map(apt => 
-        apt.id === selectedAppointment.id 
-          ? { ...apt, status: "cancelled" }
-          : apt
-      ));
-      
-      toast({
-        title: "Agendamento cancelado",
-        description: "O agendamento foi cancelado com sucesso.",
-      });
+        try {
+            await agendamentoService.cancelarAgendamento(parseInt(selectedAppointment.id, 10));
+            toast({
+              title: "Agendamento cancelado",
+              description: "O agendamento foi cancelado com sucesso.",
+            });
+            fetchAppointments(activeTab);
+        } catch (error) {
+            toast({
+                title: "Erro",
+                description: "Não foi possível cancelar o agendamento.",
+                variant: "destructive",
+            });
+        }
     }
     setShowCancelDialog(false);
   };
 
-  const handleCompleteAppointment = (appointment: Appointment) => {
-    setAppointments(appointments.map(apt => 
-      apt.id === appointment.id 
-        ? { ...apt, status: "completed" }
-        : apt
-    ));
-    
-    toast({
-      title: "Agendamento finalizado",
-      description: "O atendimento foi marcado como concluído.",
-    });
+  const handleCompleteAppointment = async (appointment: Appointment) => {
+    try {
+        await agendamentoService.concluirAgendamento(parseInt(appointment.id, 10));
+        toast({
+          title: "Agendamento finalizado",
+          description: "O atendimento foi marcado como concluído.",
+        });
+        fetchAppointments(activeTab);
+    } catch (error) {
+        toast({
+            title: "Erro",
+            description: "Não foi possível finalizar o agendamento.",
+            variant: "destructive",
+        });
+    }
   };
 
   const getStatusBadge = (status: Appointment["status"]) => {
     switch (status) {
-      case "current":
-        return <Badge className="bg-gray-500">Em andamento</Badge>;
       case "upcoming":
         return <Badge className="bg-green-500">Agendado</Badge>;
       case "completed":
@@ -145,14 +180,14 @@ const BarberAppointments = () => {
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          {appointment.status === "current" && (
+          {appointment.status === "upcoming" && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleCompleteAppointment(appointment)}
             >
               <Check className="w-4 h-4 mr-2" />
-              Finalizar
+              Concluir Agendamento
             </Button>
           )}
           {appointment.status !== "cancelled" && appointment.status !== "completed" && (
@@ -170,50 +205,69 @@ const BarberAppointments = () => {
     </Card>
   );
 
+  const upcomingAppointments = appointments.filter(apt => apt.status === "upcoming");
+  const completedAppointments = appointments.filter(apt => apt.status === "completed");
+  const cancelledAppointments = appointments.filter(apt => apt.status === "cancelled");
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Gerenciamento de Agendamentos</h1>
-        <BarberCalendar />
       </div>
 
-      <Tabs defaultValue="current" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="current">Atendimentos Atuais</TabsTrigger>
-          <TabsTrigger value="upcoming">Próximos Atendimentos</TabsTrigger>
-          <TabsTrigger value="completed">Atendimentos Finalizados</TabsTrigger>
-        </TabsList>
+      {loading && <Spinner />}
+      {error && <p className="text-red-500">{error}</p>}
+      
+      {!loading && !error && (
+        <Tabs 
+          value={activeTab}
+          defaultValue="upcoming" 
+          className="space-y-4"
+          onValueChange={(value) => setActiveTab(value as "upcoming" | "completed" | "cancelled")}
+        >
+          <TabsList>
+            <TabsTrigger value="upcoming">Próximos Atendimentos</TabsTrigger>
+            <TabsTrigger value="completed">Agendamentos Realizados</TabsTrigger>
+            <TabsTrigger value="cancelled">Agendamentos Cancelados</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="current">
-          <ScrollArea className="h-[600px] pr-4">
-            {appointments
-              .filter(apt => apt.status === "current")
-              .map(appointment => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-          </ScrollArea>
-        </TabsContent>
+          <TabsContent value="upcoming">
+            <ScrollArea className="h-[600px] pr-4">
+              {upcomingAppointments.length > 0 ? (
+                upcomingAppointments.map(appointment => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))
+              ) : (
+                <p className="text-center text-gray-500 pt-10">Não há próximos agendamentos.</p>
+              )}
+            </ScrollArea>
+          </TabsContent>
 
-        <TabsContent value="upcoming">
-          <ScrollArea className="h-[600px] pr-4">
-            {appointments
-              .filter(apt => apt.status === "upcoming")
-              .map(appointment => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-          </ScrollArea>
-        </TabsContent>
+          <TabsContent value="completed">
+            <ScrollArea className="h-[600px] pr-4">
+              {completedAppointments.length > 0 ? (
+                completedAppointments.map(appointment => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))
+              ) : (
+                <p className="text-center text-gray-500 pt-10">Não há agendamentos realizados.</p>
+              )}
+            </ScrollArea>
+          </TabsContent>
 
-        <TabsContent value="completed">
-          <ScrollArea className="h-[600px] pr-4">
-            {appointments
-              .filter(apt => apt.status === "completed" || apt.status === "cancelled")
-              .map(appointment => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="cancelled">
+            <ScrollArea className="h-[600px] pr-4">
+              {cancelledAppointments.length > 0 ? (
+                cancelledAppointments.map(appointment => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))
+              ) : (
+                <p className="text-center text-gray-500 pt-10">Não há agendamentos cancelados.</p>
+              )}
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      )}
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
