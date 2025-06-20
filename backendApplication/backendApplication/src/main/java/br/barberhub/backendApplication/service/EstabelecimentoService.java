@@ -198,7 +198,7 @@ public class EstabelecimentoService {
     }
 
     public List<EstabelecimentoDTO> listarEstabelecimentos() {
-        List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findAll();
+        List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findByStatus(StatusCadastro.APROVADO);
         return estabelecimentos.stream()
                 .map(estabelecimento -> {
                     EstabelecimentoDTO dto = modelMapper.map(estabelecimento, EstabelecimentoDTO.class);
