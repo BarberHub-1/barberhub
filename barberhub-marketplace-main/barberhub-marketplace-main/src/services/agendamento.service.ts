@@ -18,8 +18,8 @@ api.interceptors.request.use((config) => {
 interface AgendamentoResponse {
   id: number;
   dataHora: string;
-  statusAgendamento?: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
-  status?: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
+  statusAgendamento?: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
+  status?: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
   clienteId: number;
   estabelecimentoId: number;
   estabelecimentoNome: string;
@@ -53,8 +53,8 @@ export interface Agendamento {
   id: number;
   // Data e hora do agendamento no formato ISO 8601
   dataHora: string;
-  status: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
-  statusAgendamento?: 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA';
+  status: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
+  statusAgendamento?: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
   clienteId: number;
   estabelecimentoId: number;
   estabelecimentoNome: string;
@@ -107,7 +107,16 @@ export const agendamentoService = {
     const response = await api.get<AgendamentoResponse[]>(`/api/agendamentos/cliente/${clienteId}`);
     return response.data.map((agendamento) => ({
       ...agendamento,
-      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA'
+      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'
+    }));
+  },
+
+  // Buscar todos os agendamentos por um ID de cliente específico (para admin)
+  getByClienteId: async (clienteId: number): Promise<Agendamento[]> => {
+    const response = await api.get<AgendamentoResponse[]>(`/api/agendamentos/cliente/${clienteId}`);
+    return response.data.map((agendamento) => ({
+      ...agendamento,
+      status: (agendamento.statusAgendamento || agendamento.status) as 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'
     }));
   },
 
@@ -135,7 +144,7 @@ export const agendamentoService = {
       
       return {
         ...response.data,
-        status: (response.data.statusAgendamento || response.data.status) as 'AGENDADA' | 'CANCELADA' | 'CONCLUIDA'
+        status: (response.data.statusAgendamento || response.data.status) as 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'
       };
     } catch (error: any) {
       console.error('Erro na requisição:', error.response?.data);

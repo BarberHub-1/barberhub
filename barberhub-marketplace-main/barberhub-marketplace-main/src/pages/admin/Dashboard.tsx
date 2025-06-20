@@ -1,12 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building2, Calendar, TrendingUp } from "lucide-react";
+import { Users, Building2, Calendar, TrendingUp, AlertCircle } from "lucide-react";
+import { dashboardService, DashboardStats } from '../../services/dashboard.service';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const data = await dashboardService.getStats();
+        setStats(data);
+      } catch (error) {
+        console.error("Erro ao buscar estatísticas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   if (!user || user.role !== 'ADMIN') {
     return (
@@ -21,31 +41,30 @@ const AdminDashboard = () => {
     );
   }
 
-  // Dados mockados para exemplo
-  const stats = [
+  const statsCards = [
     {
       title: "Total de Usuários",
-      value: "1.234",
+      value: stats?.totalUsuarios,
       icon: <Users className="h-4 w-4 text-muted-foreground" />,
-      description: "+12% em relação ao mês anterior",
+      description: "Clientes cadastrados",
     },
     {
-      title: "Barbearias Ativas",
-      value: "89",
+      title: "Total de Barbearias",
+      value: stats?.totalEstabelecimentos,
       icon: <Building2 className="h-4 w-4 text-muted-foreground" />,
-      description: "+5 novas este mês",
+      description: "Todos os status",
     },
     {
-      title: "Agendamentos",
-      value: "456",
+      title: "Total de Agendamentos",
+      value: stats?.totalAgendamentos,
       icon: <Calendar className="h-4 w-4 text-muted-foreground" />,
-      description: "Hoje",
+      description: "Registrados no sistema",
     },
     {
-      title: "Taxa de Crescimento",
-      value: "23%",
-      icon: <TrendingUp className="h-4 w-4 text-muted-foreground" />,
-      description: "Em relação ao mês anterior",
+      title: "Barbearias Pendentes",
+      value: stats?.estabelecimentosPendentes,
+      icon: <AlertCircle className="h-4 w-4 text-muted-foreground" />,
+      description: "Aguardando aprovação",
     },
   ];
 
@@ -54,90 +73,21 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Painel Administrativo</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Card de Estabelecimentos */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Estabelecimentos</h2>
-            <p className="text-gray-600 mb-4">Gerencie os estabelecimentos cadastrados no sistema.</p>
-            <button 
-              onClick={() => navigate('/admin/barbershops')}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
-            >
-              Gerenciar Estabelecimentos
-            </button>
-          </div>
-
-          {/* Card de Usuários */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Usuários</h2>
-            <p className="text-gray-600 mb-4">Gerencie os usuários do sistema.</p>
-            <button 
-              onClick={() => navigate('/admin/users')}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
-            >
-              Gerenciar Usuários
-            </button>
-          </div>
-
-          {/* Card de Relatórios */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Relatórios</h2>
-            <p className="text-gray-600 mb-4">Acesse relatórios e estatísticas do sistema.</p>
-            <button 
-              onClick={() => navigate('/admin/reports')}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
-            >
-              Ver Relatórios
-            </button>
-          </div>
-
-          {/* Card de Configurações */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Configurações</h2>
-            <p className="text-gray-600 mb-4">Configure as opções do sistema.</p>
-            <button 
-              onClick={() => navigate('/admin/settings')}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
-            >
-              Configurações
-            </button>
-          </div>
-
-          {/* Card de Serviços */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Serviços</h2>
-            <p className="text-gray-600 mb-4">Gerencie os serviços disponíveis no sistema.</p>
-            <button 
-              onClick={() => navigate('/admin/services')}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
-            >
-              Gerenciar Serviços
-            </button>
-          </div>
-
-          {/* Card de Avaliações */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Avaliações</h2>
-            <p className="text-gray-600 mb-4">Gerencie as avaliações dos estabelecimentos.</p>
-            <button 
-              onClick={() => navigate('/admin/reviews')}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
-            >
-              Gerenciar Avaliações
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-8 mt-8">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground">
-              Bem-vindo ao painel administrativo do BarberHub
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-5 w-2/3" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-7 w-1/3 mb-2" />
+                  <Skeleton className="h-3 w-full" />
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            statsCards.map((stat) => (
               <Card key={stat.title}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
@@ -146,38 +96,14 @@ const AdminDashboard = () => {
                   {stat.icon}
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="text-2xl font-bold">{stat.value ?? '0'}</div>
                   <p className="text-xs text-muted-foreground">
                     {stat.description}
                   </p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
-              <CardHeader>
-                <CardTitle>Visão Geral</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Aqui você encontrará gráficos e análises detalhadas sobre o desempenho da plataforma.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="col-span-3">
-              <CardHeader>
-                <CardTitle>Atividades Recentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Lista das últimas atividades realizadas na plataforma.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>

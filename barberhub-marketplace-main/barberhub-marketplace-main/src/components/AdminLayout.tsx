@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, LogOut, Home, Building2, Settings, BarChart } from "lucide-react";
+import { Users, LogOut, Home, Building2, Settings, BarChart, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const AdminLayout = () => {
@@ -21,6 +21,7 @@ const AdminLayout = () => {
     { path: "/admin/dashboard", icon: <Home size={20} />, label: "Dashboard" },
     { path: "/admin/users", icon: <Users size={20} />, label: "Usuários" },
     { path: "/admin/barbershops", icon: <Building2 size={20} />, label: "Barbearias" },
+    { path: "/admin/reviews", icon: <Star className="h-5 w-5" />, label: "Avaliações" },
     { path: "/admin/settings", icon: <Settings size={20} />, label: "Configurações" },
   ];
 

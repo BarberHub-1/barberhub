@@ -52,20 +52,20 @@ public class AvaliacaoService {
     public List<AvaliacaoDTO> listarAvaliacoes() {
         List<Avaliacao> avaliacoes = avaliacaoRepository.findAll();
         return avaliacoes.stream()
-                .map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public AvaliacaoDTO buscarAvaliacaoPorId(Long id) {
-        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+        Avaliacao avaliaco = avaliacaoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
-        return modelMapper.map(avaliacao, AvaliacaoDTO.class);
+        return convertToDto(avaliaco);
     }
 
     public List<AvaliacaoDTO> buscarAvaliacoesPorEstabelecimento(Long estabelecimentoId) {
         List<Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoId(estabelecimentoId);
         return avaliacoes.stream()
-                .map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -73,5 +73,20 @@ public class AvaliacaoService {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
         avaliacaoRepository.delete(avaliacao);
+    }
+
+    private AvaliacaoDTO convertToDto(Avaliacao avaliacao) {
+        AvaliacaoDTO dto = modelMapper.map(avaliacao, AvaliacaoDTO.class);
+        
+        if (avaliacao.getEstabelecimento() != null) {
+            dto.setEstabelecimentoNome(avaliacao.getEstabelecimento().getNomeEstabelecimento());
+        }
+        
+        if (avaliacao.getAgendamento() != null && avaliacao.getAgendamento().getCliente() != null) {
+            dto.setClienteId(avaliacao.getAgendamento().getCliente().getId());
+            dto.setClienteNome(avaliacao.getAgendamento().getCliente().getNome());
+        }
+
+        return dto;
     }
 } 

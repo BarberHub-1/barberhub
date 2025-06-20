@@ -1,10 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Cliente } from '../../types';
+import { useToast } from '../../hooks/use-toast';
+import api from '../../lib/axios';
 
 const AdminUsers = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    loadClientes();
+  }, []);
+
+  const loadClientes = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get<Cliente[]>('/api/clientes');
+      const data = response.data.map(cliente => ({
+        ...cliente,
+        foto: cliente.foto ? `data:image/jpeg;base64,${cliente.foto}` : undefined
+      }));
+      setClientes(data);
+    } catch (error) {
+      console.error('Erro ao carregar clientes:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os clientes.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredClientes = clientes.filter(cliente => {
+    return cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           cliente.email.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   if (!user || user.role !== 'ADMIN') {
     return (
@@ -40,78 +77,62 @@ const AdminUsers = () => {
                   type="text"
                   placeholder="Buscar usuário..."
                   className="border rounded px-4 py-2 w-64"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <select className="border rounded px-4 py-2">
-                  <option value="">Todos os tipos</option>
-                  <option value="ADMIN">Administrador</option>
-                  <option value="CLIENTE">Cliente</option>
-                  <option value="BARBEIRO">Barbeiro</option>
-                </select>
-              </div>
-              <button className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
-                Novo Usuário
-              </button>
-            </div>
-
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">Nome</th>
-                  <th className="text-left py-3 px-4">Email</th>
-                  <th className="text-left py-3 px-4">Tipo</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="py-3 px-4">João Silva</td>
-                  <td className="py-3 px-4">joao@email.com</td>
-                  <td className="py-3 px-4">Cliente</td>
-                  <td className="py-3 px-4">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                      Ativo
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex gap-2">
-                      <button className="text-blue-600 hover:text-blue-800">Editar</button>
-                      <button className="text-red-600 hover:text-red-800">Desativar</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Maria Santos</td>
-                  <td className="py-3 px-4">maria@email.com</td>
-                  <td className="py-3 px-4">Barbeiro</td>
-                  <td className="py-3 px-4">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                      Ativo
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex gap-2">
-                      <button className="text-blue-600 hover:text-blue-800">Editar</button>
-                      <button className="text-red-600 hover:text-red-800">Desativar</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div className="mt-6 flex justify-between items-center">
-              <div className="text-gray-600">
-                Mostrando 1-2 de 2 resultados
-              </div>
-              <div className="flex gap-2">
-                <button className="border rounded px-3 py-1 disabled:opacity-50" disabled>
-                  Anterior
-                </button>
-                <button className="border rounded px-3 py-1 disabled:opacity-50" disabled>
-                  Próxima
-                </button>
               </div>
             </div>
+
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <p className="mt-2 text-gray-600">Carregando usuários...</p>
+              </div>
+            ) : (
+              <>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4">Nome</th>
+                      <th className="text-left py-3 px-4">Email</th>
+                      <th className="text-left py-3 px-4">Telefone</th>
+                      <th className="text-left py-3 px-4">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredClientes.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-center py-8 text-gray-500">
+                          Nenhum usuário encontrado
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredClientes.map((cliente) => (
+                        <tr key={cliente.id} className="border-b hover:bg-gray-50">
+                          <td className="py-3 px-4 font-medium">{cliente.nome}</td>
+                          <td className="py-3 px-4">{cliente.email}</td>
+                          <td className="py-3 px-4">{cliente.telefone}</td>
+                          <td className="py-3 px-4">
+                            <button 
+                              onClick={() => navigate(`/admin/users/${cliente.id}/appointments`)}
+                              className="bg-gray-800 hover:bg-gray-900 text-white py-1 px-3 rounded text-sm"
+                            >
+                              Agendamentos
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+
+                <div className="mt-6 flex justify-between items-center">
+                  <div className="text-gray-600">
+                    Mostrando {filteredClientes.length} de {clientes.length} resultados
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

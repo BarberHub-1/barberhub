@@ -97,6 +97,7 @@ public class ModelMapperConfig {
                 mapper.map(Cliente::getCidade, ClienteDTO::setCidade);
                 mapper.map(Cliente::getEstado, ClienteDTO::setEstado);
                 mapper.map(Cliente::getCep, ClienteDTO::setCep);
+                mapper.map(Cliente::getFoto, ClienteDTO::setFoto);
             });
         
         return modelMapper;

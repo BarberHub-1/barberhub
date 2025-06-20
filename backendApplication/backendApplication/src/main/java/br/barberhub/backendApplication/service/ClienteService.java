@@ -42,7 +42,7 @@ public class ClienteService {
         Cliente clienteSalvo = clienteRepository.save(cliente);
         
         ClienteDTO response = modelMapper.map(clienteSalvo, ClienteDTO.class);
-        response.setSenha(null); // Não retorna a senha na resposta
+        response.setSenha(null); // Não retorna a senha
         return response;
     }
 

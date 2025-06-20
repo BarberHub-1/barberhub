@@ -69,18 +69,21 @@ export interface Servico {
 export interface Agendamento {
     id: number;
     clienteId: number;
-    profissionalId: number;
-    servicoId: number;
-    data: string;
-    horario: string;
+    estabelecimentoId: number;
+    estabelecimentoNome: string;
+    dataHora: string;
+    servicos: number[];
+    servicosNomes: string[];
     status: 'AGENDADO' | 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO';
 }
 
 export interface Avaliacao {
     id: number;
     clienteId: number;
+    clienteNome: string;
     estabelecimentoId: number;
+    estabelecimentoNome: string;
     nota: number;
     comentario: string;
-    data: string;
+    dataAvaliacao: string;
 } 

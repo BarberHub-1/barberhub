@@ -27,7 +27,11 @@ public class AvaliacaoDTO {
     
     @NotNull(message = "O estabelecimento é obrigatório")
     private Long estabelecimentoId;
+    private String estabelecimentoNome;
     
+    private Long clienteId;
+    private String clienteNome;
+
 	private LocalDateTime dateTime;
     
     private Long id;

@@ -37,6 +37,7 @@ import AdminServices from './pages/admin/Services';
 import AdminReviews from './pages/admin/Reviews';
 import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
+import ClientAppointmentsAdmin from './pages/admin/ClientAppointmentsAdmin';
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ function App() {
               <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminLayout /></PrivateRoute>}>
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="users/:id/appointments" element={<ClientAppointmentsAdmin />} />
                 <Route path="barbershops" element={<AdminBarbershops />} />
                 <Route path="services" element={<AdminServices />} />
                 <Route path="reviews" element={<AdminReviews />} />

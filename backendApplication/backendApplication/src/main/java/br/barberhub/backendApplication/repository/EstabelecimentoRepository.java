@@ -13,6 +13,7 @@ import br.barberhub.backendApplication.model.StatusCadastro;
 public interface EstabelecimentoRepository extends JpaRepository<Estabelecimento, Long> {
 
 	List<Estabelecimento> findByStatus(StatusCadastro status);
+	long countByStatus(StatusCadastro status);
 
 	UserDetails findByEmail(String email);
 
