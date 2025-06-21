@@ -165,7 +165,9 @@ const FeaturedShops = () => {
                       )}
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">{shop.quantidadeAvaliacoes || 0} avaliação{(shop.quantidadeAvaliacoes || 0) === 1 ? '' : 's'}</span>
+                      <span className="text-sm text-gray-500">
+                        {shop.quantidadeAvaliacoes || 0} {((shop.quantidadeAvaliacoes || 0) === 1 ? 'avaliação' : 'avaliações')}
+                      </span>
                       <Link 
                         to={`/barbershops/${shop.id}`}
                         className="inline-flex items-center justify-center px-4 py-2 bg-barber-900 text-white rounded-md hover:bg-barber-800 transition-colors"

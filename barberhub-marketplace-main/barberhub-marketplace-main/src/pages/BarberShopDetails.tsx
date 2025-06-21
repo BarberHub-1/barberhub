@@ -116,39 +116,6 @@ const BarberShopDetails = () => {
   }, [barbershop]);
 
   const handleAgendamentoClick = () => {
-    console.log('BarberShopDetails - handleAgendamentoClick chamado');
-    console.log('BarberShopDetails - isAuthenticated:', isAuthenticated);
-    console.log('BarberShopDetails - user tipo:', user?.tipo);
-    console.log('BarberShopDetails - id:', id);
-    
-    if (!isAuthenticated) {
-      console.log('BarberShopDetails - usuário não autenticado, redirecionando para login');
-      toast({
-        title: "Login necessário",
-        description: "Por favor, faça login para agendar um horário.",
-        variant: "destructive",
-      });
-      navigate("/login", { 
-        state: { 
-          from: {
-            pathname: `/barbershops/${id}`
-          }
-        } 
-      });
-      return;
-    }
-
-    if (user?.tipo !== "CLIENTE") {
-      console.log('BarberShopDetails - usuário não é cliente');
-      toast({
-        title: "Acesso restrito",
-        description: "Apenas clientes podem realizar agendamentos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Se passou pelas verificações, permite a navegação
     console.log('BarberShopDetails - navegando para agendamento');
     navigate(`/agendamento/${id}`);
   };
@@ -299,13 +266,51 @@ const BarberShopDetails = () => {
             </Card>
 
             {/* Botão de Agendamento */}
-            <Button 
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg"
-              onClick={handleAgendamentoClick}
-            >
-              <FaCalendarAlt className="mr-2" />
-              Agendar Horário
-            </Button>
+            {!isAuthenticated ? (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <FaCalendarAlt className="mx-auto text-orange-500 text-2xl mb-2" />
+                    <h3 className="font-semibold text-orange-800 mb-2">Login Necessário</h3>
+                    <p className="text-orange-700 text-sm mb-4">
+                      Para realizar um agendamento, você precisa estar logado em sua conta.
+                    </p>
+                    <Button 
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                      onClick={() => navigate("/login", { 
+                        state: { 
+                          from: {
+                            pathname: `/barbershops/${id}`
+                          }
+                        } 
+                      })}
+                    >
+                      Fazer Login
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : user?.tipo !== "CLIENTE" ? (
+              <Card className="border-red-200 bg-red-50">
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <FaCalendarAlt className="mx-auto text-red-500 text-2xl mb-2" />
+                    <h3 className="font-semibold text-red-800 mb-2">Acesso Restrito</h3>
+                    <p className="text-red-700 text-sm">
+                      Apenas clientes podem realizar agendamentos.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Button 
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg"
+                onClick={handleAgendamentoClick}
+              >
+                <FaCalendarAlt className="mr-2" />
+                Agendar Horário
+              </Button>
+            )}
           </div>
         </div>
       </div>
