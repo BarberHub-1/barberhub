@@ -202,6 +202,7 @@ const Appointment = () => {
     queryKey: ['barbershop', id],
     queryFn: async () => {
       const response = await estabelecimentoService.getById(Number(id));
+      
       // Processa a resposta para garantir que os serviços sejam do tipo correto
       const processedServicos = response.servicos.map((servico, index) => {
         if (typeof servico === 'string') {
@@ -211,18 +212,29 @@ const Appointment = () => {
             const descMatch = servico.match(/descricao=([^,]+)/);
             const precoMatch = servico.match(/preco=([^,]+)/);
             const duracaoMatch = servico.match(/duracaoMinutos=(\d+)/);
+            const idMatch = servico.match(/id=(\d+)/);
+            
             return {
-              id: index, // Usar index como fallback
+              id: idMatch ? parseInt(idMatch[1]) : index + 1, // Usar ID do match ou index + 1
               tipo: tipoMatch ? tipoMatch[1] : 'N/A',
               descricao: descMatch ? descMatch[1] : 'Serviço',
               preco: precoMatch ? parseFloat(precoMatch[1]) : 0,
               duracaoMinutos: duracaoMatch ? parseInt(duracaoMatch[1]) : 30,
             };
-          } catch {
-            return { id: index, tipo: 'N/A', descricao: 'Serviço Inválido', preco: 0, duracaoMinutos: 0 };
+          } catch (error) {
+            return { id: index + 1, tipo: 'N/A', descricao: 'Serviço Inválido', preco: 0, duracaoMinutos: 0 };
           }
         }
-        return servico as Servico;
+        
+        // Se já for um objeto, garantir que todos os campos existam
+        const servicoObj = servico as Servico;
+        return {
+          id: servicoObj.id || index + 1,
+          tipo: servicoObj.tipo || '',
+          descricao: servicoObj.descricao || '',
+          preco: typeof servicoObj.preco === 'number' ? servicoObj.preco : 0,
+          duracaoMinutos: servicoObj.duracaoMinutos || 0
+        };
       });
 
       return { ...response, servicos: processedServicos };
