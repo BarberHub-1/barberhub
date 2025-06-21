@@ -1,60 +1,33 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar as ReactCalendar } from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof ReactCalendar>;
 
 function Calendar({
   className,
-  classNames,
-  showOutsideDays = true,
+  tileDisabled,
   ...props
 }: CalendarProps) {
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] overflow-hidden text-ellipsis whitespace-nowrap justify-center",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      {...props}
-    />
+    <div className={cn("calendar-wrapper", className)}>
+      <ReactCalendar
+        locale="pt-BR"
+        formatShortWeekday={(locale, date) => {
+          return format(date, 'EEE', { locale: ptBR }).charAt(0).toUpperCase();
+        }}
+        tileDisabled={tileDisabled}
+        className="w-full border-0 bg-transparent [&_.react-calendar__navigation]:mb-4 [&_.react-calendar__navigation__label]:text-sm [&_.react-calendar__navigation__label]:font-medium [&_.react-calendar__navigation__arrow]:h-7 [&_.react-calendar__navigation__arrow]:w-7 [&_.react-calendar__navigation__arrow]:bg-transparent [&_.react-calendar__navigation__arrow]:border [&_.react-calendar__navigation__arrow]:border-input [&_.react-calendar__navigation__arrow]:rounded-md [&_.react-calendar__navigation__arrow]:opacity-50 [&_.react-calendar__navigation__arrow]:hover:opacity-100 [&_.react-calendar__month-view__weekdays]:mb-2 [&_.react-calendar__month-view__weekdays__weekday]:text-center [&_.react-calendar__month-view__weekdays__weekday]:text-xs [&_.react-calendar__month-view__weekdays__weekday]:font-normal [&_.react-calendar__month-view__weekdays__weekday]:text-muted-foreground [&_.react-calendar__month-view__weekdays__weekday]:p-1 [&_.react-calendar__month-view__days]:grid [&_.react-calendar__month-view__days]:grid-cols-7 [&_.react-calendar__month-view__days]:gap-1 [&_.react-calendar__month-view__days__day]:h-9 [&_.react-calendar__month-view__days__day]:w-9 [&_.react-calendar__month-view__days__day]:text-center [&_.react-calendar__month-view__days__day]:text-sm [&_.react-calendar__month-view__days__day]:p-0 [&_.react-calendar__month-view__days__day]:font-normal [&_.react-calendar__month-view__days__day]:border-0 [&_.react-calendar__month-view__days__day]:bg-transparent [&_.react-calendar__month-view__days__day]:hover:bg-accent [&_.react-calendar__month-view__days__day]:hover:text-accent-foreground [&_.react-calendar__month-view__days__day]:rounded-md [&_.react-calendar__month-view__days__day]:focus:bg-accent [&_.react-calendar__month-view__days__day]:focus:text-accent-foreground [&_.react-calendar__month-view__days__day]:focus:outline-none [&_.react-calendar__month-view__days__day--selected]:bg-primary [&_.react-calendar__month-view__days__day--selected]:text-primary-foreground [&_.react-calendar__month-view__days__day--selected]:hover:bg-primary [&_.react-calendar__month-view__days__day--selected]:hover:text-primary-foreground [&_.react-calendar__month-view__days__day--today]:bg-accent [&_.react-calendar__month-view__days__day--today]:text-accent-foreground [&_.react-calendar__month-view__days__day--disabled]:text-muted-foreground [&_.react-calendar__month-view__days__day--disabled]:opacity-50 [&_.react-calendar__month-view__days__day--disabled]:hover:bg-transparent [&_.react-calendar__month-view__days__day--disabled]:hover:text-muted-foreground [&_.react-calendar__month-view__days__day--neighboringMonth]:text-muted-foreground [&_.react-calendar__month-view__days__day--neighboringMonth]:opacity-50"
+        {...props}
+      />
+    </div>
   );
 }
+
 Calendar.displayName = "Calendar";
 
 export { Calendar };

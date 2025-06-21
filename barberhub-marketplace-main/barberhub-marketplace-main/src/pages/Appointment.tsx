@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,16 @@ import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { agendamentoService } from '../services/agendamento.service';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Servico {
   id: number;
@@ -27,256 +37,14 @@ interface Servico {
 interface BarberShop {
   id: number;
   nomeEstabelecimento: string;
-  endereco: string;
+  rua: string;
+  numero: number;
+  bairro: string;
   cidade: string;
   servicos: Servico[];
 }
 
-const Appointment = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [selectedService, setSelectedService] = useState<Servico | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string>('');
-
-  // Verificar se o usuário está logado
-  React.useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Login necessário",
-        description: "Você precisa estar logado para fazer um agendamento.",
-        variant: "destructive",
-      });
-      navigate('/login', { 
-        state: { 
-          from: {
-            pathname: `/agendamento/${id}`
-          }
-        } 
-      });
-    }
-  }, [user, navigate, toast, id]);
-
-  const { data: barbershop, isLoading, error } = useQuery<BarberShop>({
-    queryKey: ['barbershop', id],
-    queryFn: async () => {
-      try {
-        const response = await estabelecimentoService.getById(Number(id));
-        console.log('Resposta da API:', response);
-        
-        // Processar os serviços para garantir que todos os campos necessários existam
-        const processedResponse = {
-          ...response,
-          servicos: response.servicos.map((servico, index) => {
-            // Se o serviço for uma string, tentar converter para objeto
-            if (typeof servico === 'string') {
-              const servicoStr = servico as string;
-              try {
-                return {
-                  id: index + 1,
-                  tipo: servicoStr.match(/tipo=([^,]+)/)?.[1] || '',
-                  descricao: servicoStr.match(/descricao=([^,]+)/)?.[1] || '',
-                  preco: parseFloat(servicoStr.match(/preco=([^,]+)/)?.[1] || '0'),
-                  duracaoMinutos: parseInt(servicoStr.match(/duracaoMinutos=(\d+)/)?.[1] || '0')
-                };
-              } catch (error) {
-                console.error('Erro ao converter serviço:', error);
-                return {
-                  id: index + 1,
-                  tipo: '',
-                  descricao: servicoStr,
-                  preco: 0,
-                  duracaoMinutos: 0
-                };
-              }
-            }
-            
-            // Se já for um objeto, garantir que todos os campos existam
-            const servicoObj = servico as Servico;
-            return {
-              id: servicoObj.id || index + 1,
-              tipo: servicoObj.tipo || '',
-              descricao: servicoObj.descricao || '',
-              preco: typeof servicoObj.preco === 'number' ? servicoObj.preco : 0,
-              duracaoMinutos: servicoObj.duracaoMinutos || 0
-            };
-          })
-        };
-        
-        console.log('Resposta processada:', processedResponse);
-        return processedResponse;
-      } catch (error) {
-        console.error('Erro ao buscar detalhes da barbearia:', error);
-        throw error;
-      }
-    },
-    enabled: !!id,
-  });
-
-  // Gerar horários disponíveis (exemplo: das 9h às 18h)
-  const availableTimes = React.useMemo(() => {
-    const times = [];
-    for (let hour = 9; hour <= 18; hour++) {
-      times.push(`${hour.toString().padStart(2, '0')}:00`);
-      times.push(`${hour.toString().padStart(2, '0')}:30`);
-    }
-    return times;
-  }, []);
-
-  // Gerar datas disponíveis (próximos 7 dias)
-  const availableDates = React.useMemo(() => {
-    const dates = [];
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user?.id) {
-      toast({
-        title: "Erro",
-        description: "Usuário não autenticado",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedService || !selectedService.id) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione um serviço",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedDate) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione uma data",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedTime) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione um horário",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Criar uma nova data com o horário selecionado
-      const dataHora = new Date(selectedDate);
-      const [hours, minutes] = selectedTime.split(':');
-      dataHora.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-      // Ajustar para o fuso horário local
-      const dataHoraLocal = new Date(dataHora.getTime() - dataHora.getTimezoneOffset() * 60000);
-
-      // Verificar se a data é futura
-      if (dataHoraLocal <= new Date()) {
-        toast({
-          title: "Erro",
-          description: "A data e hora devem ser futuras",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Data e hora selecionadas:', {
-        dataHoraOriginal: dataHora,
-        dataHoraLocal: dataHoraLocal,
-        timezoneOffset: dataHora.getTimezoneOffset(),
-        isoString: dataHoraLocal.toISOString()
-      });
-
-      const agendamentoData = {
-        clienteId: user.id,
-        estabelecimentoId: Number(id),
-        servicos: [selectedService.id],
-        dataHora: dataHoraLocal.toISOString()
-      };
-      
-      console.log('Dados do agendamento a serem enviados:', agendamentoData);
-      console.log('Serviço selecionado:', selectedService);
-
-      const response = await agendamentoService.criarAgendamento(agendamentoData);
-      console.log('Resposta do servidor:', response);
-
-      toast({
-        title: "Sucesso",
-        description: "Agendamento realizado com sucesso!",
-        variant: "default",
-      });
-      navigate('/client/appointments');
-    } catch (error: any) {
-      console.error('Erro ao realizar agendamento:', error);
-      console.error('Detalhes do erro:', error.response?.data);
-      toast({
-        title: "Erro",
-        description: error.response?.data?.message || 'Erro ao realizar agendamento',
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 mt-20">
-          <div className="flex justify-center items-center min-h-[60vh]">
-            <Spinner />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !barbershop) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 mt-20">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600">Erro ao carregar detalhes da barbearia</h1>
-            <p className="mt-2 text-gray-600">Por favor, tente novamente mais tarde.</p>
-            <Button 
-              onClick={() => navigate('/barbershops')}
-              className="mt-4 bg-gray-600 hover:bg-gray-700"
-            >
-              Voltar para Barbearias
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="container mx-auto px-4 py-8 mt-20">
-        <Button 
-          onClick={() => navigate(`/barbershops/${id}`)}
-          variant="outline"
-          className="mb-6"
-        >
-          ← Voltar
-        </Button>
-
+const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selectedService, setSelectedService, selectedDate, setSelectedDate, selectedTime, setSelectedTime, disabledDays }: { barbershop: BarberShop, availableTimes: string[], handleSubmit: (e: React.FormEvent) => Promise<void>, selectedService: Servico | null, setSelectedService: React.Dispatch<React.SetStateAction<Servico | null>>, selectedDate: Date | undefined, setSelectedDate: React.Dispatch<React.SetStateAction<any>>, selectedTime: string, setSelectedTime: React.Dispatch<React.SetStateAction<string>>, disabledDays: (({ date }: { date: Date; }) => boolean )}) => (
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
@@ -290,7 +58,9 @@ const Appointment = () => {
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{barbershop.nomeEstabelecimento}</h2>
                 <div className="flex items-center text-gray-600">
                   <FaMapMarkerAlt className="mr-2" />
-                  <span>{barbershop.endereco}, {barbershop.cidade}</span>
+            <span>
+              {barbershop.rua}, {barbershop.numero} - {barbershop.bairro}, {barbershop.cidade}
+            </span>
                 </div>
               </div>
 
@@ -338,21 +108,15 @@ const Appointment = () => {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        initialFocus
-                        disabled={(date) => {
-                          return !availableDates.some(availableDate => 
-                            availableDate.getFullYear() === date.getFullYear() &&
-                            availableDate.getMonth() === date.getMonth() &&
-                            availableDate.getDate() === date.getDate()
-                          );
+                        value={selectedDate}
+                        onChange={(value: any) => {
+                          // react-calendar pode retornar um array para range, então garantimos que é uma data
+                          const newDate = Array.isArray(value) ? value[0] : value;
+                          if (newDate instanceof Date) {
+                            setSelectedDate(newDate);
+                          }
                         }}
-                        locale={ptBR}
-                        formatters={{
-                          formatWeekdayName: (date, options) => format(date, 'EEEEEE', options),
-                        }}
+                        tileDisabled={disabledDays}
                       />
                     </PopoverContent>
                   </Popover>
@@ -412,6 +176,233 @@ const Appointment = () => {
             </CardContent>
           </Card>
         </div>
+);
+
+const Appointment = () => {
+  // 1. Chamar TODOS os hooks incondicionalmente no topo.
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [selectedService, setSelectedService] = useState<Servico | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string>('');
+
+  const { data: barbershop, isLoading, error } = useQuery<BarberShop>({
+    queryKey: ['barbershop', id],
+    queryFn: async () => {
+      const response = await estabelecimentoService.getById(Number(id));
+      // Processa a resposta para garantir que os serviços sejam do tipo correto
+      const processedServicos = response.servicos.map((servico, index) => {
+        if (typeof servico === 'string') {
+          // Tenta fazer o parse da string. Se falhar, retorna um objeto padrão.
+          try {
+            const tipoMatch = servico.match(/tipo=([^,]+)/);
+            const descMatch = servico.match(/descricao=([^,]+)/);
+            const precoMatch = servico.match(/preco=([^,]+)/);
+            const duracaoMatch = servico.match(/duracaoMinutos=(\d+)/);
+            return {
+              id: index, // Usar index como fallback
+              tipo: tipoMatch ? tipoMatch[1] : 'N/A',
+              descricao: descMatch ? descMatch[1] : 'Serviço',
+              preco: precoMatch ? parseFloat(precoMatch[1]) : 0,
+              duracaoMinutos: duracaoMatch ? parseInt(duracaoMatch[1]) : 30,
+            };
+          } catch {
+            return { id: index, tipo: 'N/A', descricao: 'Serviço Inválido', preco: 0, duracaoMinutos: 0 };
+          }
+        }
+        return servico as Servico;
+      });
+
+      return { ...response, servicos: processedServicos };
+    },
+    enabled: !!id && !authLoading && !!user,
+  });
+
+  const { data: horarios, isLoading: isLoadingHorarios } = useQuery({
+    queryKey: ['horarios', id],
+    queryFn: () => estabelecimentoService.getHorarios(Number(id)),
+    enabled: !!id && !authLoading && !!user,
+  });
+
+  const diasDeFuncionamento = React.useMemo(() => {
+    if (!horarios) return [];
+    console.log("--- DEBUG FRONTEND ---");
+    console.log("1. Horarios recebidos do backend:", horarios); 
+    const diaMap: { [key: string]: number } = {
+      DOMINGO: 0,
+      SEGUNDA: 1,
+      TERCA: 2,
+      QUARTA: 3,
+      QUINTA: 4,
+      SEXTA: 5,
+      SABADO: 6,
+    };
+    const diasMapeados = horarios.map(h => diaMap[h.diaSemana]).filter(d => d !== undefined);
+    console.log("2. Dias da semana mapeados (0=Dom, 1=Seg...):", diasMapeados);
+    console.log("----------------------");
+    return diasMapeados;
+  }, [horarios]);
+
+  const availableTimes = React.useMemo(() => {
+    const times = [];
+    for (let hour = 9; hour <= 18; hour++) {
+      times.push(`${hour.toString().padStart(2, '0')}:00`);
+      times.push(`${hour.toString().padStart(2, '0')}:30`);
+    }
+    return times;
+  }, []);
+
+  const disabledDays = ({ date }: { date: Date }): boolean => {
+    const today = new Date();
+    const futureLimit = new Date();
+    futureLimit.setDate(today.getDate() + 30);
+
+    today.setHours(0, 0, 0, 0);
+
+    // Se a barbearia funciona em um dia da semana específico, a função retorna `false` (não desabilitado).
+    // Se não funciona, retorna `true` (desabilitado).
+    const isClosedOnThisDay = !diasDeFuncionamento.includes(date.getDay());
+
+    return date < today || date > futureLimit || isClosedOnThisDay;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user?.id) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedService || !selectedService.id) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um serviço",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedDate) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione uma data",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedTime) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um horário",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const dataHora = new Date(selectedDate);
+      const [hours, minutes] = selectedTime.split(':');
+      dataHora.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const dataHoraLocal = new Date(dataHora.getTime() - dataHora.getTimezoneOffset() * 60000);
+
+      if (dataHoraLocal <= new Date()) {
+        toast({
+          title: "Erro",
+          description: "A data e hora devem ser futuras",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const agendamentoData = {
+        clienteId: user.id,
+        estabelecimentoId: Number(id),
+        servicos: [selectedService.id],
+        dataHora: dataHoraLocal.toISOString()
+      };
+
+      await agendamentoService.criarAgendamento(agendamentoData);
+
+      toast({
+        title: "Sucesso",
+        description: "Agendamento realizado com sucesso!",
+        variant: "default",
+      });
+      navigate('/client/appointments');
+    } catch (error: any) {
+      console.error('Erro ao realizar agendamento:', error);
+      toast({
+        title: "Erro",
+        description: error.response?.data?.message || 'Erro ao realizar agendamento',
+        variant: "destructive",
+      });
+    }
+  };
+
+  // 2. AGORA, com todos os hooks já chamados, podemos fazer a renderização condicional.
+  if (authLoading || isLoading || isLoadingHorarios) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <AlertDialog open={true}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Login Necessário</AlertDialogTitle>
+              <AlertDialogDescription>
+                Você precisa estar logado para agendar um horário.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => navigate(-1)}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => navigate('/login', { state: { from: { pathname: `/agendamento/${id}` } } })}>
+                Fazer Login
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
+
+  if (error || !barbershop) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 mt-20 text-center">
+            <h1 className="text-2xl font-bold text-red-600">Erro ao carregar detalhes da barbearia</h1>
+            <p className="mt-2 text-gray-600">Por favor, tente novamente mais tarde.</p>
+            <Button onClick={() => navigate('/barbershops')} className="mt-4">Voltar</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Renderização de sucesso.
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 mt-20">
+        <Button onClick={() => navigate(`/barbershops/${id}`)} variant="outline" className="mb-6">
+          ← Voltar
+        </Button>
+        <AppointmentContent {...{ barbershop, availableTimes, handleSubmit, selectedService, setSelectedService, selectedDate, setSelectedDate, selectedTime, setSelectedTime, disabledDays }} />
       </div>
     </div>
   );

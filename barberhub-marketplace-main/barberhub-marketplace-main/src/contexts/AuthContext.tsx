@@ -19,6 +19,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,14 +27,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+    try {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados de autenticação do localStorage", error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -71,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,6 @@
 package br.barberhub.backendApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -51,6 +52,7 @@ public class Estabelecimento extends Usuario {
     private StatusCadastro status;
 
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<HorarioFuncionamento> horario = new ArrayList<>();
 
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, orphanRemoval = true)

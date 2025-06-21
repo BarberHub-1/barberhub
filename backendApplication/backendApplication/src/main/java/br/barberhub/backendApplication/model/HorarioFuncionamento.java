@@ -1,5 +1,6 @@
 package br.barberhub.backendApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -34,5 +35,6 @@ public class HorarioFuncionamento {
 
     @ManyToOne
     @JoinColumn(name = "estabelecimento_id", nullable = false)
+    @JsonBackReference
     private Estabelecimento estabelecimento;
 }

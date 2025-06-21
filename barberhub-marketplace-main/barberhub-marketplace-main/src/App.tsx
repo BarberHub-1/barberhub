@@ -57,7 +57,7 @@ function App() {
               <Route path="/barbers" element={<Barbers />} />
               <Route path="/barbershops" element={<Barbershops />} />
               <Route path="/barbershops/:id" element={<BarberShopDetails />} />
-              <Route path="/agendamento/:id" element={<Appointment />} />
+              <Route path="/agendamento/:id" element={<PrivateRoute role="ANY"><Appointment /></PrivateRoute>} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/reset-password" element={<ResetPassword />} />

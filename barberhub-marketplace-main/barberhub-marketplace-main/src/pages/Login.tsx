@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um e-mail válido" }),
@@ -29,6 +30,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  const message = location.state?.message;
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -122,6 +125,15 @@ const Login = () => {
           <CardDescription>Entre com suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
         <CardContent>
+          {message && (
+            <Alert variant="destructive" className="mb-4">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Acesso Necessário</AlertTitle>
+                <AlertDescription>
+                    {message}
+                </AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <Alert variant="destructive">

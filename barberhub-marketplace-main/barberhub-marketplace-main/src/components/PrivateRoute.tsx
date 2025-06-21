@@ -11,11 +11,11 @@ export default function PrivateRoute({ children, role }: PrivateRouteProps) {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location, message: "Você precisa fazer login para continuar." }} replace />;
   }
 
   // Verifica se o usuário tem a role necessária
-  const hasRequiredRole = user?.role === role || 
+  const hasRequiredRole = role === 'ANY' || user?.role === role || 
     (role === 'ADMIN' && user?.tipo === 'ADMINISTRADOR');
 
   if (!hasRequiredRole) {

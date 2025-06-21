@@ -1,5 +1,5 @@
 import api from '../lib/axios';
-import { Estabelecimento } from '../types';
+import { Estabelecimento, HorarioFuncionamento } from '../types';
 
 export const estabelecimentoService = {
     // Para páginas públicas
@@ -26,6 +26,11 @@ export const estabelecimentoService = {
             ...response.data,
             foto: response.data.foto ? `data:image/jpeg;base64,${response.data.foto}` : undefined
         };
+    },
+
+    getHorarios: async (id: number): Promise<HorarioFuncionamento[]> => {
+        const response = await api.get<HorarioFuncionamento[]>(`/api/estabelecimentos/${id}/horarios`);
+        return response.data;
     },
 
     create: async (data: any): Promise<Estabelecimento> => {

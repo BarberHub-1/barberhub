@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { agendamentoService, Agendamento } from '../services/agendamento.service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Spinner } from '../components/Spinner';
 import { toast } from 'react-toastify';
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaTrash, FaCheck } from 'react-icons/fa';
@@ -13,6 +14,10 @@ const ClientAppointments = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [showConcluirDialog, setShowConcluirDialog] = useState(false);
+  const [agendamentoParaConcluir, setAgendamentoParaConcluir] = useState<number | null>(null);
+  const [showCancelarDialog, setShowCancelarDialog] = useState(false);
+  const [agendamentoParaCancelar, setAgendamentoParaCancelar] = useState<number | null>(null);
 
   const { data: agendamentos, isLoading, error } = useQuery<Agendamento[]>({
     queryKey: ['agendamentos'],
@@ -26,6 +31,8 @@ const ClientAppointments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agendamentos'] });
       toast.success('Agendamento cancelado com sucesso!');
+      setShowCancelarDialog(false);
+      setAgendamentoParaCancelar(null);
     },
     onError: (error) => {
       console.error('Erro ao cancelar agendamento:', error);
@@ -38,6 +45,8 @@ const ClientAppointments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agendamentos'] });
       toast.success('Agendamento concluído com sucesso!');
+      setShowConcluirDialog(false);
+      setAgendamentoParaConcluir(null);
     },
     onError: (error) => {
       console.error('Erro ao concluir agendamento:', error);
@@ -45,20 +54,30 @@ const ClientAppointments = () => {
     }
   });
 
-  const handleCancelar = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja cancelar este agendamento?')) {
+  const handleCancelar = (id: number) => {
+    setAgendamentoParaCancelar(id);
+    setShowCancelarDialog(true);
+  };
+
+  const confirmarCancelar = async () => {
+    if (agendamentoParaCancelar) {
       try {
-        await cancelarAgendamento.mutateAsync(id);
+        await cancelarAgendamento.mutateAsync(agendamentoParaCancelar);
       } catch (error) {
         console.error('Erro ao cancelar agendamento:', error);
       }
     }
   };
 
-  const handleConcluir = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja concluir este agendamento?')) {
+  const handleConcluir = (id: number) => {
+    setAgendamentoParaConcluir(id);
+    setShowConcluirDialog(true);
+  };
+
+  const confirmarConcluir = async () => {
+    if (agendamentoParaConcluir) {
       try {
-        await concluirAgendamento.mutateAsync(id);
+        await concluirAgendamento.mutateAsync(agendamentoParaConcluir);
       } catch (error) {
         console.error('Erro ao concluir agendamento:', error);
       }
@@ -226,6 +245,88 @@ const ClientAppointments = () => {
           </div>
         )}
       </div>
+
+      {/* Dialog de Confirmação para Concluir Agendamento */}
+      <Dialog open={showConcluirDialog} onOpenChange={setShowConcluirDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FaCheck className="text-green-600" />
+              Confirmar Conclusão
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja marcar este agendamento como concluído? 
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConcluirDialog(false);
+                setAgendamentoParaConcluir(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={confirmarConcluir}
+              disabled={concluirAgendamento.isPending}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {concluirAgendamento.isPending ? (
+                <>
+                  <Spinner />
+                  Concluindo...
+                </>
+              ) : (
+                'Confirmar Conclusão'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Confirmação para Cancelar Agendamento */}
+      <Dialog open={showCancelarDialog} onOpenChange={setShowCancelarDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FaTrash className="text-red-600" />
+              Confirmar Cancelamento
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja cancelar este agendamento? 
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCancelarDialog(false);
+                setAgendamentoParaCancelar(null);
+              }}
+            >
+              Voltar
+            </Button>
+            <Button
+              onClick={confirmarCancelar}
+              disabled={cancelarAgendamento.isPending}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {cancelarAgendamento.isPending ? (
+                <>
+                  <Spinner />
+                  Cancelando...
+                </>
+              ) : (
+                'Confirmar Cancelamento'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

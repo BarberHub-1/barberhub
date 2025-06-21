@@ -116,3 +116,8 @@
     background: transparent;
   }
 }
+
+/* Override para o sublinhado do calendário */
+abbr:where([title]) {
+  text-decoration: none !important;
+}

@@ -25,6 +25,7 @@ import br.barberhub.backendApplication.repository.EstabelecimentoRepository;
 import br.barberhub.backendApplication.repository.ServicoRepository;
 import br.barberhub.backendApplication.repository.AvaliacaoRepository;
 import br.barberhub.backendApplication.repository.HorarioFuncionamentoRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 
 @Service
@@ -48,6 +49,9 @@ public class EstabelecimentoService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Transactional
     public EstabelecimentoDTO cadastrarEstabelecimento(@Valid EstabelecimentoDTO estabelecimentoDTO) {
@@ -212,6 +216,9 @@ public class EstabelecimentoService {
     }
 
     public EstabelecimentoDTO buscarEstabelecimentoPorId(Long id) {
+        // Limpa o cache de primeiro nível do Hibernate para esta entidade
+        entityManager.clear(); 
+        
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado"));
         // Força o carregamento dos horários
