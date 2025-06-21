@@ -44,7 +44,7 @@ interface BarberShop {
   servicos: Servico[];
 }
 
-const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selectedService, setSelectedService, selectedDate, setSelectedDate, selectedTime, setSelectedTime, disabledDays }: { barbershop: BarberShop, availableTimes: string[], handleSubmit: (e: React.FormEvent) => Promise<void>, selectedService: Servico | null, setSelectedService: React.Dispatch<React.SetStateAction<Servico | null>>, selectedDate: Date | undefined, setSelectedDate: React.Dispatch<React.SetStateAction<any>>, selectedTime: string, setSelectedTime: React.Dispatch<React.SetStateAction<string>>, disabledDays: (({ date }: { date: Date; }) => boolean )}) => (
+const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selectedServices, setSelectedServices, selectedDate, setSelectedDate, selectedTime, setSelectedTime, disabledDays }: { barbershop: BarberShop, availableTimes: string[], handleSubmit: (e: React.FormEvent) => Promise<void>, selectedServices: Servico[], setSelectedServices: React.Dispatch<React.SetStateAction<Servico[]>>, selectedDate: Date | undefined, setSelectedDate: React.Dispatch<React.SetStateAction<any>>, selectedTime: string, setSelectedTime: React.Dispatch<React.SetStateAction<string>>, disabledDays: (({ date }: { date: Date; }) => boolean )}) => (
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
@@ -65,27 +65,49 @@ const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selected
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Seleção de Serviço */}
+                {/* Seleção de Serviços */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Serviço
+                    Serviços
                   </label>
-                  <select
-                    className="w-full p-2 border rounded-lg"
-                    value={selectedService?.id || ''}
-                    onChange={(e) => {
-                      const service = barbershop.servicos.find(s => s.id === Number(e.target.value));
-                      setSelectedService(service || null);
-                    }}
-                    required
-                  >
-                    <option value="">Selecione um serviço</option>
-                    {barbershop.servicos.map((servico) => (
-                      <option key={servico.id} value={servico.id}>
-                        {servico.descricao} - R$ {typeof servico.preco === 'number' ? servico.preco.toFixed(2) : 'N/A'} ({servico.duracaoMinutos || 0} min)
-                      </option>
-                    ))}
-                  </select>
+                  <div className="space-y-3 max-h-60 overflow-y-auto border rounded-lg p-4">
+                    {barbershop.servicos.map((servico) => {
+                      const isSelected = selectedServices.some(s => s.id === servico.id);
+                      return (
+                        <div key={servico.id} className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            id={`servico-${servico.id}`}
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedServices(prev => [...prev, servico]);
+                              } else {
+                                setSelectedServices(prev => prev.filter(s => s.id !== servico.id));
+                              }
+                            }}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor={`servico-${servico.id}`} className="flex-1 cursor-pointer">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-800">{servico.descricao}</span>
+                              <div className="text-right">
+                                <span className="text-gray-900 font-semibold">
+                                  R$ {typeof servico.preco === 'number' ? servico.preco.toFixed(2) : 'N/A'}
+                                </span>
+                                <span className="text-gray-500 text-sm ml-2">
+                                  ({servico.duracaoMinutos || 0} min)
+                                </span>
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {selectedServices.length === 0 && (
+                    <p className="text-sm text-gray-500 mt-2">Selecione pelo menos um serviço</p>
+                  )}
                 </div>
 
                 {/* Seleção de Data */}
@@ -142,23 +164,31 @@ const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selected
                     </div>
                   ) : (
                     <div className="text-center py-4 text-gray-500">
-                      {selectedDate && selectedService ? (
+                      {selectedDate && selectedServices.length > 0 ? (
                         <p>Não há horários disponíveis para este dia. Tente selecionar outra data.</p>
                       ) : (
-                        <p>Selecione uma data e um serviço para ver os horários disponíveis.</p>
+                        <p>Selecione uma data e pelo menos um serviço para ver os horários disponíveis.</p>
                       )}
                     </div>
                   )}
                 </div>
 
                 {/* Resumo do Agendamento */}
-                {selectedService && selectedDate && selectedTime && (
+                {selectedServices.length > 0 && selectedDate && selectedTime && (
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-medium text-gray-800 mb-2">Resumo do Agendamento</h3>
                     <div className="space-y-2">
-                      <p className="text-gray-600">
-                        <span className="font-medium">Serviço:</span> {selectedService.descricao}
-                      </p>
+                      <div className="text-gray-600">
+                        <span className="font-medium">Serviços:</span>
+                        <ul className="mt-1 ml-4 space-y-1">
+                          {selectedServices.map((servico) => (
+                            <li key={servico.id} className="flex justify-between">
+                              <span>• {servico.descricao}</span>
+                              <span className="text-gray-900">R$ {typeof servico.preco === 'number' ? servico.preco.toFixed(2) : 'N/A'}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                       <p className="text-gray-600">
                         <span className="font-medium">Data:</span>{' '}
                         {format(selectedDate, "PPP", { locale: ptBR })}
@@ -167,10 +197,10 @@ const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selected
                         <span className="font-medium">Horário:</span> {selectedTime}
                       </p>
                       <p className="text-gray-600">
-                        <span className="font-medium">Duração:</span> {selectedService.duracaoMinutos} minutos
+                        <span className="font-medium">Duração Total:</span> {selectedServices.reduce((total, servico) => total + (servico.duracaoMinutos || 0), 0)} minutos
                       </p>
-                      <p className="text-gray-600">
-                        <span className="font-medium">Valor:</span> R$ {typeof selectedService.preco === 'number' ? selectedService.preco.toFixed(2) : 'N/A'}
+                      <p className="text-gray-600 font-semibold">
+                        <span className="font-medium">Valor Total:</span> R$ {selectedServices.reduce((total, servico) => total + (typeof servico.preco === 'number' ? servico.preco : 0), 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -179,6 +209,7 @@ const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selected
                 <Button
                   type="submit"
                   className="w-full bg-gray-600 hover:bg-gray-700 text-white py-6 text-lg"
+                  disabled={selectedServices.length === 0}
                 >
                   Confirmar Agendamento
                 </Button>
@@ -194,7 +225,7 @@ const Appointment = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [selectedService, setSelectedService] = useState<Servico | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Servico[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>('');
 
@@ -264,7 +295,7 @@ const Appointment = () => {
   }, [horarios]);
 
   const availableTimes = React.useMemo(() => {
-    if (!horarios || !selectedDate || !selectedService) {
+    if (!horarios || !selectedDate || !selectedServices.length) {
       return [];
     }
 
@@ -288,7 +319,7 @@ const Appointment = () => {
     // Converte para minutos para facilitar os cálculos
     const startTimeMinutes = startHour * 60 + startMinute;
     const endTimeMinutes = endHour * 60 + endMinute;
-    const serviceDurationMinutes = selectedService.duracaoMinutos || 30;
+    const serviceDurationMinutes = selectedServices.reduce((total, servico) => total + (servico.duracaoMinutos || 0), 0);
     
     // Intervalo de 30 minutos entre horários
     const intervalMinutes = 30;
@@ -302,7 +333,7 @@ const Appointment = () => {
     }
 
     return times;
-  }, [horarios, selectedDate, selectedService]);
+  }, [horarios, selectedDate, selectedServices]);
 
   const disabledDays = ({ date }: { date: Date }): boolean => {
     const today = new Date();
@@ -330,10 +361,10 @@ const Appointment = () => {
       return;
     }
 
-    if (!selectedService || !selectedService.id) {
+    if (!selectedServices.length) {
       toast({
         title: "Erro",
-        description: "Por favor, selecione um serviço",
+        description: "Por favor, selecione pelo menos um serviço",
         variant: "destructive",
       });
       return;
@@ -406,7 +437,7 @@ const Appointment = () => {
       const agendamentoData = {
         clienteId: user.id,
         estabelecimentoId: Number(id),
-        servicos: [selectedService.id],
+        servicos: selectedServices.map(servico => servico.id),
         dataHora: dataHoraFormatada
       };
 
@@ -431,7 +462,7 @@ const Appointment = () => {
   // Limpa o horário selecionado quando a data ou serviço muda
   useEffect(() => {
     setSelectedTime('');
-  }, [selectedDate, selectedService]);
+  }, [selectedDate, selectedServices]);
 
   // 2. AGORA, com todos os hooks já chamados, podemos fazer a renderização condicional.
   if (authLoading || isLoading || isLoadingHorarios) {
@@ -487,7 +518,18 @@ const Appointment = () => {
         <Button onClick={() => navigate(`/barbershops/${id}`)} variant="outline" className="mb-6">
           ← Voltar
         </Button>
-        <AppointmentContent {...{ barbershop, availableTimes, handleSubmit, selectedService, setSelectedService, selectedDate, setSelectedDate, selectedTime, setSelectedTime, disabledDays }} />
+        <AppointmentContent 
+          barbershop={barbershop}
+          availableTimes={availableTimes}
+          handleSubmit={handleSubmit}
+          selectedServices={selectedServices}
+          setSelectedServices={setSelectedServices}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          selectedTime={selectedTime}
+          setSelectedTime={setSelectedTime}
+          disabledDays={disabledDays}
+        />
       </div>
     </div>
   );
