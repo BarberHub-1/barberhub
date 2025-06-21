@@ -127,18 +127,28 @@ const AppointmentContent = ({ barbershop, availableTimes, handleSubmit, selected
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Horário
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {availableTimes.map((time) => (
-                      <button
-                        key={time}
-                        type="button"
-                        onClick={() => setSelectedTime(time)}
-                        className={`px-3 py-2 border rounded-lg text-sm ${selectedTime === time ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
+                  {availableTimes.length > 0 ? (
+                    <div className="grid grid-cols-4 gap-2">
+                      {availableTimes.map((time) => (
+                        <button
+                          key={time}
+                          type="button"
+                          onClick={() => setSelectedTime(time)}
+                          className={`px-3 py-2 border rounded-lg text-sm ${selectedTime === time ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      {selectedDate && selectedService ? (
+                        <p>Não há horários disponíveis para este dia. Tente selecionar outra data.</p>
+                      ) : (
+                        <p>Selecione uma data e um serviço para ver os horários disponíveis.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Resumo do Agendamento */}
@@ -228,8 +238,6 @@ const Appointment = () => {
 
   const diasDeFuncionamento = React.useMemo(() => {
     if (!horarios) return [];
-    console.log("--- DEBUG FRONTEND ---");
-    console.log("1. Horarios recebidos do backend:", horarios); 
     const diaMap: { [key: string]: number } = {
       DOMINGO: 0,
       SEGUNDA: 1,
@@ -240,19 +248,49 @@ const Appointment = () => {
       SABADO: 6,
     };
     const diasMapeados = horarios.map(h => diaMap[h.diaSemana]).filter(d => d !== undefined);
-    console.log("2. Dias da semana mapeados (0=Dom, 1=Seg...):", diasMapeados);
-    console.log("----------------------");
     return diasMapeados;
   }, [horarios]);
 
   const availableTimes = React.useMemo(() => {
-    const times = [];
-    for (let hour = 9; hour <= 18; hour++) {
-      times.push(`${hour.toString().padStart(2, '0')}:00`);
-      times.push(`${hour.toString().padStart(2, '0')}:30`);
+    if (!horarios || !selectedDate || !selectedService) {
+      return [];
     }
+
+    // Usa getDay() que retorna 0-6 (0 = domingo, 1 = segunda, etc.)
+    const dayOfWeek = selectedDate.getDay();
+    
+    // Mapeia o número do dia para o nome usado no backend
+    const dayNames = ['DOMINGO', 'SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO'];
+    const diaSemana = dayNames[dayOfWeek];
+    
+    const horarioDoDia = horarios.find(h => h.diaSemana === diaSemana);
+
+    if (!horarioDoDia) {
+      return [];
+    }
+
+    const times = [];
+    const [startHour, startMinute] = horarioDoDia.horarioAbertura.split(':').map(Number);
+    const [endHour, endMinute] = horarioDoDia.horarioFechamento.split(':').map(Number);
+    
+    // Converte para minutos para facilitar os cálculos
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = endHour * 60 + endMinute;
+    const serviceDurationMinutes = selectedService.duracaoMinutos || 30;
+    
+    // Intervalo de 30 minutos entre horários
+    const intervalMinutes = 30;
+    
+    // Gera horários disponíveis considerando a duração do serviço
+    for (let timeMinutes = startTimeMinutes; timeMinutes + serviceDurationMinutes <= endTimeMinutes; timeMinutes += intervalMinutes) {
+      const hour = Math.floor(timeMinutes / 60);
+      const minute = timeMinutes % 60;
+      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      times.push(timeString);
+    }
+
     return times;
-  }, []);
+  }, [horarios, selectedDate, selectedService]);
 
   const disabledDays = ({ date }: { date: Date }): boolean => {
     const today = new Date();
@@ -307,14 +345,24 @@ const Appointment = () => {
       return;
     }
 
+    // Valida se o horário selecionado está na lista de horários disponíveis
+    if (!availableTimes.includes(selectedTime)) {
+      toast({
+        title: "Erro",
+        description: "Horário não disponível. Por favor, selecione outro horário.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const dataHora = new Date(selectedDate);
       const [hours, minutes] = selectedTime.split(':');
       dataHora.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      const dataHoraLocal = new Date(dataHora.getTime() - dataHora.getTimezoneOffset() * 60000);
-
-      if (dataHoraLocal <= new Date()) {
+      // Remove a conversão de fuso horário que estava causando o problema
+      // O backend deve receber a data/hora exatamente como o usuário selecionou
+      if (dataHora <= new Date()) {
         toast({
           title: "Erro",
           description: "A data e hora devem ser futuras",
@@ -323,11 +371,31 @@ const Appointment = () => {
         return;
       }
 
+      // Formata a data no fuso horário local para evitar conversões
+      const dataHoraLocal = new Date(
+        dataHora.getFullYear(),
+        dataHora.getMonth(),
+        dataHora.getDate(),
+        dataHora.getHours(),
+        dataHora.getMinutes(),
+        0,
+        0
+      );
+
+      const year = dataHoraLocal.getFullYear();
+      const month = String(dataHoraLocal.getMonth() + 1).padStart(2, '0');
+      const day = String(dataHoraLocal.getDate()).padStart(2, '0');
+      const hour = String(dataHoraLocal.getHours()).padStart(2, '0');
+      const minute = String(dataHoraLocal.getMinutes()).padStart(2, '0');
+      const second = String(dataHoraLocal.getSeconds()).padStart(2, '0');
+      
+      const dataHoraFormatada = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+
       const agendamentoData = {
         clienteId: user.id,
         estabelecimentoId: Number(id),
         servicos: [selectedService.id],
-        dataHora: dataHoraLocal.toISOString()
+        dataHora: dataHoraFormatada
       };
 
       await agendamentoService.criarAgendamento(agendamentoData);
@@ -347,6 +415,11 @@ const Appointment = () => {
       });
     }
   };
+
+  // Limpa o horário selecionado quando a data ou serviço muda
+  useEffect(() => {
+    setSelectedTime('');
+  }, [selectedDate, selectedService]);
 
   // 2. AGORA, com todos os hooks já chamados, podemos fazer a renderização condicional.
   if (authLoading || isLoading || isLoadingHorarios) {

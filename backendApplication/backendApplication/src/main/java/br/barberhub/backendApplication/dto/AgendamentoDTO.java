@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import br.barberhub.backendApplication.model.StatusAgendamento;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
@@ -39,6 +40,7 @@ public class AgendamentoDTO {
 
     @NotNull(message = "A data e hora são obrigatórias")
     @Future(message = "A data e hora devem ser futuras")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]")
     private LocalDateTime dataHora;
 
     private StatusAgendamento statusAgendamento;

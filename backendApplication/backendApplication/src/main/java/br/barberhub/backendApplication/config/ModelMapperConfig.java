@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import br.barberhub.backendApplication.dto.ClienteDTO;
 import br.barberhub.backendApplication.dto.EstabelecimentoDTO;
@@ -12,8 +13,22 @@ import br.barberhub.backendApplication.model.Cliente;
 import br.barberhub.backendApplication.model.Estabelecimento;
 import br.barberhub.backendApplication.model.HorarioFuncionamento;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import jakarta.annotation.PostConstruct;
+import java.util.TimeZone;
+
 @Configuration
 public class ModelMapperConfig {
+
+    @PostConstruct
+    public void init() {
+        // Define o timezone padrão da aplicação
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
+        System.out.println("Timezone da aplicação definido como: " + TimeZone.getDefault().getID());
+    }
 
     @Bean
     public ModelMapper modelMapper() {
@@ -101,5 +116,15 @@ public class ModelMapperConfig {
             });
         
         return modelMapper;
+    }
+
+    @Bean
+    @Primary
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
+        return mapper;
     }
 } 

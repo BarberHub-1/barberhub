@@ -56,8 +56,11 @@ public class AgendamentoService {
 
     @Transactional
     public AgendamentoDTO criarAgendamento(AgendamentoDTO agendamentoDTO) {
-        System.out.println("Iniciando criação de agendamento com dados: " + agendamentoDTO);
-        System.out.println("Data e hora recebidas: " + agendamentoDTO.getDataHora());
+        System.out.println("=== INÍCIO CRIAÇÃO DE AGENDAMENTO ===");
+        System.out.println("Dados recebidos: " + agendamentoDTO);
+        System.out.println("Data e hora recebidas (string): " + agendamentoDTO.getDataHora());
+        System.out.println("Data e hora recebidas (LocalDateTime): " + agendamentoDTO.getDataHora());
+        System.out.println("TimeZone atual: " + java.util.TimeZone.getDefault().getID());
         
         Agendamento agendamento = new Agendamento();
         
@@ -72,12 +75,15 @@ public class AgendamentoService {
         // Garantir que a data e hora sejam mantidas como recebidas
         agendamento.setDataHora(agendamentoDTO.getDataHora());
         System.out.println("Data e hora definidas no agendamento: " + agendamento.getDataHora());
+        System.out.println("Data e hora definidas (toString): " + agendamento.getDataHora().toString());
         
         agendamento.setStatus(StatusAgendamento.AGENDADA);
         
         System.out.println("Salvando agendamento base...");
         Agendamento agendamentoSalvo = agendamentoRepository.save(agendamento);
         System.out.println("Agendamento base salvo com ID: " + agendamentoSalvo.getId());
+        System.out.println("Data e hora após salvar: " + agendamentoSalvo.getDataHora());
+        System.out.println("=== FIM CRIAÇÃO DE AGENDAMENTO ===");
         
         List<AgendamentoServico> agendamentoServicos = new ArrayList<>();
         

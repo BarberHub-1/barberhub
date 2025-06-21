@@ -3,6 +3,7 @@ package br.barberhub.backendApplication.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,6 +35,7 @@ public class Agendamento {
     private Long id;
     
     @Column(nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]")
     private LocalDateTime dataHora;
     
     @ManyToOne
