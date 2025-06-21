@@ -31,7 +31,9 @@ interface EstabelecimentoDTO {
   nomeProprietario: string;
   nomeEstabelecimento: string;
   cnpj: string;
-  endereco: string;
+  rua: string;
+  bairro: string;
+  numero: number;
   cidade: string;
   cep: string;
   telefone: string;
@@ -169,7 +171,9 @@ const BarberEditProfile = () => {
         cnpj: data.cnpj,
         email: data.email,
         telefone: data.phone,
-        endereco: `${data.street}, ${data.number} - ${data.neighborhood}`,
+        rua: data.street,
+        numero: parseInt(data.number),
+        bairro: data.neighborhood,
         cidade: data.city,
         cep: data.zipCode,
         descricao: data.description,
@@ -216,58 +220,27 @@ const BarberEditProfile = () => {
       console.log('Foto do estabelecimento:', estabelecimento.foto);
       console.log('Serviços do estabelecimento:', estabelecimento.servicos);
       
-      let street = "";
-      let number = "";
-      let neighborhood = "";
-      let city = estabelecimento.cidade || "";
-      let zipCode = estabelecimento.cep || "";
-
-      if (estabelecimento.endereco) {
-        const parts = estabelecimento.endereco.split(',');
-        street = parts[0]?.trim() || "";
-        const rest = parts[1]?.trim();
-
-        if (rest) {
-          const restParts = rest.split('-');
-          number = restParts[0]?.trim() || "";
-          neighborhood = restParts[1]?.trim() || "";
-        }
-      }
-
-      let workingHoursText = "";
-      if (estabelecimento.horario && estabelecimento.horario.length > 0) {
-          workingHoursText = estabelecimento.horario.map(h => `${h.diaSemana}: ${h.horarioAbertura}-${h.horarioFechamento}`).join('\n');
-      }
-
       form.reset({
         shopName: estabelecimento.nomeEstabelecimento || "",
         ownerName: estabelecimento.nomeProprietario || "",
         cnpj: estabelecimento.cnpj || "",
         email: estabelecimento.email || "",
         phone: estabelecimento.telefone || "",
-        street: street,
-        number: number,
-        neighborhood: neighborhood,
-        city: city,
-        zipCode: zipCode,
+        street: estabelecimento.rua || "",
+        number: estabelecimento.numero?.toString() || "",
+        neighborhood: estabelecimento.bairro || "",
+        city: estabelecimento.cidade || "",
+        zipCode: estabelecimento.cep || "",
         description: estabelecimento.descricao || "",
         services: estabelecimento.servicos || [],
-        horarios: estabelecimento.horario || []
+        horarios: estabelecimento.horario?.map(h => ({
+          diaSemana: h.diaSemana,
+          horarioAbertura: h.horarioAbertura,
+          horarioFechamento: h.horarioFechamento,
+        })) || [],
       });
-
-      // Atualizar a foto se existir
       if (estabelecimento.foto) {
-        console.log('Atualizando foto para:', estabelecimento.foto);
-        // Verifica se a foto já está no formato data:image
-        if (estabelecimento.foto.startsWith('data:image')) {
-          setShopImage(estabelecimento.foto);
-        } else {
-          // Se não estiver, adiciona o prefixo data:image/jpeg;base64,
-          setShopImage(`data:image/jpeg;base64,${estabelecimento.foto}`);
-        }
-      } else {
-        console.log('Nenhuma foto encontrada, usando placeholder');
-        setShopImage("https://placehold.co/400x300/e2e8f0/64748b?text=Foto+da+Barbearia");
+        setShopImage(estabelecimento.foto);
       }
     }
   }, [estabelecimento, form]);
